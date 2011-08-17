@@ -4,27 +4,35 @@
 #include <X11/Xlib.h>
 #define LENGTH(X)               (sizeof X / sizeof X[0])
 
-static const char *lvms[]      = { "dm-2","dm-3", "dm-4" }; // partition name in /proc/diskstats
-static const char *lvm_names[] = { "/"   ,"/dev/mapper/archbook-home","/media/Dings" }; // mountpoint
-#define MAXPARTITIONS 10                    // max number of posible partitions mounted if you mount more it will crash
+#define MAXPARTITIONS 20                    // max number of posible partitions mounted if you mount more it will crash
+
+typedef struct {
+  char name[5];
+  unsigned long long bytes;
+  Bool used;
+} Partition;
 
 typedef struct {
   unsigned long long read, write, readtime, writetime, ios_in_process, iostime;
 } DiskActions;
 
 typedef struct {
-  char path[256], realname[256], mountpoint[512];
+  char path[512], realname[256], mountpoint[512];
   Bool mounted, active;
   unsigned long free, total, avil, used;
   DiskActions last,now,between;
 } Disk;
 
 static Disk disks[MAXPARTITIONS];
+static char mountpoints[MAXPARTITIONS][512];
+static char paths[MAXPARTITIONS][512];
+static Partition partitions[MAXPARTITIONS];
 
 void setup_disk();
 void get_disk_stat();
 void update_mounts();
 void update_stats();
+char* is_partition(unsigned long long *size);
 
 int main()
 {
@@ -40,13 +48,31 @@ int main()
 
   int i;
   for(i = 0;i < MAXPARTITIONS;i++){
-  if(!disks[i].active) break;
+    if(!disks[i].active) break;
 
-    printf("%llu %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu -- %s %s %s\n",disks[i].between.write,disks[i].between.read,disks[i].between.writetime,disks[i].between.readtime,disks[i].between.ios_in_process,disks[i].between.iostime,disks[i].now.write,disks[i].now.read,disks[i].now.writetime,disks[i].now.readtime,disks[i].now.ios_in_process,disks[i].now.iostime, disks[i].realname, disks[i].path, disks[i].mountpoint);
-
+    printf("%llu %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu -- %s %s %s  --  %s %s\n",disks[i].between.write,disks[i].between.read,disks[i].between.writetime,disks[i].between.readtime,disks[i].between.ios_in_process,disks[i].between.iostime,disks[i].now.write,disks[i].now.read,disks[i].now.writetime,disks[i].now.readtime,disks[i].now.ios_in_process,disks[i].now.iostime, disks[i].realname, disks[i].path, disks[i].mountpoint, mountpoints[i], paths[i]);
+    
   }
+    
 }
 }
+
+char* is_partition(unsigned long long *size)
+{
+  int i, index;
+  unsigned long long last = 0;
+  for(i = index = 0; i < MAXPARTITIONS;i++){
+    if(!partitions[i].used) break;
+    if(partitions[i].bytes < *size) continue;
+    if(*size > last){
+      last = *size;
+      index = i;
+    }
+  }
+
+  return &partitions[i].name;
+}
+
 
 void update_mounts()
 {
@@ -56,6 +82,7 @@ void update_mounts()
   size_t len = 0;
   ssize_t read;
   int i, j, k;
+  i = 1;
   
   // open /proc/stat
   fp = fopen("/proc/mounts", "r");
@@ -67,27 +94,28 @@ void update_mounts()
   // reading line by line
   while ((read = getline(&line, &len, fp)) != -1) {
     if(strstr(line, "/dev/sd") || strstr(line, "/dev/mapper/")){ //TODO make a string arry for lvm volumes
-      for(i = 0;i < MAXPARTITIONS;i++){
-        if(!disks[i].active) break;
-        
-        if(strstr(line,disks[i].realname)){
-          k = 1;
-          for(j = 0;j < len;j++){
-            if(line[j] == ' ') break;
-            disks[i].path[j] = line[j]; 
-          }
+      if(i == MAXPARTITIONS) break;        
 
-          for(k = 0, j++;j < len;j++,k++){
-            if(line[j] == ' ') break;
-            disks[i].mountpoint[k] = line[j]; 
-          }
-        }
+      for(j = 0;j < len;j++){
+        if(line[j] == ' ') break;
+        paths[i][j] = line[j]; 
       }
+
+      for(k = 0, j++;j < len;j++,k++){
+        if(line[j] == ' ') break;
+        mountpoints[i][k] = line[j]; 
+      }
+      i++;
     }
   }
 
   if (line) free(line);
   fclose(fp);
+
+  for(;i < MAXPARTITIONS;i++){
+    paths[i][0] = '\x00';
+    mountpoints[i][0] = '\x00';
+  }
 
 }
 
@@ -192,7 +220,7 @@ void get_disk_stat()
   int i;
 
 
-  for(i = 1; i < LENGTH(partitions); i++)
+  for(i = 1; i < MAXPARTITIONS; i++)
   {
     if(disks[i].mounted){
       statfs(disks[i].mountpoint, &fs);
@@ -212,7 +240,5 @@ void get_disk_stat()
 
 void setup_disk()
 {
-  int i,j,length = LENGTH(partitions);
-
   get_disk_stat();
 }
