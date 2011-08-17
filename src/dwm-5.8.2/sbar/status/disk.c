@@ -4,9 +4,8 @@
 #include <X11/Xlib.h>
 #define LENGTH(X)               (sizeof X / sizeof X[0])
 
-static const char *partitions[]     = { "sda","sda1","sda3", "dm-1","dm-2","dm-3" }; // partitons to show informations of
-static const char *part_names[]     = { "all","boot","Dings","swap","root","home" }; // name of the partitons
-static const char *mount_points[]   = { NULL,"/boot","/media/Dings/",NULL,"/","/home" }; // mountpoints of the partitions 
+static const char *lvms[]      = { "dm-2","dm-3", "dm-4" }; // partition name in /proc/diskstats
+static const char *lvm_names[] = { "/"   ,"/dev/mapper/archbook-home","/media/Dings" }; // mountpoint
 #define MAXPARTITIONS 10                    // max number of posible partitions mounted if you mount more it will crash
 
 typedef struct {
@@ -14,9 +13,9 @@ typedef struct {
 } DiskActions;
 
 typedef struct {
-  char name[256], realname[256], mountpoint[512];
+  char path[256], realname[256], mountpoint[512];
   Bool mounted, active;
-  unsigned long free, total;
+  unsigned long free, total, avil, used;
   DiskActions last,now,between;
 } Disk;
 
@@ -30,9 +29,11 @@ void update_stats();
 int main()
 {
   update_stats();
+  update_mounts();
   while(1==1){
   sleep(1);
   update_stats();
+  update_mounts();
 
   printf("| write | read | write time | read time | I/Os | I/Os time || write | read | write time | read time | I/Os | I/Os time |\n");
   
@@ -41,7 +42,7 @@ int main()
   for(i = 0;i < MAXPARTITIONS;i++){
   if(!disks[i].active) break;
 
-    printf("%llu %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu \n",disks[i].between.write,disks[i].between.read,disks[i].between.writetime,disks[i].between.readtime,disks[i].between.ios_in_process,disks[i].between.iostime,disks[i].now.write,disks[i].now.read,disks[i].now.writetime,disks[i].now.readtime,disks[i].now.ios_in_process,disks[i].now.iostime);
+    printf("%llu %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu -- %s %s %s\n",disks[i].between.write,disks[i].between.read,disks[i].between.writetime,disks[i].between.readtime,disks[i].between.ios_in_process,disks[i].between.iostime,disks[i].now.write,disks[i].now.read,disks[i].now.writetime,disks[i].now.readtime,disks[i].now.ios_in_process,disks[i].now.iostime, disks[i].realname, disks[i].path, disks[i].mountpoint);
 
   }
 }
@@ -54,7 +55,7 @@ void update_mounts()
   char * line = NULL;
   size_t len = 0;
   ssize_t read;
-  int i, j;
+  int i, j, k;
   
   // open /proc/stat
   fp = fopen("/proc/mounts", "r");
@@ -65,7 +66,24 @@ void update_mounts()
   
   // reading line by line
   while ((read = getline(&line, &len, fp)) != -1) {
+    if(strstr(line, "/dev/sd") || strstr(line, "/dev/mapper/")){ //TODO make a string arry for lvm volumes
+      for(i = 0;i < MAXPARTITIONS;i++){
+        if(!disks[i].active) break;
+        
+        if(strstr(line,disks[i].realname)){
+          k = 1;
+          for(j = 0;j < len;j++){
+            if(line[j] == ' ') break;
+            disks[i].path[j] = line[j]; 
+          }
 
+          for(k = 0, j++;j < len;j++,k++){
+            if(line[j] == ' ') break;
+            disks[i].mountpoint[k] = line[j]; 
+          }
+        }
+      }
+    }
   }
 
   if (line) free(line);
@@ -169,7 +187,7 @@ void update_stats()
 void get_disk_stat()
 {
   struct statfs fs;
-  unsigned long long bfree, bsize, btotal;
+  unsigned long long bfree, bsize, btotal, bavil;
   char buf[30];
   int i;
 
@@ -179,12 +197,15 @@ void get_disk_stat()
     if(disks[i].mounted){
       statfs(disks[i].mountpoint, &fs);
       bfree = fs.f_bfree;
+      bavil = fs.f_bavail;
       bsize = fs.f_bsize;
       btotal = fs.f_blocks;
 
       disks[i].free = bfree * bsize;
+      disks[i].avil = bavil * bsize;
+      disks[i].used = (btotal - bfree) * bsize;
       disks[i].total = btotal * bsize;
-      printf("%s, %s, %s: %llu bytes left of %llu - %Lf      bsize %d, bfree %d\n", disks[i].mountpoint, disks[i].realname, disks[i].name, disks[i].free, disks[i].total, ((long double)disks[i].free / (long double)disks[i].total), bsize, bfree);
+    //  printf("%s, %s, %s: %llu bytes left of %llu - %Lf      bsize %d, bfree %d\n", disks[i].mountpoint, disks[i].realname, disks[i].name, disks[i].free, disks[i].total, ((long double)disks[i].free / (long double)disks[i].total), bsize, bfree);
     }
   }
 }
