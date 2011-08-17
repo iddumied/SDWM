@@ -1,0 +1,156 @@
+#define ANZ_TEXT_BARS 1
+#define ANZ_STYL_BARS 1
+#define MAX_TABS 9
+#define SATANDART_TEXT True
+#define STANADART_BAR 0
+#include "typedef.c"
+
+static const Bool texttopbar        = True;       // False means bottom bar
+static const Bool bottomborder      = True;	      // border of text bar
+  // color bottomborder    //"#a2c2cd"; //"#3b85a2"; //"#669cb6"; //"#21536a"; 
+static const Bool readFromXroot     = False;      // if set sbar draws a collurfull statusbar in textmode
+                                                  // with cpu and memory usage, battery clock and date
+                                                  // controled by setings above
+static const Bool showbattery       = True;
+static const Bool cpu_in_middle     = True;       // if True cpu is placed in middel of bar
+static int cpu_posx                 = 600;
+static const int cpu_length         = 60;         // length of one cpu consider this if you have more
+static const int distance_x         = 5;          // distance betwen mem and swap and between cpus if you have more than one
+static const int distance_y         = 2;          // distance between top and bottom of bar
+static const int mem_posx           = 1000;
+static const int mem_length         = 60;
+static const int swap_length        = 30;
+static const int battery_length     = 30;
+static const int battery_pos_x      = 1190;
+
+static const char memused_col[]      = "#00aaff";   //"#18B218";
+static const char membuff_col[]      = "#ffffff";   //"#0F3FBA";
+static const char memcach_col[]      = "#005588";   //"#FFFF00";
+
+static const int status_refresh     = 1;           // refresh zyklus in seconds
+
+static const Bool simply_style      = True;
+static const Bool show_year         = True;
+
+static const char mainsymbol[]      = "\x18";
+static const Bool cpumem_timeline   = True;
+static const Bool shift_left        = True;
+
+
+static const Bool utime_seconds     = False;
+static const int  uptime_posx       = 900;
+static const int  tbar_distancex    = 12;
+
+static const unsigned int gappx     = 6;
+static const int max_link_quality   = 70; // max wlan quality found out by calling iwconfig
+
+
+// satuswin
+static const char swnormbordercolor[] = "#005588";  // border of inactiv window
+static const char swnormbgcolor[]     = "#000000";  // color of statsusbar
+static const char swnormfgcolor[]     = "#ffffff";  // font color of statusbar
+static const char swselbordercolor[]  = "#00aaff";  // border of active window 
+static const char swselbgcolor[]      = "#000000";  // bgcolor of active text 
+static const char swselfgcolor[]      = "#00aaff";  // font color of active text
+static const char swbotbordercolor[]  = "#00aaff";  // color of bottom border
+static const char swcpu_line_color[]  = "#21536a";  // color of cpu timeline line
+static const char swcpu_point_color[] = "#00aaff";  // color of cpu timeline point
+static const int  stwwidth            = 1366;
+
+static const double blowstat        = 0.1;        // defines the warning stat of battery
+static const double bverylowstat    = 0.12;      // 1 is full 0 is empty
+static const double bat_suspend     = 0.075;       // percent when go to suspend
+
+// normal color
+static const char normbordercolor[] = "#005588";  // border of inactiv window
+static const char normbgcolor[]     = "#000000";  // color of statsusbar
+static const char normfgcolor[]     = "#ffffff";  // font color of statusbar
+static const char selbordercolor[]  = "#00aaff";  // border of active window 
+static const char selbgcolor[]      = "#000000";  // bgcolor of active text 
+static const char selfgcolor[]      = "#00aaff";  // font color of active text
+static const char botbordercolor[]  = "#00aaff";  // color of bottom border
+static const char cpu_line_color[]  = "#21536a";  // color of cpu timeline line
+static const char cpu_point_color[] = "#00aaff";  // color of cpu timeline point
+
+// if battery low
+static const char bnormbordercolor[] = "#005588";  // border of inactiv window
+static const char bnormbgcolor[]     = "#000000";  // color of statsusbar
+static const char bnormfgcolor[]     = "#ffffff";  // font color of statusbar
+static const char bselbordercolor[]  = "#00aaff";  // border of active window 
+static const char bselbgcolor[]      = "#000000";  // bgcolor of active text 
+static const char bselfgcolor[]      = "#00aaff";  // font color of active text
+static const char bbotbordercolor[]  = "#ff0000";  // color of bottom border
+static const char bcpu_line_color[]  = "#21536a";  // color of cpu timeline line
+static const char bcpu_point_color[] = "#00aaff";  // color of cpu timeline point
+
+// if battery very low
+static const char bbnormbordercolor[] = "#880000";  // border of inactiv window
+static const char bbnormbgcolor[]     = "#000000";  // color of statsusbar
+static const char bbnormfgcolor[]     = "#ff0000";  // font color of statusbar
+static const char bbselbordercolor[]  = "#ff0000";  // border of active window 
+static const char bbselbgcolor[]      = "#000000";  // bgcolor of active text 
+static const char bbselfgcolor[]      = "#ffaa00";  // font color of active textmode
+static const char bbbotbordercolor[]  = "#ff0000";  // color of bottom border
+static const char bbcpu_line_color[]  = "#440000";  // color of cpu timeline line
+static const char bbcpu_point_color[] = "#ff0000";  // color of cpu timeline point
+
+/*
+// name of each text bar tabs
+static const char** tbars_tab_names[ANZ_TEXT_BARS] {
+  { "main", "term", "dev", "stuff", "else", },
+}
+
+
+// TODO replease config in config.h
+static const char* tbars_colors[ANZ_TEXT_BARS] {
+ "#000000"; 
+  
+}
+*/
+
+
+/* includes heigth, ntabs, gb-img, topbar, Tabs(w,h,x,y,used, active) of each Bar
+ * 
+ * imgs must be in the xpm format.
+ * default to place in :
+ * 
+ *   /home/chief/.dwm-sbar/has-win/
+ *   /home/chief/.dwm-sbar/has-active-win/
+ *   /home/chief/.dwm-sbar/active-without-window/
+ *   /home/chief/.dwm-sbar/active-with-window/
+ * * * * * * * * * * * * * * * * * * * */
+static const ConfBar confbar[] = {
+  { 40, 5, False, "/home/chief/.dwm-sbar/bg/win7.xpm",
+    {
+      { 60, 40, 59, 0,
+        "/home/chief/.dwm-sbar/has-win/ie.xpm",
+        "/home/chief/.dwm-sbar/has-active-win/ie.xpm",
+	"/home/chief/.dwm-sbar/active-without-window/ie.xpm",
+	"/home/chief/.dwm-sbar/active-with-window/ie.xpm"     },
+      { 60, 40, 121, 0,
+        "/home/chief/.dwm-sbar/has-win/term.xpm",
+        "/home/chief/.dwm-sbar/has-active-win/term.xpm",
+	"/home/chief/.dwm-sbar/active-without-window/term.xpm",
+	"/home/chief/.dwm-sbar/active-with-window/term.xpm"     },
+      { 60, 40, 183, 0,	
+	"/home/chief/.dwm-sbar/has-win/dev.xpm",
+	"/home/chief/.dwm-sbar/has-active-win/dev.xpm",
+	"/home/chief/.dwm-sbar/active-without-window/dev.xpm",
+	"/home/chief/.dwm-sbar/active-with-window/dev.xpm"     },
+      { 60, 40, 245, 0, 
+	"/home/chief/.dwm-sbar/has-win/play.xpm",
+	"/home/chief/.dwm-sbar/has-active-win/play.xpm",
+	"/home/chief/.dwm-sbar/active-without-window/play.xpm",
+	"/home/chief/.dwm-sbar/active-with-window/play.xpm"     },
+      { 60, 40, 307, 0,
+        "/home/chief/.dwm-sbar/has-win/dir.xpm",
+	"/home/chief/.dwm-sbar/has-active-win/dir.xpm",
+	"/home/chief/.dwm-sbar/active-without-window/dir.xpm",
+	"/home/chief/.dwm-sbar/active-with-window/dir.xpm"     },
+    },
+  }
+};
+
+
+  
+  
