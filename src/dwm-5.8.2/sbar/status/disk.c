@@ -7,13 +7,15 @@ typedef struct {
 typedef struct {
   char *path, realname[256], *mountpoint;
   Bool active;
-  unsigned long free, total, avil, used;
+  unsigned long long free, total, avil, used;
+  long double pfree, pavil, pused;
   DiskActions last,now,between;
 } Disk;
 
 static Disk disks[MAXPARTITIONS];
 static char mountpoints[MAXPARTITIONS][512];
 static char paths[MAXPARTITIONS][512];
+static int mounted_volumes;
 
 void setup_disk();
 void get_disk_stat();
@@ -126,7 +128,7 @@ void update_mounts()
   size_t len = 0;
   ssize_t read;
   int i, j, k;
-  i = 0;
+  mounted_volumes = i = 0;
   
   // open /proc/stat
   fp = fopen("/proc/mounts", "r");
@@ -139,6 +141,7 @@ void update_mounts()
   while ((read = getline(&line, &len, fp)) != -1) {
     if(strstr(line, "/dev/sd") || strstr(line, "/dev/mapper/")){ //TODO make a string arry for lvm volumes
       if(i == MAXPARTITIONS) break;        
+      mounted_volumes++;
 
       for(j = 0;j < len;j++){
         if(line[j] == ' ') break;
@@ -280,6 +283,10 @@ void get_disk_stat()
       disks[i].avil = bavil * bsize;
       disks[i].used = (btotal - bfree) * bsize;
       disks[i].total = btotal * bsize;
+
+      disks[i].pfree = ((long double)disks[i].free / (long double)disks[i].total);
+      disks[i].pused = ((long double)disks[i].used / (long double)disks[i].total);
+      disks[i].pavil = ((long double)disks[i].avil / (long double)disks[i].total);
     }
   }
 }

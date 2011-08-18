@@ -5,10 +5,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 int xtoi(const char* xs, int szlen);
-void human_readable(int bytes, Bool bits, char *result);
+void human_readable(unsigned long long bytes, Bool bits, char* result);
+void human_readable_disk(unsigned long long bytes, char* result);
 
 
-void human_readable(int bytes, Bool bits, char* result)
+void human_readable(unsigned long long bytes, Bool bits, char* result)
 {
   const char *byte[] = { "B/s","KB/s","MB/s" };
   const char *bit[]  = { "bit/s","Kbit/s","Mbit/s" };
@@ -17,12 +18,28 @@ void human_readable(int bytes, Bool bits, char* result)
   
   
   int n, i;
-  double calc;
+  long double calc;
   
-  for(n = 0, calc = (double)bytes; n < 2 && calc > 1000.0;calc /= 1024, n++);
+  for(n = 0, calc = (long double)bytes; n < 2 && calc > 1000.0;calc /= 1024, n++);
   
   
-  sprintf(result,"%d %s",(int)calc, (bits ? bit[n] : byte[n]));  
+  sprintf(result,"%llu %s",(unsigned long long)calc, (bits ? bit[n] : byte[n]));  
+}
+
+
+void human_readable_disk(unsigned long long bytes, char* result)
+{
+  const char *byte[] = { "B","KB","MB", "GB", "TB" };
+  
+  int n, i;
+  long double calc;
+  
+  for(n = 0, calc = (long double)bytes; n < 4 && calc > 1000.0;calc /= 1024, n++);
+  
+  if(calc > 10)  
+    sprintf(result,"%llu %s",(unsigned long long)calc, byte[n]);  
+  else
+    sprintf(result,"%3.1F %s",(double)(calc), byte[n]);  
 }
 
 

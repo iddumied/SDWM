@@ -23,6 +23,7 @@ typedef struct {
 
 Write stwwrite;
 
+
 void wprinttimelineln(int bytes, int length, double fact, Timeline *timeline, unsigned int cline, unsigned int cpoint, int max)
 {
   wprinttimeline(bytes, length, fact, timeline, cline, cpoint, max);

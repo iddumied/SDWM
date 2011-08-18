@@ -134,9 +134,7 @@ void drawstw()
                                         wprintln("");
                                         wprintln(stwbuffer);
                                         wprintln("  |");
-                                        wprintln("  +---------------------------------------------------------------------------+");
-                                        wprintln("  |                                                                           |");
-                                        wprintln("  +--status                                                                   +--net");
+                                        wprintln("  +--status");
                                         wprintln("  |    |");
                                         wprintln("  |    +--cpu");
                                         wprintln("  |    |    |");
@@ -297,8 +295,70 @@ wprinttimelineln(wlan0r, netstat.length, 1,
                  &netstat.wlan0r,stw.sbar[SBarCpuLine], 
                  stw.sbar[SBarCpuPoint],netstat.wlan0r.max);
 }                                         
+
+
+
+
 }
 
+char hbuf[20];
+int mi = 0;
+stwwrite.xs = stwwrite.xc  = 1100;
+stwwrite.ys = stwwrite.yc = (stw.font.height + gappx);
+stwwrite.xe = stwwrite.w = stw.w - gappx;
+stwwrite.ye = stwwrite.h = stw.h;
+
+wprintln("");
+wprintln("Volumes mounted");
+wprintln("  |");
+for(i = 0; i < MAXPARTITIONS; i++){
+  if(!disks[i].active) break;
+  
+
+  if(disks[i].mountpoint != NULL){
+    mi++;
+    sprintf(stwbuffer,"  +--%s", disks[i].path);  
+    wprintln(stwbuffer);
+    if(mi < mounted_volumes) wprintln("  |    |");
+    else wprintln("       |");
+
+    if(mi < mounted_volumes) sprintf(stwbuffer,"  |    +--mountpoint:  %s",disks[i].mountpoint);
+    else sprintf(stwbuffer,"       +--mountpoint:  %s",disks[i].mountpoint);
+    wprintln(stwbuffer);
+  
+    if(mi < mounted_volumes) wprint("  |    +--usage:  ");
+    else wprint("       +--usage:  ");
+    wprintcolln(disks[i].pused, 100, 0.65, 2 );
+    if(mi < mounted_volumes) wprintln("  |         |");
+    else wprintln("            |");
+    
+    human_readable_disk(disks[i].total, &hbuf);
+    if(mi < mounted_volumes) sprintf(stwbuffer,"  |         +--total:  %s", hbuf);
+    else sprintf(stwbuffer,"            +--total:  %s", hbuf);
+    wprintln(stwbuffer);
+    
+    human_readable_disk(disks[i].avil, &hbuf);
+    if(mi < mounted_volumes) sprintf(stwbuffer,"  |         +--free:  %d%c  -  %s", (int)(disks[i].pavil*100),'%', hbuf);
+    else sprintf(stwbuffer,"            +--free:  %d%c  -  %s", (int)(disks[i].pavil*100),'%', hbuf);
+    wprintln(stwbuffer);
+    
+    human_readable_disk(disks[i].used, &hbuf);
+    if(mi < mounted_volumes) sprintf(stwbuffer,"  |         +--used:  %d%c  -  %s", (int)(disks[i].pused*100),'%', hbuf);
+    else sprintf(stwbuffer,"            +--used:  %d%c  -  %s", (int)(disks[i].pused*100),'%', hbuf);
+    wprintln(stwbuffer);
+
+    if(mi < mounted_volumes) wprintln("  |");
+  }
+
+
+}
+
+
+// set to original Coordinates
+stwwrite.xs = stwwrite.xc  = gappx;
+stwwrite.ys = stwwrite.yc = stw.font.height + gappx;
+stwwrite.xe = stwwrite.w = stw.w - gappx;
+stwwrite.ye = stwwrite.h = stw.h;
 
                                         
   XCopyArea(dpy, stw.drawable, selmon->statuswin, stw.gc, 0, 0, stw.w, stw.h, 0, 0 );
