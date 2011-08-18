@@ -76,11 +76,26 @@ void merge_mount_path()
           disks[i].mountpoint = &mountpoints[j];
           break;
         }
-      }      
+      }     
       if(j == MAXPARTITIONS){
-        disks[i].path = NULL;
+        for(j = 0; j < MAXPARTITIONS; j++)          
+          if(paths[j][0] == '\x00') break;
+  
+        sprintf(paths[j],"/dev/%s",disks[i].realname);
+
+        disks[i].path = &paths[j];
         disks[i].mountpoint = NULL;
       }
+    }else if(disks[i].realname[0] == 's' && disks[i].realname[1] == 'd' && disks[i].realname[3] == '\x00'){
+      for(j = 0; j < MAXPARTITIONS; j++)          
+        if(paths[j][0] == '\x00') break;
+  
+      sprintf(paths[j],"/dev/%s",disks[i].realname);
+
+      disks[i].path = &paths[j];
+      disks[i].mountpoint = NULL;
+
+
     }else if(disks[i].realname[0] == 'd'){ // if /dev/mapper read the name from   
       sprintf(buf,"/sys/block/%s/dm/name",disks[i].realname);
 
@@ -92,18 +107,30 @@ void merge_mount_path()
   
       // reading line by line
       if((read = getline(&line, &len, fp)) != -1) {
-        for(j = 0; j < len; j++)
+        for(j = 0; j < len; j++){
           if(line[j] == '\n') line[j] = '\x00';
-  
+          if(line[j] == '\x00') break;
+        }
+
         for(j = 0;j < MAXPARTITIONS;j++){
-          if(strstr(paths[j],line)){
+          if(!strcmp(paths[j]+12,line)){
             disks[i].path = &paths[j];
+            if(paths[j][0] == '\x00'){
+              paths[j][0] = '/';
+              break;
+            }
+              
             disks[i].mountpoint = &mountpoints[j];
             break;
           }
         }  
         if(j == MAXPARTITIONS){
-          disks[i].path = NULL;
+          for(j = 0; j < MAXPARTITIONS; j++)          
+            if(paths[j][0] == '\x00') break;
+  
+          sprintf(paths[j],"/dev/mapper/%s",line);
+
+          disks[i].path = &paths[j];
           disks[i].mountpoint = NULL;
         }
       }   
@@ -125,7 +152,7 @@ void update_mounts()
   size_t len = 0;
   ssize_t read;
   int i, j, k;
-  i = 1;
+  i = 0;
   
   // open /proc/stat
   fp = fopen("/proc/mounts", "r");
@@ -143,11 +170,14 @@ void update_mounts()
         if(line[j] == ' ') break;
         paths[i][j] = line[j]; 
       }
+      paths[i][j] = '\x00';
 
       for(k = 0, j++;j < len;j++,k++){
         if(line[j] == ' ') break;
         mountpoints[i][k] = line[j]; 
       }
+      mountpoints[i][j] = '\x00';
+
       i++;
     }
   }
