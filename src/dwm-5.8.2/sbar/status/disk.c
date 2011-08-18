@@ -113,7 +113,7 @@ void merge_mount_path()
         }
 
         for(j = 0;j < MAXPARTITIONS;j++){
-          if(!strcmp(paths[j]+12,line)){
+          if(!strcmp(paths[j]+12,line) && paths[j][5] != 's'){
             disks[i].path = &paths[j];
             if(paths[j][0] == '\x00'){
               paths[j][0] = '/';
