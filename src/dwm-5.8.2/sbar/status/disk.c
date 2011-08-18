@@ -1,11 +1,4 @@
 #include <sys/vfs.h>
-//#include <stdio.h>
-//#include <string.h>
-//#include <X11/Xlib.h>
-//#define LENGTH(X)               (sizeof X / sizeof X[0])
-
-//#define MAXPARTITIONS 20                    // max number of posible partitions mounted if you mount more it will crash
-
 
 typedef struct {
   unsigned long long read, write, readtime, writetime, ios_in_process, iostime;
@@ -36,38 +29,6 @@ void update_disk()
   merge_mount_path();
   get_disk_stat();
 }
-
-/*
-int main()
-{
-  update_stats();
-  update_mounts();
-  merge_mount_path();
-  get_disk_stat();
-  while(1==1){
-  sleep(1);
-  update_stats();
-  update_mounts();
-  merge_mount_path();
-  get_disk_stat();
-
-//  printf("| write | read | write time | read time | I/Os | I/Os time || write | read | write time | read time | I/Os | I/Os time |\n");
-  printf("\n");  
-
-  int i;
-  for(i = 0;i < MAXPARTITIONS;i++){
-    if(!disks[i].active) break;
-
-    printf("\n%s  %s  %s",disks[i].realname, disks[i].path, disks[i].mountpoint);
-
-
-//    printf("%llu %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu -- %s %s %s  --  %s %s\n",disks[i].between.write,disks[i].between.read,disks[i].between.writetime,disks[i].between.readtime,disks[i].between.ios_in_process,disks[i].between.iostime,disks[i].now.write,disks[i].now.read,disks[i].now.writetime,disks[i].now.readtime,disks[i].now.ios_in_process,disks[i].now.iostime, disks[i].realname, disks[i].path, disks[i].mountpoint, mountpoints[i], paths[i]);
-    
-  }
-    
-}
-}
-*/
 
 void merge_mount_path()
 {

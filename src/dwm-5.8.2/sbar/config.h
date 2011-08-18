@@ -44,10 +44,7 @@ static const int  tbar_distancex    = 12;
 static const unsigned int gappx     = 6;
 static const int max_link_quality   = 70; // max wlan quality found out by calling iwconfig
 
-static const char *partitions[]     = { "sda","sda1","sda3", "dm-1","dm-2","dm-3" }; // partitons to show informations of
-static const char *part_names[]     = { "all","boot","Dings","swap","root","home" }; // name of the partitons
-static const char *mount_points[]   = { NULL,"/boot","/media/Dings/",NULL,"/","/home" }; // mountpoints of the partitions 
-#define MAXPARTITIONS 10                    // max number of posible partitions mounted if you mount more it will crash
+#define MAXPARTITIONS 20                    // max number of posible partitions mounted if you mount more it will crash
 
 
 // satuswin
