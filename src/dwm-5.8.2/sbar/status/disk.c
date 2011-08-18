@@ -33,6 +33,7 @@ void get_disk_stat();
 void update_mounts();
 void update_stats();
 char* is_partition(unsigned long long *size);
+void read_partitions();
 
 int main()
 {
@@ -56,6 +57,33 @@ int main()
     
 }
 }
+
+void read_partitions()
+{
+  // initializing
+  FILE * fp;
+  char * line = NULL;
+  size_t len = 0;
+  ssize_t read;
+  int i, j;
+  
+  // open /proc/stat
+  fp = fopen("/proc/stat", "r");
+  if (fp == NULL){
+      printf("\nfailed to read /proc/stat\n");
+      return;
+  }
+  
+  // reading line by line
+  while ((read = getline(&line, &len, fp)) != -1) {
+    
+  }
+
+  if (line) free(line);
+  fclose(fp);
+
+}
+
 
 char* is_partition(unsigned long long *size)
 {
