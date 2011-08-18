@@ -13,7 +13,7 @@ typedef struct {
 
 typedef struct {
   char *path, realname[256], *mountpoint;
-  Bool mounted, active;
+  Bool active;
   unsigned long free, total, avil, used;
   DiskActions last,now,between;
 } Disk;
@@ -33,11 +33,13 @@ int main()
   update_stats();
   update_mounts();
   merge_mount_path();
+  get_disk_stat();
   while(1==1){
   sleep(1);
   update_stats();
   update_mounts();
   merge_mount_path();
+  get_disk_stat();
 
 //  printf("| write | read | write time | read time | I/Os | I/Os time || write | read | write time | read time | I/Os | I/Os time |\n");
   printf("\n");  
@@ -192,8 +194,6 @@ void update_mounts()
 
 }
 
-
-
 void update_stats()
 {
   // initializing
@@ -291,11 +291,13 @@ void get_disk_stat()
   unsigned long long bfree, bsize, btotal, bavil;
   char buf[30];
   int i;
-
+  
 
   for(i = 1; i < MAXPARTITIONS; i++)
   {
-    if(disks[i].mounted){
+    if(!disks[i].active) break;
+
+    if(disks[i].mountpoint != NULL){
       statfs(disks[i].mountpoint, &fs);
       bfree = fs.f_bfree;
       bavil = fs.f_bavail;
@@ -306,7 +308,6 @@ void get_disk_stat()
       disks[i].avil = bavil * bsize;
       disks[i].used = (btotal - bfree) * bsize;
       disks[i].total = btotal * bsize;
-    //  printf("%s, %s, %s: %llu bytes left of %llu - %Lf      bsize %d, bfree %d\n", disks[i].mountpoint, disks[i].realname, disks[i].name, disks[i].free, disks[i].total, ((long double)disks[i].free / (long double)disks[i].total), bsize, bfree);
     }
   }
 }
