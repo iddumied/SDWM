@@ -1,10 +1,10 @@
 #include <sys/vfs.h>
-#include <stdio.h>
-#include <string.h>
-#include <X11/Xlib.h>
-#define LENGTH(X)               (sizeof X / sizeof X[0])
+//#include <stdio.h>
+//#include <string.h>
+//#include <X11/Xlib.h>
+//#define LENGTH(X)               (sizeof X / sizeof X[0])
 
-#define MAXPARTITIONS 20                    // max number of posible partitions mounted if you mount more it will crash
+//#define MAXPARTITIONS 20                    // max number of posible partitions mounted if you mount more it will crash
 
 
 typedef struct {
@@ -27,7 +27,17 @@ void get_disk_stat();
 void update_mounts();
 void update_stats();
 void merge_mount_path();
+void update_disk();
 
+void update_disk()
+{
+  update_stats();
+  update_mounts();
+  merge_mount_path();
+  get_disk_stat();
+}
+
+/*
 int main()
 {
   update_stats();
@@ -57,6 +67,7 @@ int main()
     
 }
 }
+*/
 
 void merge_mount_path()
 {
@@ -314,5 +325,5 @@ void get_disk_stat()
 
 void setup_disk()
 {
-  get_disk_stat();
+  update_stats();
 }

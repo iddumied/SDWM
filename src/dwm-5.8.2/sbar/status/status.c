@@ -34,6 +34,7 @@ pthread_mutex_t mutex;
 #include "backlight.c"
 #include "audio.c"
 #include "net.c"
+#include "disk.c"
 
 
 #define XFnToggleMute 0x1008ff12
@@ -74,6 +75,7 @@ void update_status()
     update_backlight();
 //    update_audio();
     update_net();
+    update_disk();
 
 
     XExposeEvent ev;
@@ -151,6 +153,9 @@ int main()
 */
 void setup_status()
 {
+  // setup disks
+  setup_disk();  
+
   // setup uptime
   setup_uptime();
   
