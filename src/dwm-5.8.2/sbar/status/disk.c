@@ -32,8 +32,7 @@ void setup_disk();
 void get_disk_stat();
 void update_mounts();
 void update_stats();
-char* is_partition(unsigned long long *size);
-void read_partitions();
+void merge_mount_path();
 
 int main()
 {
@@ -58,49 +57,10 @@ int main()
 }
 }
 
-void read_partitions()
+void merge_mount_path()
 {
-  // initializing
-  FILE * fp;
-  char * line = NULL;
-  size_t len = 0;
-  ssize_t read;
-  int i, j;
-  
-  // open /proc/stat
-  fp = fopen("/proc/stat", "r");
-  if (fp == NULL){
-      printf("\nfailed to read /proc/stat\n");
-      return;
-  }
-  
-  // reading line by line
-  while ((read = getline(&line, &len, fp)) != -1) {
     
-  }
-
-  if (line) free(line);
-  fclose(fp);
-
 }
-
-
-char* is_partition(unsigned long long *size)
-{
-  int i, index;
-  unsigned long long last = 0;
-  for(i = index = 0; i < MAXPARTITIONS;i++){
-    if(!partitions[i].used) break;
-    if(partitions[i].bytes < *size) continue;
-    if(*size > last){
-      last = *size;
-      index = i;
-    }
-  }
-
-  return &partitions[i].name;
-}
-
 
 void update_mounts()
 {
