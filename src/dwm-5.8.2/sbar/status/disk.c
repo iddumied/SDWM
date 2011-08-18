@@ -6,18 +6,13 @@
 
 #define MAXPARTITIONS 20                    // max number of posible partitions mounted if you mount more it will crash
 
-typedef struct {
-  char name[5];
-  unsigned long long bytes;
-  Bool used;
-} Partition;
 
 typedef struct {
   unsigned long long read, write, readtime, writetime, ios_in_process, iostime;
 } DiskActions;
 
 typedef struct {
-  char path[512], realname[256], mountpoint[512];
+  char *path, realname[256], *mountpoint;
   Bool mounted, active;
   unsigned long free, total, avil, used;
   DiskActions last,now,between;
@@ -26,7 +21,6 @@ typedef struct {
 static Disk disks[MAXPARTITIONS];
 static char mountpoints[MAXPARTITIONS][512];
 static char paths[MAXPARTITIONS][512];
-static Partition partitions[MAXPARTITIONS];
 
 void setup_disk();
 void get_disk_stat();
@@ -38,19 +32,24 @@ int main()
 {
   update_stats();
   update_mounts();
+  merge_mount_path();
   while(1==1){
   sleep(1);
   update_stats();
   update_mounts();
+  merge_mount_path();
 
-  printf("| write | read | write time | read time | I/Os | I/Os time || write | read | write time | read time | I/Os | I/Os time |\n");
-  
+//  printf("| write | read | write time | read time | I/Os | I/Os time || write | read | write time | read time | I/Os | I/Os time |\n");
+  printf("\n");  
 
   int i;
   for(i = 0;i < MAXPARTITIONS;i++){
     if(!disks[i].active) break;
 
-    printf("%llu %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu -- %s %s %s  --  %s %s\n",disks[i].between.write,disks[i].between.read,disks[i].between.writetime,disks[i].between.readtime,disks[i].between.ios_in_process,disks[i].between.iostime,disks[i].now.write,disks[i].now.read,disks[i].now.writetime,disks[i].now.readtime,disks[i].now.ios_in_process,disks[i].now.iostime, disks[i].realname, disks[i].path, disks[i].mountpoint, mountpoints[i], paths[i]);
+    printf("\n%s  %s  %s",disks[i].realname, disks[i].path, disks[i].mountpoint);
+
+
+//    printf("%llu %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu %llu -- %s %s %s  --  %s %s\n",disks[i].between.write,disks[i].between.read,disks[i].between.writetime,disks[i].between.readtime,disks[i].between.ios_in_process,disks[i].between.iostime,disks[i].now.write,disks[i].now.read,disks[i].now.writetime,disks[i].now.readtime,disks[i].now.ios_in_process,disks[i].now.iostime, disks[i].realname, disks[i].path, disks[i].mountpoint, mountpoints[i], paths[i]);
     
   }
     
@@ -59,7 +58,63 @@ int main()
 
 void merge_mount_path()
 {
-    
+  FILE * fp;
+  char * line = NULL;
+  size_t len = 0;
+  ssize_t read;
+  int i,j;
+  char buf[256], *linebreak;
+
+  for(i = 0; i < MAXPARTITIONS;i++){
+    if(!disks[i].active) break;
+
+    if(disks[i].realname[0] == 's' && disks[i].realname[1] == 'd' && disks[i].realname[3] != '\x00'){
+      // find mountpoint and path who belong to the disk 
+      for(j = 0;j < MAXPARTITIONS;j++){
+        if(strstr(paths[j],disks[i].realname)){
+          disks[i].path = &paths[j];
+          disks[i].mountpoint = &mountpoints[j];
+          break;
+        }
+      }      
+      if(j == MAXPARTITIONS){
+        disks[i].path = NULL;
+        disks[i].mountpoint = NULL;
+      }
+    }else if(disks[i].realname[0] == 'd'){ // if /dev/mapper read the name from   
+      sprintf(buf,"/sys/block/%s/dm/name",disks[i].realname);
+
+      fp = fopen(buf, "r");
+      if (fp == NULL){
+        printf("\nfailed to read %s\n",buf);
+        return;
+      }
+  
+      // reading line by line
+      if((read = getline(&line, &len, fp)) != -1) {
+        for(j = 0; j < len; j++)
+          if(line[j] == '\n') line[j] = '\x00';
+  
+        for(j = 0;j < MAXPARTITIONS;j++){
+          if(strstr(paths[j],line)){
+            disks[i].path = &paths[j];
+            disks[i].mountpoint = &mountpoints[j];
+            break;
+          }
+        }  
+        if(j == MAXPARTITIONS){
+          disks[i].path = NULL;
+          disks[i].mountpoint = NULL;
+        }
+      }   
+
+      fclose(fp);
+    }else { // volume not mounted
+      disks[i].path = NULL;
+      disks[i].mountpoint = NULL;
+    }
+  }   
+  if (line) free(line);
 }
 
 void update_mounts()
