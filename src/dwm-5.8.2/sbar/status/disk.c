@@ -1,4 +1,11 @@
 #include <sys/vfs.h>
+#include <stdio.h>
+#include <string.h>
+#include <X11/Xlib.h>
+#define LENGTH(X) (sizeof X / sizeof X[0])
+#ifndef MAXPARTITIONS
+#define MAXPARTITIONS 20
+#endif
 
 typedef struct {
   unsigned long long read, write, readtime, writetime, ios_in_process, iostime;
@@ -23,6 +30,17 @@ void update_mounts();
 void update_stats();
 void merge_mount_path();
 void update_disk();
+
+#ifndef STANADART_BAR
+int main()
+{
+  setup_disk();
+  update_disk();
+  sleep(1);
+  update_disk();
+
+}
+#endif
 
 void update_disk()
 {
@@ -210,7 +228,7 @@ void update_stats()
           break;
 
         case 7:
-          disks[i].now.write = atoll(line+j);
+          disks[i].now.write = (atoll(line+j) * 512);
           break;
     
         case 8:

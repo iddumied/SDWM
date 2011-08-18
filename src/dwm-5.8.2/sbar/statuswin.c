@@ -301,7 +301,7 @@ wprinttimelineln(wlan0r, netstat.length, 1,
 
 }
 
-char hbuf[20];
+char hbuf[20], timebuf[120], speedbuf[20];
 int mi = 0;
 stwwrite.xs = stwwrite.xc  = 1100;
 stwwrite.ys = stwwrite.yc = (stw.font.height + gappx);
@@ -317,34 +317,45 @@ for(i = 0; i < MAXPARTITIONS; i++){
 
   if(disks[i].mountpoint != NULL){
     mi++;
-    sprintf(stwbuffer,"  +--%s", disks[i].path);  
+    sprintf(stwbuffer,"  +--%s  @  %s", disks[i].path, disks[i].mountpoint);  
     wprintln(stwbuffer);
     if(mi < mounted_volumes) wprintln("  |    |");
     else wprintln("       |");
-
+/*
     if(mi < mounted_volumes) sprintf(stwbuffer,"  |    +--mountpoint:  %s",disks[i].mountpoint);
     else sprintf(stwbuffer,"       +--mountpoint:  %s",disks[i].mountpoint);
     wprintln(stwbuffer);
-  
+*/
     if(mi < mounted_volumes) wprint("  |    +--usage:  ");
     else wprint("       +--usage:  ");
     wprintcolln(disks[i].pused, 100, 0.65, 2 );
     if(mi < mounted_volumes) wprintln("  |         |");
     else wprintln("            |");
-    
+/*
     human_readable_disk(disks[i].total, &hbuf);
     if(mi < mounted_volumes) sprintf(stwbuffer,"  |         +--total:  %s", hbuf);
     else sprintf(stwbuffer,"            +--total:  %s", hbuf);
     wprintln(stwbuffer);
-    
+*/
     human_readable_disk(disks[i].avil, &hbuf);
-    if(mi < mounted_volumes) sprintf(stwbuffer,"  |         +--free:  %d%c  -  %s", (int)(disks[i].pavil*100),'%', hbuf);
-    else sprintf(stwbuffer,"            +--free:  %d%c  -  %s", (int)(disks[i].pavil*100),'%', hbuf);
+    human_readable_disk(disks[i].total, &speedbuf);
+    if(mi < mounted_volumes) sprintf(stwbuffer,"  |         +--free:  %d%c  -  %s  of  %s", (int)(disks[i].pavil*100),'%', hbuf, speedbuf);
+    else sprintf(stwbuffer,"            +--free:  %d%c  -  %s  of %s", (int)(disks[i].pavil*100),'%', hbuf, speedbuf);
     wprintln(stwbuffer);
-    
+/*
     human_readable_disk(disks[i].used, &hbuf);
     if(mi < mounted_volumes) sprintf(stwbuffer,"  |         +--used:  %d%c  -  %s", (int)(disks[i].pused*100),'%', hbuf);
     else sprintf(stwbuffer,"            +--used:  %d%c  -  %s", (int)(disks[i].pused*100),'%', hbuf);
+    wprintln(stwbuffer);
+*/
+    human_readable_disk(disks[i].now.read, &hbuf);
+    if(mi < mounted_volumes) sprintf(stwbuffer,"  |         +--read: %s  -  %llu Bytes",hbuf,disks[i].now.read);
+    else sprintf(stwbuffer,"            +--read: %s  -  %llu Bytes",hbuf,disks[i].now.read);
+    wprintln(stwbuffer);
+    
+    human_readable_disk(disks[i].now.write, &hbuf);
+    if(mi < mounted_volumes) sprintf(stwbuffer,"  |         +--write: %s   -  %llu Bytes",hbuf,disks[i].now.write);
+    else sprintf(stwbuffer,"            +--write: %s   -  %llu Bytes",hbuf,disks[i].now.write);
     wprintln(stwbuffer);
 
     if(mi < mounted_volumes) wprintln("  |");
@@ -352,6 +363,42 @@ for(i = 0; i < MAXPARTITIONS; i++){
 
 
 }
+
+stwwrite.xs = stwwrite.xc  = 850;
+stwwrite.ys = stwwrite.yc = stw.font.height + gappx;
+stwwrite.xe = stwwrite.w = stw.w - gappx;
+stwwrite.ye = stwwrite.h = stw.h;
+
+wprintln("");
+wprintln("Disk monitor");
+wprintln("  |");
+for(i = 0;i < MAXPARTITIONS;i++){
+   if(!disks[i].active) break;
+    
+    sprintf(stwbuffer,"  +--%s", disks[i].path);  
+    wprint(stwbuffer);
+  
+    if(disks[i].mountpoint == NULL)
+      wprintln("");
+    else{
+      sprintf(stwbuffer,"  @  %s", disks[i].mountpoint);  
+      wprintln(stwbuffer);
+    }
+      
+    wprintln("  |     |");
+    human_readable_disk(disks[i].now.read, &hbuf);
+    sprintf(stwbuffer,"  |    +--read: %s  -  %llu Bytes",hbuf,disks[i].now.read);
+    wprintln(stwbuffer);
+    
+    human_readable_disk(disks[i].now.write, &hbuf);
+    sprintf(stwbuffer,"  |    +--write: %s   -  %llu Bytes",hbuf,disks[i].now.write);
+    wprintln(stwbuffer);
+
+    wprintln("  |");
+}
+
+
+
 
 
 // set to original Coordinates

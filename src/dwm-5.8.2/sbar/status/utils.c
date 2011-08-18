@@ -7,6 +7,31 @@
 int xtoi(const char* xs, int szlen);
 void human_readable(unsigned long long bytes, Bool bits, char* result);
 void human_readable_disk(unsigned long long bytes, char* result);
+void readadable_seconds(unsigned long long sec, char* result);
+
+
+
+
+void readadable_seconds(unsigned long long sec, char* result)
+{
+  int d, h, m, s;
+  s = sec%60;
+  m = (sec/60)%60;
+  h = (sec/60/60)%24;
+  d = (sec/60/60/24);
+
+
+  if(d > 0)
+    sprintf(result,"%dd %dh %dm %ds",d,h,m,s);
+  else if(h > 0)
+    sprintf(result,"%dh %dm %ds",h,m,s);
+  else if(m > 0)
+    sprintf(result,"%dm %ds",m,s);
+  else 
+    sprintf(result,"%ds",s);
+
+}
+
 
 
 void human_readable(unsigned long long bytes, Bool bits, char* result)
@@ -15,7 +40,6 @@ void human_readable(unsigned long long bytes, Bool bits, char* result)
   const char *bit[]  = { "bit/s","Kbit/s","Mbit/s" };
   
   if(bits) bytes *= 8;
-  
   
   int n, i;
   long double calc;
