@@ -76,21 +76,23 @@ void wprinttimeline(int bytes, int length, double fact, Timeline *timeline, unsi
   py = y + (int)((double)h * percent);
   ly = py+1;
     
-   if(ly < stwwrite.yc){
+  if(ly < stwwrite.yc){
     gcv.foreground = cline;
     XChangeGC(dpy, stwwrite.gc, GCForeground, &gcv);
     XDrawLine(dpy, stwwrite.drawable, stwwrite.gc, x+length-1, ly, x+length-1, stwwrite.yc-1);
-   }
-   if(py < stwwrite.yc){
+  }
+  if(py < stwwrite.yc){
     gcv.foreground = cpoint;
     XChangeGC(dpy, stwwrite.gc, GCForeground, &gcv);
     XDrawPoint(dpy, stwwrite.drawable, stwwrite.gc, x+length-1, py);
-   }
+  }
    
-   timeline->bytes[length-1] = bytes;
+  timeline->bytes[length-1] = bytes;
    
-    gcv.foreground = stw.sel[ColFG];;
-    XChangeGC(dpy, stw.gc, GCForeground, &gcv);
+  gcv.foreground = stw.sel[ColFG];;
+  XChangeGC(dpy, stw.gc, GCForeground, &gcv);
+
+  stwwrite.xc += length;
 }
 
 
