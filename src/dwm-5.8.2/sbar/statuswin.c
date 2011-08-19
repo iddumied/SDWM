@@ -309,7 +309,7 @@ wprinttimelineln(wlan0r, netstat.length, 1,
 }
 
 char ebuf[5][20];
-int countdisks, mi = 0;
+int countdisks, mj, mi = 0;
 stwwrite.xs = stwwrite.xc  = 1100;
 stwwrite.ys = stwwrite.yc = (stw.font.height + gappx);
 stwwrite.xe = stwwrite.w = stw.w - gappx;
@@ -375,6 +375,7 @@ for(i = 0; i < MAXPARTITIONS; i++){
         wprintln("  |         |");
 
       }else{
+        diskstat[i].readges = 0; // clearing history
         sprintf(stwbuffer,"  |         +--readed: %s",ebuf[0]);
         wprintln(stwbuffer);
       }
@@ -396,6 +397,7 @@ for(i = 0; i < MAXPARTITIONS; i++){
         wprintln("            |");
 
       }else{
+        diskstat[i].readges = 0; // clearing history
         sprintf(stwbuffer,"            +--readed %s",ebuf[0]);
         wprintln(stwbuffer);
       }
@@ -429,6 +431,7 @@ for(i = 0; i < MAXPARTITIONS; i++){
         wprintln(stwbuffer);
 
       }else{
+        diskstat[i].writeges = 0; // clearing history
         sprintf(stwbuffer,"  |         +--writen: %s",ebuf[0]);
         wprintln(stwbuffer);
       }
@@ -448,6 +451,7 @@ for(i = 0; i < MAXPARTITIONS; i++){
         sprintf(stwbuffer,"   %s",ebuf[3]);
         wprintln(stwbuffer);
       }else{
+        diskstat[i].writeges = 0; // clearing history
         sprintf(stwbuffer,"            +--writen: %s",ebuf[0]);
         wprintln(stwbuffer);
       }
@@ -455,6 +459,16 @@ for(i = 0; i < MAXPARTITIONS; i++){
     }
 
     if(mi < mounted_volumes) wprintln("  |");
+  }else if(diskstat[i].read.max > 0 || diskstat[i].write.max > 0){
+    diskstat[i].read.max  = 0;
+    diskstat[i].write.max = 0;
+    diskstat[i].readges   = 0;
+    diskstat[i].writeges   = 0;
+
+    for(mj = 0;mj < diskstat[i].length;mj++){
+      diskstat[i].read.bytes[mj]  = 0;
+      diskstat[i].write.bytes[mj] = 0;
+    }
   }
 }
 
