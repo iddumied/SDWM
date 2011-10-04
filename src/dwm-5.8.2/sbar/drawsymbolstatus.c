@@ -1,6 +1,23 @@
 void drawsymbolstatus();
+void draw_main_and_time(int y, int pos);
 
+void draw_main_and_time(int y, int pos)
+{
 
+  // draw main symbol
+  if(dc.font.set)
+    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, 3, y+1, mainsymbol, 1);
+  else
+    XDrawString(dpy, dc.drawable, dc.gc, 3, y+1, mainsymbol, 1);
+  
+  
+  // draw date and time
+  if(dc.font.set)
+    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, tbar_date.date,tbar_date.len);
+  else
+    XDrawString(dpy, dc.drawable, dc.gc, pos, y, tbar_date.date,tbar_date.len);
+  
+}
 
 void drawsymbolstatus()
 {
@@ -45,20 +62,9 @@ void drawsymbolstatus()
   y = dc.y + (dc.h / 2) - (h / 2) + dc.font.ascent;
   
   /*************** DRAWING ***************/
-  // draw main symbol
-  if(dc.font.set)
-    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, 3, y+1, mainsymbol, 1);
-  else
-    XDrawString(dpy, dc.drawable, dc.gc, 3, y+1, mainsymbol, 1);
   
-  
-  // draw date and time
-  if(dc.font.set)
-    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, tbar_date.date,tbar_date.len);
-  else
-    XDrawString(dpy, dc.drawable, dc.gc, pos, y, tbar_date.date,tbar_date.len);
-  
-  
+  draw_main_and_time(y, pos);  
+
   // calculating battery color;
   gcv.foreground = ((int)(battstat * 255)) * statusstyle.gl + 
           (255 - ((int)(battstat * 255))) * statusstyle.rl;

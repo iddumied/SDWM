@@ -50,7 +50,8 @@ typedef struct {
 } SBarConf;
 
 typedef struct {
-  void (*func) (unsigned long) (unsigned long);
-  const char symbol[], text[];
-  unsigned long ul_symbol, ul_text
-} SBarStatusSymbols
+  void (*func) (int, int, unsigned long, unsigned long);
+  const char symbol[8], text[8];
+  unsigned long ul_symbol, ul_text;
+  Bool active;
+} SBarStatusSymbol;
