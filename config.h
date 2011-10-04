@@ -96,7 +96,6 @@ static Key keys[] = {
 	{ MODKEY,                       XK_p,             spawn,            {.v = dmenucmd } },
 	{ MODKEY|ShiftMask,             XK_Return,        spawn,            {.v = termcmd } },
   { MODKEY|ShiftMask,             XK_z,             spawn,            SHCMD("transset-df -a") },
-	{ MODKEY|ShiftMask,             XK_b,             togglesbar_mode,  {}},
 	{ MODKEY,                       XK_b,             togglebar,        {0} },
 	{ MODKEY,                       XK_s,             focusstack,       {.i = +1 } },
 	{ MODKEY,                       XK_a,             focusstack,       {.i = -1 } },
