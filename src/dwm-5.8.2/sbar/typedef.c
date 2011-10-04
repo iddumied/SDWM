@@ -48,3 +48,9 @@ typedef struct {
   Bool battery, textbar, border, redroot;
   unsigned long bordercolor;
 } SBarConf;
+
+typedef struct {
+  void (*func) (unsigned long) (unsigned long);
+  const char symbol[], text[];
+  unsigned long ul_symbol, ul_text
+} SBarStatusSymbols
