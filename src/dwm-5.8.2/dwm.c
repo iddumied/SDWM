@@ -174,6 +174,16 @@ void movestack(const Arg *arg);            // move window in stack
 int get_stackposition(Client *c, Client *stack);
 int get_next_stackposition(Client* sel, Client* stack);
 static void mytest();
+// SBar Staus Symbol functions
+int draw_time(int y, int pos);
+int draw_battery(int y, int pos);
+int draw_uptime(int y, int pos);
+int draw_memory(int y, int pos);
+int draw_termal(int y, int pos);
+int draw_backlight(int y, int pos);
+int draw_audio(int y, int pos);
+int draw_net(int y, int pos);
+
 
 // dwm functions
 static void applyrules(Client *c);
@@ -1064,10 +1074,8 @@ dirtomon(int dir) {
 void
 drawbar(Monitor *m) {
   // if battery low change style
-  pthread_mutex_lock (&mutex);
   double batstat = battery.stat;
   int batmode = battery.adapter;
-  pthread_mutex_unlock (&mutex);
   
 
   
