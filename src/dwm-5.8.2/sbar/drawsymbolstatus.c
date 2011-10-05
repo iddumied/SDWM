@@ -2,8 +2,84 @@ void drawsymbolstatus();
 int draw_time(int y, int pos);
 int draw_battery(int y, int pos);
 int draw_uptime(int y, int pos);
+int draw_memory(int y, int pos);
+int draw_termal(int y, int pos);
+int draw_backlight(int y, int pos);
 
 static XGCValues gcv;
+
+int draw_backlight(int y, int pos)
+{
+
+}
+
+
+int draw_termal(int y, int pos)
+{
+  char buffer[8];
+  int buffer_len;
+
+  // draw thermal
+  sprintf(buffer,"\x1c %d°C", thermal);
+  
+  // calculaing color
+  if(thermal > 55)
+    gcv.foreground = sbarcolor.red;
+  else gcv.foreground = dc.norm[ColFG];
+  
+  XChangeGC(dpy, dc.gc, GCForeground, &gcv);
+    
+  buffer_len = strlen(buffer);
+
+  // update pos
+  pos -= textnw(buffer, buffer_len);
+  
+  if(dc.font.set)
+    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, buffer, buffer_len);
+  else
+    XDrawString(dpy, dc.drawable, dc.gc, pos, y, buffer, buffer_len);
+  
+  return pos; 
+}
+
+int draw_memory(int y, int pos)
+{
+  int swap_buffer_len, mem_buffer_len, swapusedper;
+  char mem_buffer[5];
+
+  // draw swap if used
+  swapusedper = (int)(memory.pswapused*100);
+  if(swapusedper > 0){
+    char swap_buffer[4];
+    
+    gcv.foreground = sbarcolor.red;
+    XChangeGC(dpy, dc.gc, GCForeground, &gcv);
+    
+    sprintf(swap_buffer, " %d%c", swapusedper, '%');
+    swap_buffer_len = strlen(swap_buffer);
+    pos -= textnw(swap_buffer, swap_buffer_len);
+    
+    if(dc.font.set)
+      XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, swap_buffer, swap_buffer_len);
+    else
+      XDrawString(dpy, dc.drawable, dc.gc, pos, y, swap_buffer, swap_buffer_len);
+  }
+  
+  // draw memory usage
+  gcv.foreground = dc.norm[ColFG];
+  XChangeGC(dpy, dc.gc, GCForeground, &gcv);
+  
+  sprintf(mem_buffer, "\x1a %d%c", (int)(memory.pused*100),'%');
+  mem_buffer_len = strlen(mem_buffer);
+  pos -= textnw(mem_buffer, mem_buffer_len);
+
+  if(dc.font.set)
+    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, mem_buffer, mem_buffer_len);
+  else
+    XDrawString(dpy, dc.drawable, dc.gc, pos, y, mem_buffer, mem_buffer_len);
+  
+  return pos;
+}
 
 int draw_uptime(int y, int pos)
 {
@@ -86,20 +162,15 @@ void drawsymbolstatus()
   
   // values
   double used, buffer, cached, swapused, light, audioper, wlanstat;
-  char memstat[5], swapstat[4], thermalstring[6], lightsym[7], audiosym[7], netsym[13], netspeedstr[11];
-  int upt, upl, battre_h, battre_m, y, h, swapusedper, pos, swapstat_len, memstat_len, temperature, thermal_len, light_len, audio_len, net_len, netspeed;
+  char thermalstring[6], lightsym[7], audiosym[7], netsym[13], netspeedstr[11];
+  int y, h,pos, memstat_len, temperature, thermal_len, light_len, audio_len, net_len, netspeed;
   Bool audiomute, audiophones, netonline, ethonline, walnonline;
   // catching information
   pthread_mutex_lock (&mutex);
-  upt         = tbar_uptime.uptime;
-  upl         =  tbar_uptime.len;
   used        = memory.pused;
   buffer      = memory.pbuffer;
   cached      = memory.pcached;
   swapused    = memory.pswapused;
-  battre_h    = battery.remain.h;
-  battre_m    = battery.remain.m;
-  temperature = thermal;
   light       = backlight.per;
   audioper    = audio.percent;
   audiophones = audio.headphones;
@@ -128,62 +199,14 @@ void drawsymbolstatus()
   pos = draw_time(y, pos) - tbar_distancex;  
   pos = draw_battery(y, pos) - tbar_distancex;
   pos = draw_uptime(y, pos) - tbar_distancex; 
-  
-    
-  // update pos
-  pos -= tbar_distancex;  
-  
-  // draw swap if used
-  swapusedper = (int)(swapused*100);
-  if(swapusedper > 0){
-    gcv.foreground = sbarcolor.red;
-    XChangeGC(dpy, dc.gc, GCForeground, &gcv);
-    
-    sprintf(swapstat, " %d%c", swapusedper, '%');
-    swapstat_len = strlen(swapstat);
-    pos -= textnw(swapstat, swapstat_len);
-    
-    if(dc.font.set)
-      XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, swapstat, swapstat_len);
-    else
-      XDrawString(dpy, dc.drawable, dc.gc, pos, y, swapstat, swapstat_len);
-  }
-  
-  // draw memory usage
-  gcv.foreground = dc.norm[ColFG];
-  XChangeGC(dpy, dc.gc, GCForeground, &gcv);
-  
-  sprintf(memstat, "\x1a %d%c", (int)(used*100),'%');
-  memstat_len = strlen(memstat);
-  pos -= textnw(memstat, memstat_len);
-
-  if(dc.font.set)
-    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, memstat, memstat_len);
-  else
-    XDrawString(dpy, dc.drawable, dc.gc, pos, y, memstat, memstat_len);
+  pos = draw_memory(y, pos) - tbar_distancex; 
+  pos = draw_termal(y, pos) - tbar_distancex; 
   
   
-  // update pos
-  pos -= tbar_distancex;  
+ 
   
-  // draw thermal
-  sprintf(thermalstring,"\x1c %d°C",temperature);
   
-  // calculaing color
-  if(temperature > 55)
-    gcv.foreground = sbarcolor.red;
-  else gcv.foreground = dc.norm[ColFG];
-  
-  XChangeGC(dpy, dc.gc, GCForeground, &gcv);
-    
-  thermal_len = strlen(thermalstring);
-  pos -= textnw(thermalstring, thermal_len);
-  
-  if(dc.font.set)
-    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, thermalstring, thermal_len);
-  else
-    XDrawString(dpy, dc.drawable, dc.gc, pos, y, thermalstring, thermal_len);
-  
+ 
     
   // update pos
   pos -= tbar_distancex;  
