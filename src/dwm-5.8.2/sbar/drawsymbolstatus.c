@@ -6,12 +6,50 @@ int draw_memory(int y, int pos);
 int draw_termal(int y, int pos);
 int draw_backlight(int y, int pos);
 int draw_audio(int y, int pos);
+int draw_net(int y, int pos);
 
 static XGCValues gcv;
 
-int draw_audio(int y, int pos)
+int draw_net(int y, int pos)
 {
 
+}
+
+int draw_audio(int y, int pos)
+{
+  int buffer_len;
+  char buffer[8];  
+
+  // draw audio
+  gcv.foreground = dc.norm[ColFG];
+  XChangeGC(dpy, dc.gc, GCForeground, &gcv);
+
+  // calc symbol
+  if(audio.mute)
+    sprintf(buffer,"\x0f %d%c", (int)(audio.percent*100),'%');
+  else if(audio.headphones)
+    sprintf(buffer,"È %d%c", (int)(audio.percent*100),'%');
+  else if(audio.percent < 0.25)
+    sprintf(buffer,"\x10 %d%c", (int)(audio.percent*100),'%');
+  else if(audio.percent < 0.5)
+    sprintf(buffer,"\x11 %d%c", (int)(audio.percent*100),'%');
+  else if(audio.percent < 0.75)
+    sprintf(buffer,"\x12 %d%c", (int)(audio.percent*100),'%');
+  else
+    sprintf(buffer,"É %d%c", (int)(audio.percent*100),'%');
+  
+  
+    
+  buffer_len = strlen(buffer);
+  pos -= textnw(buffer, buffer_len);
+  
+  if(dc.font.set)
+    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, buffer, buffer_len);
+  else
+    XDrawString(dpy, dc.drawable, dc.gc, pos, y, buffer, buffer_len);
+  
+ 
+  return pos;
 }
 
 int draw_backlight(int y, int pos)
@@ -42,6 +80,7 @@ int draw_backlight(int y, int pos)
   else
     XDrawString(dpy, dc.drawable, dc.gc, pos, y, buffer, buffer_len);
   
+  return pos;
 }
 
 
@@ -192,19 +231,16 @@ void drawsymbolstatus()
   XChangeGC(dpy, dc.gc, GCForeground, &gcv);
   
   // values
-  double used, buffer, cached, swapused, audioper, wlanstat;
-  char thermalstring[6], audiosym[7], netsym[13], netspeedstr[11];
-  int y, h,pos, memstat_len, temperature, thermal_len, audio_len, net_len, netspeed;
-  Bool audiomute, audiophones, netonline, ethonline, walnonline;
+  double used, buffer, cached, swapused, wlanstat;
+  char thermalstring[6], netsym[13], netspeedstr[11];
+  int y, h,pos, memstat_len, temperature, thermal_len, net_len, netspeed;
+  Bool netonline, ethonline, walnonline;
   // catching information
   pthread_mutex_lock (&mutex);
   used        = memory.pused;
   buffer      = memory.pbuffer;
   cached      = memory.pcached;
   swapused    = memory.pswapused;
-  audioper    = audio.percent;
-  audiophones = audio.headphones;
-  audiomute   = audio.mute;
   netonline   = net.connected;
   ethonline   = net.eth0.online;
   walnonline  = net.wlan0.online;
@@ -232,39 +268,12 @@ void drawsymbolstatus()
   pos = draw_memory(y, pos) - tbar_distancex; 
   pos = draw_termal(y, pos) - tbar_distancex; 
   pos = draw_backlight(y, pos) - tbar_distancex; 
+  pos = draw_audio(y, pos) - tbar_distancex; 
 
   
   
   
-  // draw audio
-  gcv.foreground = dc.norm[ColFG];
-  XChangeGC(dpy, dc.gc, GCForeground, &gcv);
-
-  // calc symbol
-  if(audiomute)
-    sprintf(audiosym,"\x0f %d%c", (int)(audioper*100),'%');
-  else if(audiophones)
-    sprintf(audiosym,"È %d%c", (int)(audioper*100),'%');
-  else if(audioper < 0.25)
-    sprintf(audiosym,"\x10 %d%c", (int)(audioper*100),'%');
-  else if(audioper < 0.5)
-    sprintf(audiosym,"\x11 %d%c", (int)(audioper*100),'%');
-  else if(audioper < 0.75)
-    sprintf(audiosym,"\x12 %d%c", (int)(audioper*100),'%');
-  else
-    sprintf(audiosym,"É %d%c", (int)(audioper*100),'%');
-  
-  
-    
-  audio_len = strlen(audiosym);
-  pos -= textnw(audiosym, audio_len);
-  
-  if(dc.font.set)
-    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, audiosym, audio_len);
-  else
-    XDrawString(dpy, dc.drawable, dc.gc, pos, y, audiosym, audio_len);
-  
-  
+ 
   
         
   // update pos
