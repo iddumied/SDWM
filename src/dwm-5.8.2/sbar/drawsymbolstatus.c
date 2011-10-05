@@ -12,7 +12,40 @@ static XGCValues gcv;
 
 int draw_net(int y, int pos)
 {
+  int buffer_buffer_net_len;
+  char buffer_net[13], buffer_speed[11];
+  
+  // draw net
+  gcv.foreground = dc.norm[ColFG];
+  XChangeGC(dpy, dc.gc, GCForeground, &gcv);
 
+  // calc symbol
+  // TODO interface off includen via Fn-key
+  if(!net.connected)
+    sprintf(buffer_net,"Ô offline");
+  else if(net.eth0.online){
+    human_readable(net.eth0.between.receive.bytes_per_sec, False, buffer_speed);
+    sprintf(buffer_net,"\x19  %s", buffer_speed);
+  }else if(net.wlan0.online){
+    if(net.wlan0.strength < 0.25)
+      sprintf(buffer_net,"\x13 %d%c", (int)(net.wlan0.strength*100),'%');
+    else if(net.wlan0.strength < 0.5)
+      sprintf(buffer_net,"\x14 %d%c", (int)(net.wlan0.strength*100),'%');
+    else if(net.wlan0.strength < 0.75)
+      sprintf(buffer_net,"\x15 %d%c", (int)(net.wlan0.strength*100),'%');
+    else
+      sprintf(buffer_net,"\x16 %d%c", (int)(net.wlan0.strength*100),'%');
+  }else
+    sprintf(buffer_net,"Error");
+    
+  buffer_net_len = strlen(buffer_net);
+  pos -= textnw(buffer_net, buffer_net_len);
+  
+  if(dc.font.set)
+    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, buffer_net, buffer_net_len);
+  else
+    XDrawString(dpy, dc.drawable, dc.gc, pos, y, buffer_net, buffer_net_len);
+  
 }
 
 int draw_audio(int y, int pos)
@@ -231,22 +264,11 @@ void drawsymbolstatus()
   XChangeGC(dpy, dc.gc, GCForeground, &gcv);
   
   // values
-  double used, buffer, cached, swapused, wlanstat;
-  char thermalstring[6], netsym[13], netspeedstr[11];
-  int y, h,pos, memstat_len, temperature, thermal_len, net_len, netspeed;
-  Bool netonline, ethonline, walnonline;
+  double used, buffer, cached, swapused, net.wlan0.strength;
+  char thermalstring[6];
+  int y, h,pos, memstat_len, temperature, thermal_len, net.eth0.between.receive.bytes_per_sec;
+  Bool net.connected, net.eth0.online, net.wlan0.online;
   // catching information
-  pthread_mutex_lock (&mutex);
-  used        = memory.pused;
-  buffer      = memory.pbuffer;
-  cached      = memory.pcached;
-  swapused    = memory.pswapused;
-  netonline   = net.connected;
-  ethonline   = net.eth0.online;
-  walnonline  = net.wlan0.online;
-  wlanstat    = net.wlan0.strength;
-  netspeed    = net.eth0.between.receive.bytes_per_sec;
-  pthread_mutex_unlock (&mutex);
   
   // calculaing font values
   pos = screenWidth - 6;                                        //abstand als variable in config.h auslagern
@@ -269,6 +291,7 @@ void drawsymbolstatus()
   pos = draw_termal(y, pos) - tbar_distancex; 
   pos = draw_backlight(y, pos) - tbar_distancex; 
   pos = draw_audio(y, pos) - tbar_distancex; 
+  pos = draw_net(y, pos) - tbar_distancex; 
 
   
   
@@ -276,39 +299,7 @@ void drawsymbolstatus()
  
   
         
-  // update pos
-  pos -= tbar_distancex;  
   
-  // draw net
-  gcv.foreground = dc.norm[ColFG];
-  XChangeGC(dpy, dc.gc, GCForeground, &gcv);
-
-  // calc symbol
-  // TODO interface off includen via Fn-key
-  if(!netonline)
-    sprintf(netsym,"Ô offline");
-  else if(ethonline){
-    human_readable(netspeed, False, netspeedstr);
-    sprintf(netsym,"\x19  %s", netspeedstr);
-  }else if(walnonline){
-    if(wlanstat < 0.25)
-      sprintf(netsym,"\x13 %d%c", (int)(wlanstat*100),'%');
-    else if(wlanstat < 0.5)
-      sprintf(netsym,"\x14 %d%c", (int)(wlanstat*100),'%');
-    else if(wlanstat < 0.75)
-      sprintf(netsym,"\x15 %d%c", (int)(wlanstat*100),'%');
-    else
-      sprintf(netsym,"\x16 %d%c", (int)(wlanstat*100),'%');
-  }else
-    sprintf(netsym,"Error");
-    
-  net_len = strlen(netsym);
-  pos -= textnw(netsym, net_len);
-  
-  if(dc.font.set)
-    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, netsym, net_len);
-  else
-    XDrawString(dpy, dc.drawable, dc.gc, pos, y, netsym, net_len);
-  
+ 
   
 }
