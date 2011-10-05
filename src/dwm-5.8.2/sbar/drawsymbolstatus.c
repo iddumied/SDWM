@@ -1,3 +1,5 @@
+#define ANZ_SBAR_SYMBOLS 8
+
 void drawsymbolstatus();
 int draw_time(int y, int pos);
 int draw_battery(int y, int pos);
@@ -12,7 +14,7 @@ static XGCValues gcv;
 
 int draw_net(int y, int pos)
 {
-  int buffer_buffer_net_len;
+  int buffer_net_len;
   char buffer_net[13], buffer_speed[11];
   
   // draw net
@@ -46,6 +48,7 @@ int draw_net(int y, int pos)
   else
     XDrawString(dpy, dc.drawable, dc.gc, pos, y, buffer_net, buffer_net_len);
   
+  return pos;
 }
 
 int draw_audio(int y, int pos)
@@ -260,15 +263,9 @@ int draw_time(int y, int pos)
 void drawsymbolstatus()
 {
   /*************** INITIALIZE ***************/
+  int i, y, h, pos;
   gcv.foreground = dc.norm[ColFG];
   XChangeGC(dpy, dc.gc, GCForeground, &gcv);
-  
-  // values
-  double used, buffer, cached, swapused, net.wlan0.strength;
-  char thermalstring[6];
-  int y, h,pos, memstat_len, temperature, thermal_len, net.eth0.between.receive.bytes_per_sec;
-  Bool net.connected, net.eth0.online, net.wlan0.online;
-  // catching information
   
   // calculaing font values
   pos = screenWidth - 6;                                        //abstand als variable in config.h auslagern
@@ -277,29 +274,27 @@ void drawsymbolstatus()
   
   /*************** DRAWING ***************/
   
-
   // draw main symbol
   if(dc.font.set)
     XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, 3, y+1, mainsymbol, 1);
   else
     XDrawString(dpy, dc.drawable, dc.gc, 3, y+1, mainsymbol, 1);
   
-  pos = draw_time(y, pos) - tbar_distancex;  
-  pos = draw_battery(y, pos) - tbar_distancex;
-  pos = draw_uptime(y, pos) - tbar_distancex; 
-  pos = draw_memory(y, pos) - tbar_distancex; 
-  pos = draw_termal(y, pos) - tbar_distancex; 
-  pos = draw_backlight(y, pos) - tbar_distancex; 
-  pos = draw_audio(y, pos) - tbar_distancex; 
-  pos = draw_net(y, pos) - tbar_distancex; 
+SBarStatusSymbol sbar_status_symbols[] = {
+  { draw_time,      True },
+  { draw_battery,   True },
+  { draw_uptime,    True },
+  { draw_memory,    True },
+  { draw_termal,    True },
+  { draw_backlight, True },
+  { draw_audio,     True },
+  { draw_net,       True },
+};
 
-  
-  
-  
- 
-  
-        
-  
- 
-  
+  // drawing sbar symbols. The order is configured in config.h
+  for(i = 0; i < ANZ_SBAR_SYMBOLS;i++){
+    if(sbar_status_symbols[i].active)
+      pos = sbar_status_symbols[i].func(y, pos) - tbar_distancex;
+  }
+
 }
