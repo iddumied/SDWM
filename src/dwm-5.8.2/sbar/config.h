@@ -5,6 +5,19 @@
 #define STANADART_BAR 0
 #include "typedef.c"
 
+// order of SBar Status Symbols. first = right
+SBarStatusSymbol sbar_status_symbols[] = {
+//  function        active
+  { draw_time,      True },
+  { draw_battery,   True },
+  { draw_uptime,    True },
+  { draw_memory,    True },
+  { draw_termal,    True },
+  { draw_backlight, True },
+  { draw_audio,     True },
+  { draw_net,       True },
+};
+
 static const Bool texttopbar        = True;       // False means bottom bar
 static const Bool bottomborder      = True;	      // border of text bar
   // color bottomborder    //"#a2c2cd"; //"#3b85a2"; //"#669cb6"; //"#21536a"; 
