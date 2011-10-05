@@ -1,35 +1,93 @@
 void drawsymbolstatus();
-void draw_main_and_time(int y, int pos);
+int draw_time(int y, int pos);
+int draw_battery(int y, int pos);
+int draw_uptime(int y, int pos);
 
-void draw_main_and_time(int y, int pos)
+static XGCValues gcv;
+
+int draw_uptime(int y, int pos)
 {
-
-  // draw main symbol
+  // update pos
+  pos -= textnw(tbar_uptime.uptime, tbar_uptime.len); 
+  
+  // draw uptime
+  gcv.foreground = dc.norm[ColFG];
+  XChangeGC(dpy, dc.gc, GCForeground, &gcv);
   if(dc.font.set)
-    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, 3, y+1, mainsymbol, 1);
+    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, tbar_uptime.uptime, tbar_uptime.len);
   else
-    XDrawString(dpy, dc.drawable, dc.gc, 3, y+1, mainsymbol, 1);
+    XDrawString(dpy, dc.drawable, dc.gc, pos, y,tbar_uptime.uptime, tbar_uptime.len);
   
+  return pos;
+}
+
+int draw_battery(int y, int pos)
+{
+  int buffer_len;
+  char buffer[8];
+
+  // calculating battery color;
+  gcv.foreground = ((int)(battery.stat * 255)) * statusstyle.gl + 
+          (255 - ((int)(battery.stat * 255))) * statusstyle.rl;
+  XChangeGC(dpy, dc.gc, GCForeground, &gcv);
   
+  // calculating battery stat
+  if(battery.mode == CHARGING){
+     sprintf(buffer, "%c %s", (char)23, battery.remain.h, battery.remain.m);
+   
+  }else if(battery.mode == CHARGED){
+    sprintf(buffer, "%c Full", (char)23);
+   
+  }else{
+    if(battery.stat < 0.25)
+      sprintf(buffer, "%c %02d:%02d", (char)11, battery.remain.h, battery.remain.m);
+    else if(battery.stat < 0.5)
+      sprintf(buffer, "%c %02d:%02d", (char)12, battery.remain.h, battery.remain.m);
+    else if(battery.stat < 0.75)
+      sprintf(buffer, "%c %02d:%02d", (char)13, battery.remain.h, battery.remain.m);
+    else
+      sprintf(buffer, "%c %02d:%02d", (char)14, battery.remain.h, battery.remain.m);
+
+  }
+
+  // update pos
+  buffer_len = strlen(buffer);
+  pos -= textnw(buffer, buffer_len);
+  
+ 
+  if(dc.font.set)
+    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, buffer, buffer_len);
+  else
+    XDrawString(dpy, dc.drawable, dc.gc, pos, y, buffer, buffer_len);
+
+  return pos; 
+}
+
+
+int draw_time(int y, int pos)
+{
+  // update pos  
+  pos -= textnw(tbar_date.date,tbar_date.len);
+
   // draw date and time
   if(dc.font.set)
     XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, tbar_date.date,tbar_date.len);
   else
     XDrawString(dpy, dc.drawable, dc.gc, pos, y, tbar_date.date,tbar_date.len);
   
+  return pos;
 }
 
 void drawsymbolstatus()
 {
   /*************** INITIALIZE ***************/
-  XGCValues gcv;
   gcv.foreground = dc.norm[ColFG];
   XChangeGC(dpy, dc.gc, GCForeground, &gcv);
   
   // values
-  double used, buffer, cached, swapused, battstat, light, audioper, wlanstat;
-  char batttime[6], battimesym[8],memstat[5], swapstat[4], thermalstring[6], lightsym[7], audiosym[7], netsym[13], netspeedstr[11];
-  int upt, upl, battre_h, battre_m, battime_len, y, h, battmode, swapusedper, pos, swapstat_len, memstat_len, temperature, thermal_len, light_len, audio_len, net_len, netspeed;
+  double used, buffer, cached, swapused, light, audioper, wlanstat;
+  char memstat[5], swapstat[4], thermalstring[6], lightsym[7], audiosym[7], netsym[13], netspeedstr[11];
+  int upt, upl, battre_h, battre_m, y, h, swapusedper, pos, swapstat_len, memstat_len, temperature, thermal_len, light_len, audio_len, net_len, netspeed;
   Bool audiomute, audiophones, netonline, ethonline, walnonline;
   // catching information
   pthread_mutex_lock (&mutex);
@@ -39,11 +97,9 @@ void drawsymbolstatus()
   buffer      = memory.pbuffer;
   cached      = memory.pcached;
   swapused    = memory.pswapused;
-  battstat    = battery.stat;
   battre_h    = battery.remain.h;
   battre_m    = battery.remain.m;
   temperature = thermal;
-  battmode    = battery.mode;
   light       = backlight.per;
   audioper    = audio.percent;
   audiophones = audio.headphones;
@@ -53,64 +109,27 @@ void drawsymbolstatus()
   walnonline  = net.wlan0.online;
   wlanstat    = net.wlan0.strength;
   netspeed    = net.eth0.between.receive.bytes_per_sec;
-  sprintf(batttime,"%02d:%02d", battery.remain.h, battery.remain.m);
   pthread_mutex_unlock (&mutex);
   
   // calculaing font values
-  pos = screenWidth - textnw(tbar_date.date,tbar_date.len) - 6;
+  pos = screenWidth - 6;                                        //abstand als variable in config.h auslagern
   h = dc.font.ascent + dc.font.descent;
   y = dc.y + (dc.h / 2) - (h / 2) + dc.font.ascent;
   
   /*************** DRAWING ***************/
   
-  draw_main_and_time(y, pos);  
 
-  // calculating battery color;
-  gcv.foreground = ((int)(battstat * 255)) * statusstyle.gl + 
-          (255 - ((int)(battstat * 255))) * statusstyle.rl;
-  XChangeGC(dpy, dc.gc, GCForeground, &gcv);
-  
-  // calculating battery stat
-  if(battmode == CHARGING){
-     sprintf(battimesym, "%c %s", (char)23, batttime);
-   
-  }else if(battmode == CHARGED){
-    sprintf(battimesym, "%c Full", (char)23);
-   
-  }else{
-    if(battstat < 0.25)
-      sprintf(battimesym, "%c %s", (char)11, batttime);
-    else if(battstat < 0.5)
-      sprintf(battimesym, "%c %s", (char)12, batttime);
-    else if(battstat < 0.75)
-      sprintf(battimesym, "%c %s", (char)13, batttime);
-    else
-      sprintf(battimesym, "%c %s", (char)14, batttime);
-
-  }
-  
-  // update pos
-  battime_len = strlen(battimesym);
-  pos -= (tbar_distancex + textnw(battimesym, battime_len));
- 
+  // draw main symbol
   if(dc.font.set)
-    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, battimesym, battime_len);
+    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, 3, y+1, mainsymbol, 1);
   else
-    XDrawString(dpy, dc.drawable, dc.gc, pos, y, battimesym, battime_len);
+    XDrawString(dpy, dc.drawable, dc.gc, 3, y+1, mainsymbol, 1);
   
+  pos = draw_time(y, pos) - tbar_distancex;  
+  pos = draw_battery(y, pos) - tbar_distancex;
+  pos = draw_uptime(y, pos) - tbar_distancex; 
   
-  
-  // draw uptime
-  pos -= (tbar_distancex + textnw(upt, upl));
-  
-  gcv.foreground = dc.norm[ColFG];
-  XChangeGC(dpy, dc.gc, GCForeground, &gcv);
-  if(dc.font.set)
-    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, upt, upl);
-  else
-    XDrawString(dpy, dc.drawable, dc.gc, pos, y,  upt, upl);
-  
-  
+    
   // update pos
   pos -= tbar_distancex;  
   
