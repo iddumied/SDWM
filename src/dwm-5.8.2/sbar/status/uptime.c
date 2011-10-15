@@ -77,6 +77,7 @@ void get_uptime()
   fp = fopen("/proc/uptime", "r");
   if (fp == NULL){
       printf("\nfailed to read /proc//uptime\n");
+      sbar_status_symbols[DrawUptime].active = False;
       return;
   }
   
