@@ -20,6 +20,7 @@ void get_memory()
   fp = fopen("/proc/meminfo", "r");
   if (fp == NULL){
       printf("\nfailed to read /proc/meminfo\n");
+      sbar_status_symbols[DrawMemory].active = False;
       return;
   }
 
