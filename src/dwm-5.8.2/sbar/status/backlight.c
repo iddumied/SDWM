@@ -44,6 +44,7 @@ void get_backlight_stat()
     fp = fopen("/proc/easy_backlight", "r");
     if (fp == NULL){
          printf("\nfailed to read /proc/easy_backlight\n");
+         sbar_status_symbols[DrawBacklight].active = False;
          return;
     }
 
@@ -105,6 +106,7 @@ void get_backlight_cur()
     fp = fopen("/sys/class/backlight/samsung/actual_brightness", "r");
     if (fp == NULL){
          printf("\nfailed to read /sys/class/backlight/samsung/actual_brightness\n");
+         sbar_status_symbols[DrawBacklight].active = False;
          return;
     }
 
@@ -130,6 +132,7 @@ void get_backlight_max()
     fp = fopen("/sys/class/backlight/samsung/max_brightness", "r");
     if (fp == NULL){
          printf("\nfailed to read /sys/class/backlight/samsung/max_brightness\n");
+         sbar_status_symbols[DrawBacklight].active = False;
          return;
     }
 
