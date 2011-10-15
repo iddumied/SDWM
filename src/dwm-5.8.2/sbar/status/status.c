@@ -77,7 +77,7 @@ void update_status()
     update_net();
     update_disk();
 
-
+/*
     XExposeEvent ev;
 
     ev.type = Expose;
@@ -89,7 +89,7 @@ void update_status()
   	ev.height = bh;
     ev.count = 0;    
 
-/*  	if(XSendEvent(dpy, selmon->barwin, False, NoEventMask, (XEvent *)&ev) != 0){
+    if(XSendEvent(dpy, selmon->barwin, False, NoEventMask, (XEvent *)&ev) != 0){
 
       pthread_mutex_lock (&mutex);
       XFlush(dpy);
