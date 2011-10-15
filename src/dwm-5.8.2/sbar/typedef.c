@@ -50,8 +50,23 @@ typedef struct {
 } SBarConf;
 
 typedef struct {
-  void (*func) (int, int, unsigned long, unsigned long);
-  const char symbol[8], text[8];
-  unsigned long ul_symbol, ul_text;
+  int (*func) (int, int);
   Bool active;
 } SBarStatusSymbol;
+
+
+enum { DrawTime, DrawBattery, DrawUptime, DrawMemory, DrawTermal, DrawBacklight, DrawAudio, DrawNet, DrawLast };
+
+
+
+SBarStatusSymbol sbar_status_symbols[] = {
+//  function        active
+  { draw_time,      True },
+  { draw_battery,   False },
+  { draw_uptime,    True },
+  { draw_memory,    True },
+  { draw_termal,    True },
+  { draw_backlight, True },
+  { draw_audio,     True },
+  { draw_net,       True },
+}

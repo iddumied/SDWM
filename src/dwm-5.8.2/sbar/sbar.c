@@ -7,7 +7,6 @@
 
 double calc_time_div(struct timeval t_end, struct timeval t_star);
 void setup_sbar();
-void switch_bar_mode();
 
 static SBarColor sbarcolor;
 static SBar sbars[ANZ_STYL_BARS];
@@ -19,6 +18,7 @@ static int screenWidth, screenHeight;
 static Bool sbarloaded;
 static Bool tbarloaded = False;
 static Pixmap *timeline;
+static Bool status_symbol_mode[DrawLast];
 
 #include "statuswin.c"
 
@@ -121,7 +121,7 @@ void setup_sbar()
         
   for(i = 0;i < ncpus+1;i++)
     timeline[i] = XCreatePixmap(dpy, root, cpu_length, bh-1, DefaultDepth(dpy, screen));
-  }
+  }//hier timline initialisieren mit fillrectangle
 
   
   gettimeofday(&end_time, 0);
