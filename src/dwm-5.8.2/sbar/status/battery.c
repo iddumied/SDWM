@@ -86,7 +86,7 @@ void get_capacity()
   ssize_t read;
   int i;
   
-  fp = fopen("/sys/class/power_supply/BAT1/charge_full");
+  fp = fopen("/sys/class/power_supply/BAT1/charge_full", "r");
   if (fp == NULL){
       printf("\nfailed to read /sys/class/power_supply/BAT1/charge_full\n");
   }else{
