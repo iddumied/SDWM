@@ -43,6 +43,7 @@ void check_adapter()
   fp = fopen("/proc/acpi/ac_adapter/ADP1/state", "r");
   if (fp == NULL){
       printf("\nfailed to read /proc/acpi/ac_adapter/ADP1/state\n");
+      sbar_status_symbols[DrawBattery].active = False;
       return;
   }
   
@@ -77,6 +78,7 @@ void get_capacity()
   fp = fopen("/proc/acpi/battery/BAT1/info", "r");
   if (fp == NULL){
       printf("\nfailed to read /proc/acpi/battery/BAT1/info\n");
+      sbar_status_symbols[DrawBattery].active = False;
       return;
   }
 
@@ -114,6 +116,7 @@ void check_stat()
   fp = fopen("/proc/acpi/battery/BAT1/state", "r");
   if (fp == NULL){
     printf("\nfailed to open/proc/acpi/battery/BAT1/state");
+    sbar_status_symbols[DrawBattery].active = False;
     return;
   }
 
