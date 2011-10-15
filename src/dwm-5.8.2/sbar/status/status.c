@@ -60,11 +60,8 @@ typedef struct {
 
 static StatusStyle statusstyle;
 
-//# void *update_status()
 void update_status()
 {
-  //# while(True){  
-    //# sleep(status_refresh);
     
     get_memory();
     check_battery();
@@ -77,80 +74,8 @@ void update_status()
     update_net();
     update_disk();
 
-/*
-    XExposeEvent ev;
-
-    ev.type = Expose;
-    ev.display = dpy;
-    ev.window = selmon->barwin;
-  	ev.x = 0;
-  	ev.y = 0;
-  	ev.width = 1366;
-  	ev.height = bh;
-    ev.count = 0;    
-
-    if(XSendEvent(dpy, selmon->barwin, False, NoEventMask, (XEvent *)&ev) != 0){
-
-      pthread_mutex_lock (&mutex);
-      XFlush(dpy);
-      pthread_mutex_unlock (&mutex);
-    }
-    else
-      printf("\nfaile");
-*/
-
-  //# }
 }
 
-/*
-
-int main()
-{
-
-  setup_status();
-  
-  printf("\n");
-  
-  while(True){
-    sleep(1);
-
-    
-    char *batmod;
-    
-    if(pthread_mutex_trylock (&mutex) != EBUSY){ // locking mutex
-        
-      system("clear");
-      
-      switch(battery.mode){
-        case DISCHARGING:
-          batmod = "discharging";
-          break;
-        case CHARGING:
-          batmod = "charging";
-          break;
-        case CHARGED:
-          batmod = "charged";
-          break;
-      }
-      
-      printf("\nBattery:\n Adapter: %s\n capacity: %d mAh\n mode: %s\n rate: %d mA\n remain: %d mAh\n ramain time: %02d:%02d\n\nCPU:\n", 
-      battery.adapter ? "onLine" : "offLine", battery.capacity, batmod, battery.rate, battery.current, battery.remain.h, battery.remain.m);
-      
-      int i = 0;
-      for(;i < ncpus;i++)
-        printf(" cpu%d: %f  \n", i, cpuloads[i]);    
-      
-      printf("\nMemory:\n total: %d\n used: %d\n buffer: %d\n chached: %d\n free: %d\n swap total: %d\n swap free: %d\n", memory.total, memory.used, memory.buffer, 
-              memory.cached, memory.free, memory.swaptotal, memory.swapfree);
-    
-      printf("\nMemory:\n used: %f\n buffer: %f\n chached: %f\n free: %f\n swap free: %f\n swap used: %f\n",memory.pused, memory.pbuffer, memory.pcached, memory.pfree, 
-              memory.pswapfree, memory.pswapused);
-      
-      pthread_mutex_unlock (&mutex);
-    }
-  }
-}
-*/
 void setup_status()
 {
   // setup disks
@@ -183,14 +108,6 @@ void setup_status()
 
   setup_cpu();
   
-  // creating refresh Thread and init mutex
-  //# pthread_t refresh;
-  //# pthread_mutex_init (&mutex, NULL);
-  
-  // start thread
-  //# pthread_create (&refresh, NULL, update_status, NULL);
-
-  // get color
   statusstyle.cmem_used   = getcolor(memused_col);
   statusstyle.cmem_buffer = getcolor(membuff_col);
   statusstyle.cmem_cached = getcolor(memcach_col);
