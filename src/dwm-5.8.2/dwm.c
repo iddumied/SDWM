@@ -1073,51 +1073,61 @@ dirtomon(int dir) {
 
 void
 drawbar(Monitor *m) {
-  // if battery low change style
-  double batstat = battery.stat;
-  int batmode = battery.adapter;
-  
 
-  
-  if(batmode){ //normal colors
-    dc.norm[ColBorder]    = sbarcolor.normbordercolor;
-    dc.norm[ColBG]        = sbarcolor.normbgcolor;
-    dc.norm[ColFG]        = sbarcolor.normfgcolor;
-    dc.sel[ColBorder]     = sbarcolor.selbordercolor;
-    dc.sel[ColBG]         = sbarcolor.selbgcolor;
-    dc.sel[ColFG]         = sbarcolor.selfgcolor;
-    dc.sbar[SBarBorder]   = sbarcolor.botbordercolor;
-    dc.sbar[SBarCpuLine]  = sbarcolor.cpu_line; 
-    dc.sbar[SBarCpuPoint] = sbarcolor.cpu_point;
-    
-  }else if(batstat <= bat_suspend){
-    Arg arg = SHCMD("sudo pm-suspend");
-    spawn(&arg);
-
-      
-  }else if(batstat <= bverylowstat){
-    dc.norm[ColBorder]    = sbarcolor.bbnormbordercolor;
-    dc.norm[ColBG]        = sbarcolor.bbnormbgcolor;
-    dc.norm[ColFG]        = sbarcolor.bbnormfgcolor;
-    dc.sel[ColBorder]     = sbarcolor.bbselbordercolor;
-    dc.sel[ColBG]         = sbarcolor.bbselbgcolor;
-    dc.sel[ColFG]         = sbarcolor.bbselfgcolor;
-    dc.sbar[SBarBorder]   = sbarcolor.bbbotbordercolor;
-    dc.sbar[SBarCpuLine]  = sbarcolor.bbcpu_line; 
-    dc.sbar[SBarCpuPoint] = sbarcolor.bbcpu_point;
-    
-  }else if(batstat <= blowstat){
-    dc.norm[ColBorder]    = sbarcolor.bnormbordercolor;
-    dc.norm[ColBG]        = sbarcolor.bnormbgcolor;
-    dc.norm[ColFG]        = sbarcolor.bnormfgcolor;
-    dc.sel[ColBorder]     = sbarcolor.bselbordercolor;
-    dc.sel[ColBG]         = sbarcolor.bselbgcolor;
-    dc.sel[ColFG]         = sbarcolor.bselfgcolor;
-    dc.sbar[SBarBorder]   = sbarcolor.bbotbordercolor;
-    dc.sbar[SBarCpuLine]  = sbarcolor.bcpu_line; 
-    dc.sbar[SBarCpuPoint] = sbarcolor.bcpu_point;
+  //calc if Battery is used
+  unsigned int i;
+  Bool battery_in_use;
+  for(i = 0;i < LENGTH(sbar_status_symbols);i++){
+    if(sbar_status_symbols[i].func == draw_battery)
+       battery_in_use = sbar_status_symbols[i].active;
   }
+  
+  if(battery_in_use){
+    // if battery low change style
+    double batstat = battery.stat;
+    int batmode = battery.adapter;
+  
 
+  
+    if(batmode){ //normal colors
+      dc.norm[ColBorder]    = sbarcolor.normbordercolor;
+      dc.norm[ColBG]        = sbarcolor.normbgcolor;
+      dc.norm[ColFG]        = sbarcolor.normfgcolor;
+      dc.sel[ColBorder]     = sbarcolor.selbordercolor;
+      dc.sel[ColBG]         = sbarcolor.selbgcolor;
+      dc.sel[ColFG]         = sbarcolor.selfgcolor;
+      dc.sbar[SBarBorder]   = sbarcolor.botbordercolor;
+      dc.sbar[SBarCpuLine]  = sbarcolor.cpu_line; 
+      dc.sbar[SBarCpuPoint] = sbarcolor.cpu_point;
+      
+    }else if(batstat <= bat_suspend){
+      Arg arg = SHCMD("sudo pm-suspend");
+      spawn(&arg);
+  
+        
+    }else if(batstat <= bverylowstat){
+      dc.norm[ColBorder]    = sbarcolor.bbnormbordercolor;
+      dc.norm[ColBG]        = sbarcolor.bbnormbgcolor;
+      dc.norm[ColFG]        = sbarcolor.bbnormfgcolor;
+      dc.sel[ColBorder]     = sbarcolor.bbselbordercolor;
+      dc.sel[ColBG]         = sbarcolor.bbselbgcolor;
+      dc.sel[ColFG]         = sbarcolor.bbselfgcolor;
+      dc.sbar[SBarBorder]   = sbarcolor.bbbotbordercolor;
+      dc.sbar[SBarCpuLine]  = sbarcolor.bbcpu_line; 
+      dc.sbar[SBarCpuPoint] = sbarcolor.bbcpu_point;
+      
+    }else if(batstat <= blowstat){
+      dc.norm[ColBorder]    = sbarcolor.bnormbordercolor;
+      dc.norm[ColBG]        = sbarcolor.bnormbgcolor;
+      dc.norm[ColFG]        = sbarcolor.bnormfgcolor;
+      dc.sel[ColBorder]     = sbarcolor.bselbordercolor;
+      dc.sel[ColBG]         = sbarcolor.bselbgcolor;
+      dc.sel[ColFG]         = sbarcolor.bselfgcolor;
+      dc.sbar[SBarBorder]   = sbarcolor.bbotbordercolor;
+      dc.sbar[SBarCpuLine]  = sbarcolor.bcpu_line; 
+      dc.sbar[SBarCpuPoint] = sbarcolor.bcpu_point;
+    }
+  }
         
 
   
@@ -1129,7 +1139,7 @@ drawbar(Monitor *m) {
   printf("\nDrawbar:  %f Seconds\n", calc_time_div(end_time, start_time));  
 */
 	int x;
-	unsigned int i, occ = 0, urg = 0;
+	unsigned int occ = 0, urg = 0;
 	unsigned long *col;
 	Client *c;
 	
