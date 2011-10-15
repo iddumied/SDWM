@@ -1,15 +1,5 @@
 #define ANZ_SBAR_SYMBOLS 8
-
 void drawsymbolstatus();
-int draw_time(int y, int pos);
-int draw_battery(int y, int pos);
-int draw_uptime(int y, int pos);
-int draw_memory(int y, int pos);
-int draw_termal(int y, int pos);
-int draw_backlight(int y, int pos);
-int draw_audio(int y, int pos);
-int draw_net(int y, int pos);
-
 static XGCValues gcv;
 
 int draw_net(int y, int pos)
@@ -118,7 +108,6 @@ int draw_backlight(int y, int pos)
   
   return pos;
 }
-
 
 int draw_termal(int y, int pos)
 {
@@ -245,7 +234,6 @@ int draw_battery(int y, int pos)
   return pos; 
 }
 
-
 int draw_time(int y, int pos)
 {
   // update pos  
@@ -280,19 +268,9 @@ void drawsymbolstatus()
   else
     XDrawString(dpy, dc.drawable, dc.gc, 3, y+1, mainsymbol, 1);
   
-SBarStatusSymbol sbar_status_symbols[] = {
-  { draw_time,      True },
-  { draw_battery,   True },
-  { draw_uptime,    True },
-  { draw_memory,    True },
-  { draw_termal,    True },
-  { draw_backlight, True },
-  { draw_audio,     True },
-  { draw_net,       True },
-};
 
   // drawing sbar symbols. The order is configured in config.h
-  for(i = 0; i < ANZ_SBAR_SYMBOLS;i++){
+  for(i = 0; i < DrawLast;i++){
     if(sbar_status_symbols[i].active)
       pos = sbar_status_symbols[i].func(y, pos) - tbar_distancex;
   }
