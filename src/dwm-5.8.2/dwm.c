@@ -1076,13 +1076,8 @@ drawbar(Monitor *m) {
 
   //calc if Battery is used
   unsigned int i;
-  Bool battery_in_use;
-  for(i = 0;i < LENGTH(sbar_status_symbols);i++){
-    if(sbar_status_symbols[i].func == draw_battery)
-       battery_in_use = sbar_status_symbols[i].active;
-  }
   
-  if(battery_in_use){
+  if(sbar_status_symbols[DrawBattery].active){
     // if battery low change style
     double batstat = battery.stat;
     int batmode = battery.adapter;
