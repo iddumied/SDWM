@@ -38,6 +38,20 @@ void check_adapter()
   size_t len = 0;
   ssize_t read;
   int i;
+
+  fp = fopen("/sys/class/power_supply/ADP1/online", "r");
+  if (fp == NULL){
+      printf("\nfailed to read /sys/class/power_supply/ADP1/online\n");
+  }else{
+    
+    if((read = getline(&line, &len, fp)) != -1)
+      battery.adapter = line[0] == '1' ? True : False;
+    
+    if(line) free(line);
+    fclose(fp);
+    return;
+  }
+  // try  /proc file
   
   // open /proc/stat
   fp = fopen("/proc/acpi/ac_adapter/ADP1/state", "r");
@@ -52,9 +66,7 @@ void check_adapter()
     for(i = 0;i < len;i++){
       // chech if adapter is online
       if(line[i] == 'o'){
-        pthread_mutex_lock (&mutex);
         battery.adapter = line[i+1] == 'n' ? True : False;
-        pthread_mutex_unlock (&mutex);
         break;
       }
     }
