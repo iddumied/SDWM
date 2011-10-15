@@ -138,175 +138,206 @@ void drawstw()
 
     
   // statusmesage
-                                        wprintln("");
-                                        wprintln(stwbuffer);
-                                        wprintln("  |");
-                                        wprintln("  +--status");
-                                        wprintln("  |    |");
-                                        wprintln("  |    +--cpu");
-                                        wprintln("  |    |    |");
-for(i = 0; i < ncpus; i++){;
-                              sprintf(stwbuffer, "  |    |    +--cpu%d:  %d%c",i+1, (int)(loadcpu[i]*100), '%');
+  wprintln("");
   wprintln(stwbuffer);
-  //wprintcolln(loadcpu[i], 100, 0.65, 2);
-} 
-                                        wprintln("  |    |");
-                                          wprint("  |    +--ram:  ");
-double percent[3] = {pused,pbuffer,pcached}; 
-unsigned long colors[3] = { stw.sel[ColFG],
+  wprintln("  |");
+  wprintln("  +--status");
+  wprintln("  |    |");
+  wprintln("  |    +--cpu");
+  wprintln("  |    |    |");
+
+  for(i = 0; i < ncpus; i++){;
+    sprintf(stwbuffer, "  |    |    +--cpu%d:  %d%c",i+1, (int)(loadcpu[i]*100), '%');
+    wprintln(stwbuffer);
+    //wprintcolln(loadcpu[i], 100, 0.65, 2);
+  }
+ 
+  wprintln("  |    |");
+  wprint("  |    +--ram:  ");
+  double percent[3] = {pused,pbuffer,pcached}; 
+  unsigned long colors[3] = { stw.sel[ColFG],
   stw.sbar[SBarCpuLine], stw.sbar[SBarCpuPoint] };
-wprintcolsln(&percent, &colors, 3, 100, 0.65,2);
-                                        wprintln("  |    |    |");
-                              sprintf(stwbuffer, "  |    |    +--used:  %d MB / %d MB  -  %d%c", used/1024, ramtotal/1024,(int)(pused*100),'%');
-                              wprintln(stwbuffer);  
-                              sprintf(stwbuffer, "  |    |    +--buffer:  %d MB", buffer/1024);
-                              wprintln(stwbuffer);
-                              sprintf(stwbuffer, "  |    |    +--cached:  %d MB", cached/1024);
-                              wprintln(stwbuffer);
-                                        wprintln("  |    |");
-if(swapused/1024 == 0){       sprintf(stwbuffer, "  |    +--swap:  %d MB / %d MB  -  %d%c", swapused/1024, swaptotal/1024, (int)(pswapused*100),'%');
-                              wprintln(stwbuffer);  
-}else{                                    wprint("  |    +--swap:  ");
-wprintcolln(pswapused, 100, 0.65, 2 );
-                                        wprintln("  |    |    |");
-                              sprintf(stwbuffer, "  |    |    +--used:  %d MB / %d MB  -  %d%c", swapused/1024, swaptotal/1024, (int)(pswapused*100),'%');
-                              wprintln(stwbuffer);  
-                                        wprintln("  |    |");
-}
-                                        wprintln("  |    +--processes  ");
-                                        wprintln("  |    |    |");
-                              sprintf(stwbuffer, "  |    |    +--amount:  %d", pro_total);
-                              wprintln(stwbuffer);  
-                              sprintf(stwbuffer, "  |    |    +--running:  %d", pro_running);
-                              wprintln(stwbuffer);                                        
-                              sprintf(stwbuffer, "  |    |    +--blocked:  %d", pro_blocked);
-                              wprintln(stwbuffer);
-                                        wprintln("  |    |");
-                              sprintf(stwbuffer, "  |    +--battery:  %d%c", (int)(battstat*100), '%');
-                              wprintln(stwbuffer);
+  wprintcolsln(&percent, &colors, 3, 100, 0.65,2);
+  wprintln("  |    |    |");
+  sprintf(stwbuffer, "  |    |    +--used:  %d MB / %d MB  -  %d%c", used/1024, ramtotal/1024,(int)(pused*100),'%');
+  wprintln(stwbuffer);  
+  sprintf(stwbuffer, "  |    |    +--buffer:  %d MB", buffer/1024);
+  wprintln(stwbuffer);
+  sprintf(stwbuffer, "  |    |    +--cached:  %d MB", cached/1024);
+  wprintln(stwbuffer);
+  wprintln("  |    |");
+
+  if(swapused/1024 == 0){       sprintf(stwbuffer, "  |    +--swap:  %d MB / %d MB  -  %d%c", swapused/1024, swaptotal/1024, (int)(pswapused*100),'%');
+    wprintln(stwbuffer);  
+  }else{                                    wprint("  |    +--swap:  ");
+
+    wprintcolln(pswapused, 100, 0.65, 2 );
+    wprintln("  |    |    |");
+    sprintf(stwbuffer, "  |    |    +--used:  %d MB / %d MB  -  %d%c", swapused/1024, swaptotal/1024, (int)(pswapused*100),'%');
+    wprintln(stwbuffer);  
+    wprintln("  |    |");
+  }
+
+  wprintln("  |    +--processes  ");
+  wprintln("  |    |    |");
+  sprintf(stwbuffer, "  |    |    +--amount:  %d", pro_total);
+  wprintln(stwbuffer);  
+  sprintf(stwbuffer, "  |    |    +--running:  %d", pro_running);
+  wprintln(stwbuffer);                                        
+  sprintf(stwbuffer, "  |    |    +--blocked:  %d", pro_blocked);
+  wprintln(stwbuffer);
+  wprintln("  |    |");
+  sprintf(stwbuffer, "  |    +--battery:  %d%c", (int)(battstat*100), '%');
+  wprintln(stwbuffer);
                                         wprintln("  |         |");
-if(battmode == CHARGING)                wprintln("  |         +--mode:  charging");
-else if(battmode == DISCHARGING)        wprintln("  |         +--mode:  discharging");    
-else if(battmode == CHARGED)            wprintln("  |         +--mode:  charged");    
-                              sprintf(stwbuffer, "  |         +--remain:  %02d:%02d", battre_h,battre_m);
-                              wprintln(stwbuffer);
-                                        wprintln("  |");
-                                        wprintln("  +--net");
-                                        wprintln("       |");
-                                          wprint("       +--lo");
-calc_timline_max(&netstat.lot, lot, netstat.length);
-calc_timline_max(&netstat.lor, lor, netstat.length);
-if(netstat.lor.max == 0 && netstat.lot.max == 0){                                 
-                                        wprintln(":  inactive");
-}else{                                  wprintln("");
-                                        wprintln("       |    |");
-if(netstat.lot.max == 0)                wprintln("       |    +--up:  inactiv");
-else{  
-human_readable(lot, False, hread);
-human_readable(netstat.lot.max, False, maxhread);
-                              sprintf(stwbuffer, "       |    +--up:  %s  @  %s ", hread, maxhread);
-                              wprintln(stwbuffer);
-                                        wprintln("       |    |    |");
-                                          wprint("       |    |    +--");
-wprinttimelineln(lot, netstat.length, 1, 
-        &netstat.lot,stw.sbar[SBarCpuLine], 
-        stw.sbar[SBarCpuPoint],netstat.lot.max);
-                                        wprintln("       |    |");
-}
-if(netstat.lor.max == 0)                wprintln("       |    +--down:  inactiv");
-else{  
-human_readable(lor, False, hread);
-human_readable(netstat.lor.max, False, maxhread);
-                              sprintf(stwbuffer, "       |    +--down:  %s  @  %s ", hread, maxhread);
-                              wprintln(stwbuffer);
-                                        wprintln("       |         |");
-                                          wprint("       |         +--");
-wprinttimelineln(lor, netstat.length, 1, 
-                 &netstat.lor,stw.sbar[SBarCpuLine], 
-                 stw.sbar[SBarCpuPoint],netstat.lor.max);
-}
-                                        wprintln("       |");
-}                      
-                                          wprint("       +--eth0");
-calc_timline_max(&netstat.eth0r, eth0t, netstat.length);
-calc_timline_max(&netstat.eth0t, eth0t, netstat.length);
-if(netstat.eth0r.max == 0 && netstat.eth0t.max == 0){                                 
-  if(ethonline)                         wprintln(":  inactive");  
-  else                                  wprintln(":  down");
-}else{ if(!ethonline)                   wprintln(":  down");
-else                                    wprintln(":  connected");
-                                        wprintln("       |    |");
-if(netstat.eth0t.max == 0)              wprintln("       |    +--up:  inactiv");
-else{
-human_readable(eth0t, False, hread);
-human_readable(netstat.eth0t.max, False, maxhread);
-                              sprintf(stwbuffer, "       |    +--up:  %s  @  %s ", hread, maxhread);
-                              wprintln(stwbuffer);
-                                        wprintln("       |    |    |");
-                                          wprint("       |    |    +--");
-wprinttimelineln(eth0t, netstat.length, 1, 
-        &netstat.eth0t,stw.sbar[SBarCpuLine], 
-        stw.sbar[SBarCpuPoint],netstat.eth0t.max);
-                                        wprintln("       |    |");
-}
-if(netstat.eth0r.max == 0)              wprintln("       |    +--down:  inactiv");
-else{
-human_readable(eth0r, False, hread);
-human_readable(netstat.eth0r.max, False, maxhread);
-                              sprintf(stwbuffer, "       |    +--down:  %s  @  %s ", hread, maxhread);
-                              wprintln(stwbuffer);
-                                        wprintln("       |         |");
-                                          wprint("       |         +--");
-wprinttimelineln(eth0r, netstat.length, 1, 
-                 &netstat.eth0r,stw.sbar[SBarCpuLine], 
-                 stw.sbar[SBarCpuPoint],netstat.eth0r.max);
-}
-                                        wprintln("       |");   
-}
+  if(battmode == CHARGING)                wprintln("  |         +--mode:  charging");
+  else if(battmode == DISCHARGING)        wprintln("  |         +--mode:  discharging");    
+  else if(battmode == CHARGED)            wprintln("  |         +--mode:  charged");    
+
+  sprintf(stwbuffer, "  |         +--remain:  %02d:%02d", battre_h,battre_m);
+  wprintln(stwbuffer);
+  wprintln("  |");
+  wprintln("  +--net");
+  wprintln("       |");
+  wprint("       +--lo");
+
+  calc_timline_max(&netstat.lot, lot, netstat.length);
+  calc_timline_max(&netstat.lor, lor, netstat.length);
+  if(netstat.lor.max == 0 && netstat.lot.max == 0){                                 
+    wprintln(":  inactive");
+  }else{
+    wprintln("");
+    wprintln("       |    |");
+    if(netstat.lot.max == 0)    
+      wprintln("       |    +--up:  inactiv");
+    else{  
+      human_readable(lot, False, hread);
+      human_readable(netstat.lot.max, False, maxhread);
+      sprintf(stwbuffer, "       |    +--up:  %s  @  %s ", hread, maxhread);
+      wprintln(stwbuffer);
+      wprintln("       |    |    |");
+      wprint("       |    |    +--");
+      wprinttimelineln(lot, netstat.length, 1, 
+      &netstat.lot,stw.sbar[SBarCpuLine], 
+      stw.sbar[SBarCpuPoint],netstat.lot.max);
+      wprintln("       |    |");
+    }
+
+    if(netstat.lor.max == 0)    
+      wprintln("       |    +--down:  inactiv");
+    else{  
+      human_readable(lor, False, hread);
+      human_readable(netstat.lor.max, False, maxhread);
+      sprintf(stwbuffer, "       |    +--down:  %s  @  %s ", hread, maxhread);
+      wprintln(stwbuffer);
+      wprintln("       |         |");
+      wprint("       |         +--");
+      wprinttimelineln(lor, netstat.length, 1, 
+      &netstat.lor,stw.sbar[SBarCpuLine], 
+      stw.sbar[SBarCpuPoint],netstat.lor.max);
+    }
+    wprintln("       |");
+  }                      
+
+  wprint("       +--eth0");
+  calc_timline_max(&netstat.eth0r, eth0t, netstat.length);
+  calc_timline_max(&netstat.eth0t, eth0t, netstat.length);
+  if(netstat.eth0r.max == 0 && netstat.eth0t.max == 0){                                 
+    if(ethonline)
+      wprintln(":  inactive");  
+    else
+      wprintln(":  down");
+  }else{ 
+    if(!ethonline)   
+      wprintln(":  down");
+    else
+      wprintln(":  connected");
+
+    
+    wprintln("       |    |");
+    if(netstat.eth0t.max == 0)   
+      wprintln("       |    +--up:  inactiv");
+    else{
+      human_readable(eth0t, False, hread);
+      human_readable(netstat.eth0t.max, False, maxhread);
+      sprintf(stwbuffer, "       |    +--up:  %s  @  %s ", hread, maxhread);
+      wprintln(stwbuffer);
+      wprintln("       |    |    |");
+      wprint("       |    |    +--");
+      wprinttimelineln(eth0t, netstat.length, 1, 
+      &netstat.eth0t,stw.sbar[SBarCpuLine], 
+      stw.sbar[SBarCpuPoint],netstat.eth0t.max);
+      wprintln("       |    |");
+    }
+
+    if(netstat.eth0r.max == 0)    
+      wprintln("       |    +--down:  inactiv");
+    else{
+      human_readable(eth0r, False, hread);
+      human_readable(netstat.eth0r.max, False, maxhread);
+      sprintf(stwbuffer, "       |    +--down:  %s  @  %s ", hread, maxhread);
+      wprintln(stwbuffer);
+      wprintln("       |         |");
+      wprint("       |         +--");
+      wprinttimelineln(eth0r, netstat.length, 1, 
+      &netstat.eth0r,stw.sbar[SBarCpuLine], 
+      stw.sbar[SBarCpuPoint],netstat.eth0r.max);
+    }
+    wprintln("       |");   
+  }
                                           wprint("       +--wlan0");
-calc_timline_max(&netstat.wlan0t, wlan0t, netstat.length);
-calc_timline_max(&netstat.wlan0r, wlan0r, netstat.length);
-if(netstat.wlan0r.max == 0 && netstat.wlan0t.max == 0){                                 
-  if(walnonline)                        wprintln(":  inactive");
-  else if(wlaneasy)                     wprintln(":  disconnected");
-  else                                  wprintln(":  down");
-}else{ if(!wlaneasy)                    wprintln(":  down");
-else if(!walnonline)                    wprintln(":  disconnected");
-else                                    wprintln(":  connected");
-                                        wprintln("            |");
-if(walnonline){               sprintf(stwbuffer, "            +--signal:  %d%c",(int)(wlanstat*100),'%');
-                              wprintln(stwbuffer);
-}
-if(netstat.wlan0t.max == 0)             wprintln("            +--up:  inactiv");
-else{       
-human_readable(wlan0t, False, hread);
-human_readable(netstat.wlan0t.max, False, maxhread);
-                              sprintf(stwbuffer, "            +--up:  %s  @  %s ", hread, maxhread);
-                              wprintln(stwbuffer);
-                                        wprintln("            |    |");
-                                          wprint("            |    +--");
-wprinttimelineln(wlan0t, netstat.length, 1, 
-        &netstat.wlan0t,stw.sbar[SBarCpuLine], 
-        stw.sbar[SBarCpuPoint],netstat.wlan0t.max);
-                                        wprintln("            |");
-}
-if(netstat.wlan0r.max == 0)             wprintln("            +--down:  inactiv");
-else{  
-human_readable(wlan0r, False, hread);
-human_readable(netstat.wlan0r.max, False, maxhread);
-                              sprintf(stwbuffer, "            +--down:  %s  @  %s ", hread, maxhread);
-                              wprintln(stwbuffer);
-                                        wprintln("                 |");
-                                          wprint("                 +--");
-wprinttimelineln(wlan0r, netstat.length, 1, 
-                 &netstat.wlan0r,stw.sbar[SBarCpuLine], 
-                 stw.sbar[SBarCpuPoint],netstat.wlan0r.max);
-}                                         
+  calc_timline_max(&netstat.wlan0t, wlan0t, netstat.length);
+  calc_timline_max(&netstat.wlan0r, wlan0r, netstat.length);
+  if(netstat.wlan0r.max == 0 && netstat.wlan0t.max == 0){                                 
+    if(walnonline) 
+      wprintln(":  inactive");
+    else if(wlaneasy)      
+      wprintln(":  disconnected");
+    else   
+      wprintln(":  down");
+  }else{ 
+    if(!wlaneasy) 
+      wprintln(":  down");
+    else if(!walnonline)  
+      wprintln(":  disconnected");
+    else  
+      wprintln(":  connected");
+    
+    wprintln("            |");
+    if(walnonline){    
+      sprintf(stwbuffer, "            +--signal:  %d%c",(int)(wlanstat*100),'%');
+      wprintln(stwbuffer);
+    }
 
+    if(netstat.wlan0t.max == 0)     
+      wprintln("            +--up:  inactiv");
+    else{       
+      human_readable(wlan0t, False, hread);
+      human_readable(netstat.wlan0t.max, False, maxhread);
+      sprintf(stwbuffer, "            +--up:  %s  @  %s ", hread, maxhread);
+      wprintln(stwbuffer);
+      wprintln("            |    |");
+      wprint("            |    +--");
+      wprinttimelineln(wlan0t, netstat.length, 1, 
+      &netstat.wlan0t,stw.sbar[SBarCpuLine], 
+      stw.sbar[SBarCpuPoint],netstat.wlan0t.max);
+      wprintln("            |");
+    }
 
-
-
-}
+    if(netstat.wlan0r.max == 0)        
+      wprintln("            +--down:  inactiv");
+    else{  
+      human_readable(wlan0r, False, hread);
+      human_readable(netstat.wlan0r.max, False, maxhread);
+      sprintf(stwbuffer, "            +--down:  %s  @  %s ", hread, maxhread);
+      wprintln(stwbuffer);
+      wprintln("                 |");
+      wprint("                 +--");
+      wprinttimelineln(wlan0r, netstat.length, 1, 
+      &netstat.wlan0r,stw.sbar[SBarCpuLine], 
+      stw.sbar[SBarCpuPoint],netstat.wlan0r.max);
+    }                                         
+  } 
 
 char ebuf[5][20];
 int countdisks, mj, mi = 0;
