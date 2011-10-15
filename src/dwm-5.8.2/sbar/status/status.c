@@ -63,15 +63,28 @@ static StatusStyle statusstyle;
 void update_status()
 {
     
-    get_memory();
-    check_battery();
+    if(sbar_status_symbols[DrawMemory].active)
+      get_memory();
+    
+    if(sbar_status_symbols[DrawBattery].active)
+      check_battery();
+
     cpu_usage();
     update_date();
-    update_uptime();
-    get_thermal();
-    update_backlight();
+
+    if(sbar_status_symbols[DrawUptime].active)
+      update_uptime();
+
+    if(sbar_status_symbols[DrawTermal].active)
+      get_thermal();
+
+    if(sbar_status_symbols[DrawBacklight].active)
+      update_backlight();
 //    update_audio();
-    update_net();
+
+    if(sbar_status_symbols[DrawNet].active)
+      update_net();
+
     update_disk();
 
 }
@@ -82,17 +95,22 @@ void setup_status()
   setup_disk();  
 
   // setup uptime
-  setup_uptime();
+  if(sbar_status_symbols[DrawUptime].active)
+    setup_uptime();
   
   // setup net
-  setup_net();
+  if(sbar_status_symbols[DrawNet].active)
+    setup_net();
   
   // setup audio
-  setup_audio();
+  if(sbar_status_symbols[DrawAudio].active)
+    setup_audio();
   
   // setup backlight
-  backlight.on = True;
+  if(sbar_status_symbols[DrawBacklight].active)
+    backlight.on = True;
 
+  // setup cpu
   // initializing
   ncpus = get_ncpus();
   unsigned int i, r, g;
