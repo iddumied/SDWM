@@ -14,6 +14,7 @@ void get_thermal()
     fp = fopen("/sys/class/thermal/thermal_zone0/temp", "r");
     if (fp == NULL){
          printf("\nfailed to read /sys/class/thermal/thermal_zone0/temp\n");
+         sbar_status_symbols[DrawTermal].active = False;
          return;
     }
 
