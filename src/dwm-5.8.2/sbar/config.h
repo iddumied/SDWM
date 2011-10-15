@@ -9,7 +9,7 @@
 SBarStatusSymbol sbar_status_symbols[] = {
 //  function        active
   { draw_time,      True },
-  { draw_battery,   False },
+  { draw_battery,   True },
   { draw_uptime,    True },
   { draw_memory,    True },
   { draw_termal,    True },
