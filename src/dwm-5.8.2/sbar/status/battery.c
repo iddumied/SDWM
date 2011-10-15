@@ -86,6 +86,22 @@ void get_capacity()
   ssize_t read;
   int i;
   
+  fp = fopen("/sys/class/power_supply/BAT1/charge_full");
+  if (fp == NULL){
+      printf("\nfailed to read /sys/class/power_supply/BAT1/charge_full\n");
+  }else{
+
+    if((read = getline(&line, &len, fp)) != -1)
+      battery.capacity = atoi(line);
+    
+    if(line) free(line);
+    fclose(fp);
+    return;
+  }
+
+  // try proc file
+
+
   // open /proc/stat
   fp = fopen("/proc/acpi/battery/BAT1/info", "r");
   if (fp == NULL){
@@ -101,9 +117,7 @@ void get_capacity()
     if(line[0] == 'd'){
       for(i = 16;i < len;i++){
         if(line[i] != ' '){
-          pthread_mutex_lock (&mutex);
           battery.capacity = atoi(line+i);
-          pthread_mutex_unlock (&mutex);
           break;
         }
       }
@@ -124,6 +138,61 @@ void check_stat()
   ssize_t read;
   int i;
 
+
+
+  fp = fopen("/sys/class/power_supply/BAT1/status", "r");
+  if (fp == NULL){
+    printf("\nfailed to open /sys/class/power_supply/BAT1/status");
+  }else{
+    
+    if((read = getline(&line, &len, fp)) != -1){
+      if(line[0] == 'D') battery.mode = DISCHARGING;
+      else if(line[6] == 'd') battery.mode = CHARGED;
+      else if(line[6] == 'n') battery.mode = CHARGING;
+    }
+
+    
+    fp = fopen("/sys/class/power_supply/BAT1/charge_now", "r");
+    if (fp == NULL){
+      printf("\nfailed to open /sys/class/power_supply/BAT1/charge_now");
+    }else{
+
+      if((read = getline(&line, &len, fp)) != -1)
+        battery.current = atoi(line);
+
+      fp = fopen("/sys/class/power_supply/BAT1/current_now", "r");
+      if (fp == NULL){
+        printf("\nfailed to open /sys/class/power_supply/BAT1/current_now");
+      }else{
+
+        if((read = getline(&line, &len, fp)) != -1)
+          battery.rate = atoi(line);
+
+        if(battery.mode == DISCHARGING){
+          battery.remain.h = battery.current / battery.rate;
+          battery.remain.m = (int)(((double)battery.current / 
+                              (double)battery.rate - battery.remain.h) * 60);
+          battery.stat = (double)battery.current / (double)battery.capacity;
+        }else if(battery.mode == CHARGING){
+          battery.remain.h = (battery.capacity - battery.current) / battery.rate;
+          battery.remain.m = (int)(((double)(battery.capacity - battery.current) / 
+			                        (double)battery.rate - battery.remain.h) * 60);
+          battery.stat = (double)battery.current / (double)battery.capacity;
+        }else{ //charged
+          battery.stat = 1.0;
+          battery.remain.h = 0;
+          battery.remain.m = 0;
+        }
+      
+        if(line) free(line);
+        fclose(fp);
+        return;
+      }
+    }
+  }
+
+  // try proc file
+
   // open /proc/stat
   fp = fopen("/proc/acpi/battery/BAT1/state", "r");
   if (fp == NULL){
@@ -139,36 +208,29 @@ void check_stat()
     else if(line[0] == 'c' && line[1] == 'h'){ // if line == charging state:
       for(i = 15;i < len;i++){
         if(line[i] != ' '){
-          pthread_mutex_lock (&mutex);
           if(line[i] == 'd') battery.mode = DISCHARGING;
           else if(line[i+6] == 'd') battery.mode = CHARGED;
           else if(line[i+6] == 'n') battery.mode = CHARGING;
-          pthread_mutex_unlock (&mutex);
           break;
         }
       }
     }else if(line[0] == 'p' && line[8] == 'r'){ //if line = present rate: 
       for(i = 13;i < len;i++){
         if(line[i] != ' '){
-          pthread_mutex_lock (&mutex);
           battery.rate = atoi(line+i);
-          pthread_mutex_unlock (&mutex);
           break;
         }
       }
     }else if(line[0] == 'r'){ // if line = remaining capacity:
       for(i = 19;i < len;i++){
         if(line[i] != ' '){
-          pthread_mutex_lock (&mutex);
           battery.current = atoi(line+i);
-          pthread_mutex_unlock (&mutex);
           break;
         }
       }
     }else break;
   }
   
-  pthread_mutex_lock (&mutex);
   if(battery.mode == DISCHARGING){
     battery.remain.h = battery.current / battery.rate;
     battery.remain.m = (int)(((double)battery.current / 
@@ -184,7 +246,6 @@ void check_stat()
     battery.remain.h = 0;
     battery.remain.m = 0;
   }
-  pthread_mutex_unlock (&mutex);
   
   if (line) free(line);
   fclose(fp);
