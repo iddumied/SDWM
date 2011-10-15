@@ -55,18 +55,3 @@ typedef struct {
 } SBarStatusSymbol;
 
 
-enum { DrawTime, DrawBattery, DrawUptime, DrawMemory, DrawTermal, DrawBacklight, DrawAudio, DrawNet, DrawLast };
-
-
-
-SBarStatusSymbol sbar_status_symbols[] = {
-//  function        active
-  { draw_time,      True },
-  { draw_battery,   False },
-  { draw_uptime,    True },
-  { draw_memory,    True },
-  { draw_termal,    True },
-  { draw_backlight, True },
-  { draw_audio,     True },
-  { draw_net,       True },
-}

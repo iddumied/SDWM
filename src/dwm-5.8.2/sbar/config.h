@@ -9,7 +9,7 @@
 SBarStatusSymbol sbar_status_symbols[] = {
 //  function        active
   { draw_time,      True },
-  { draw_battery,   True },
+  { draw_battery,   False },
   { draw_uptime,    True },
   { draw_memory,    True },
   { draw_termal,    True },
@@ -17,6 +17,9 @@ SBarStatusSymbol sbar_status_symbols[] = {
   { draw_audio,     True },
   { draw_net,       True },
 };
+// must be in the same order!
+enum { DrawTime, DrawBattery, DrawUptime, DrawMemory, DrawTermal, DrawBacklight, DrawAudio, DrawNet, DrawLast };
+
 
 static const Bool texttopbar        = True;       // False means bottom bar
 static const Bool bottomborder      = True;	      // border of text bar
