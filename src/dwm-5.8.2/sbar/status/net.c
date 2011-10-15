@@ -82,6 +82,7 @@ void get_net_statistic()
   fp = fopen("/proc/net/dev", "r");
   if (fp == NULL){
         printf("\nfailed to read /proc/net/dev\n");
+        sbar_status_symbols[DrawNet].active = False;
         return;
   }
 
@@ -252,6 +253,7 @@ void get_wireless_sterngth()
   fp = fopen("/proc/net/wireless", "r");
   if (fp == NULL){
         printf("\nfailed to read /proc/net/wireless\n");
+        sbar_status_symbols[DrawNet].active = False;
         return;
   }
 
@@ -284,6 +286,7 @@ void get_interface_stat()
   fp = fopen("/sys/class/net/wlan0/operstate", "r");
   if (fp == NULL){
         printf("\nfailed to read /sys/class/net/wlan0/operstate\n");
+        sbar_status_symbols[DrawNet].active = False;
         return;
   }
 
@@ -305,6 +308,7 @@ void get_interface_stat()
   fp = fopen("/proc/easy_wifi_kill", "r");
   if (fp == NULL){
         printf("\nfailed to read /proc/easy_wifi_kill\n");
+        sbar_status_symbols[DrawNet].active = False;
         return;
   }
 
@@ -326,6 +330,7 @@ void get_interface_stat()
   fp = fopen("/sys/class/net/eth0/operstate", "r");
   if (fp == NULL){
         printf("\nfailed to read /sys/class/net/eth0/operstate\n");
+        sbar_status_symbols[DrawNet].active = False;
         return;
   }
 
@@ -370,6 +375,7 @@ void setup_net()
   fp = fopen("/proc/net/dev", "r");
   if (fp == NULL){
         printf("\nfailed to read /proc/net/dev\n");
+        sbar_status_symbols[DrawNet].active = False;
         return;
   }
 
