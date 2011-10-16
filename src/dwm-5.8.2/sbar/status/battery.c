@@ -144,13 +144,13 @@ void check_stat()
   if (fp == NULL){
     printf("\nfailed to open /sys/class/power_supply/BAT1/status");
   }else{
-    
     if((read = getline(&line, &len, fp)) != -1){
       if(line[0] == 'D') battery.mode = DISCHARGING;
       else if(line[6] == 'd') battery.mode = CHARGED;
       else if(line[6] == 'n') battery.mode = CHARGING;
     }
 
+    fclose(fp);
     
     fp = fopen("/sys/class/power_supply/BAT1/charge_now", "r");
     if (fp == NULL){
@@ -159,6 +159,8 @@ void check_stat()
 
       if((read = getline(&line, &len, fp)) != -1)
         battery.current = atoi(line);
+
+      fclose(fp);
 
       fp = fopen("/sys/class/power_supply/BAT1/current_now", "r");
       if (fp == NULL){
