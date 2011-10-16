@@ -1,4 +1,3 @@
-#define ANZ_SBAR_SYMBOLS 8
 void drawsymbolstatus();
 static XGCValues gcv;
 
@@ -194,6 +193,7 @@ int draw_uptime(int y, int pos)
 
 int draw_battery(int y, int pos)
 {
+printf("\n\nin Moadchose\n");
   int buffer_len;
   char buffer[8];
 
@@ -202,9 +202,10 @@ int draw_battery(int y, int pos)
           (255 - ((int)(battery.stat * 255))) * statusstyle.rl;
   XChangeGC(dpy, dc.gc, GCForeground, &gcv);
   
+printf("\n\nin Moadchose2\n");
   // calculating battery stat
   if(battery.mode == CHARGING){
-     sprintf(buffer, "%c %s", (char)23, battery.remain.h, battery.remain.m);
+     sprintf(buffer, "%c %02d:%02d", (char)23, battery.remain.h, battery.remain.m);
    
   }else if(battery.mode == CHARGED){
     sprintf(buffer, "%c Full", (char)23);
@@ -221,6 +222,7 @@ int draw_battery(int y, int pos)
 
   }
 
+printf("\n\nin Moadchose3\n");
   // update pos
   buffer_len = strlen(buffer);
   pos -= textnw(buffer, buffer_len);
@@ -231,6 +233,7 @@ int draw_battery(int y, int pos)
   else
     XDrawString(dpy, dc.drawable, dc.gc, pos, y, buffer, buffer_len);
 
+printf("\n\nin Moadchose4\n");
   return pos; 
 }
 
