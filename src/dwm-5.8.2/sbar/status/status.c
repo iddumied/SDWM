@@ -111,19 +111,6 @@ void setup_status()
     backlight.on = True;
 
   // setup cpu
-  // initializing
-  ncpus = get_ncpus();
-  unsigned int i, r, g;
-
-  // reserving memory
-  cpuloads = (double*)malloc((sizeof(double)*ncpus));
-  last    = (unsigned long**)malloc((sizeof(unsigned long*)*ncpus));
-  current = (unsigned long**)malloc((sizeof(unsigned long*)*ncpus));
-  for(i = 0;i < ncpus;i++){
-    last[i] = (unsigned long*)malloc((sizeof(unsigned long)*ncpus));
-    current[i] = (unsigned long*)malloc((sizeof(unsigned long)*ncpus));
-  }
-
   setup_cpu();
   
   statusstyle.cmem_used   = getcolor(memused_col);
@@ -132,21 +119,4 @@ void setup_status()
   statusstyle.rl          = getcolor("#010000");
   statusstyle.gl          = getcolor("#000100");
 
-  
-  if(!simply_style){
-    // creating TBar pixmaps
-    XGCValues gcv;
-    GC gc = XCreateGC(dpy, root, 0, NULL);
-
-    statusstyle.cpu_drawable = XCreatePixmap(dpy, root, cpu_length-1, (bh-distance_y*2 - 2), DefaultDepth(dpy, screen));
-    for(i = 0;i < cpu_length-1;i++){
-          gcv.foreground = (int)(((double)i / (double)cpu_length) * 255) * statusstyle.rl + 
-            (255 - (int)(((double)i / (double)cpu_length) * 255)) * statusstyle.gl;
-
-          XChangeGC(dpy, gc, GCForeground, &gcv);
-          XDrawLine(dpy, statusstyle.cpu_drawable, gc, i, 0, i, (bh-distance_y*2 - 2));
-    }
-
-    XFreeGC(dpy, gc);
-  }
 }

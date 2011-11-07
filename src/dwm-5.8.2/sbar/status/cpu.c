@@ -16,14 +16,28 @@ Processes processes;
 
 void setup_cpu()
 {
-  // initializing
+  // creating values
   FILE * fp;
   char * line = NULL;
   size_t len = 0;
   ssize_t read;
   int i, j, cpu, usg;
   cpu = 0;
-  
+
+
+  // initializing
+  ncpus = get_ncpus();
+
+  // reserving memory
+  cpuloads = (double*)malloc((sizeof(double)*ncpus));
+  last    = (unsigned long**)malloc((sizeof(unsigned long*)*ncpus));
+  current = (unsigned long**)malloc((sizeof(unsigned long*)*ncpus));
+  for(i = 0;i < ncpus;i++){
+    last[i] = (unsigned long*)malloc((sizeof(unsigned long)*ncpus));
+    current[i] = (unsigned long*)malloc((sizeof(unsigned long)*ncpus));
+  }
+
+ 
   // open /proc/stat
   fp = fopen("/proc/stat", "r");
   if (fp == NULL){
@@ -38,9 +52,7 @@ void setup_cpu()
       // geting values vor user, nice, system, idle  
       for(i = 4;i < len;i++){
         if(line[i] == ' '){
-          pthread_mutex_lock (&mutex);
           last[cpu][usg] = atoi(line+i+1);
-          pthread_mutex_unlock (&mutex);
           usg++;
           if(usg == 4) break;
         }
@@ -104,9 +116,7 @@ void cpu_usage()
         usg = 0;
         for(i = 4;i < len;i++){
           if(line[i] == ' '){
-            pthread_mutex_lock (&mutex);
             current[cpu][usg] = atoi(line+i+1);
-            pthread_mutex_unlock (&mutex);
             usg++;
             if(usg == 4) break;
           }
@@ -117,27 +127,21 @@ void cpu_usage()
         if(line[4] == 'e'){ // processes total
           for(i = 4;i < len;i++){
             if(line[i] == ' '){
-              pthread_mutex_lock (&mutex);
               processes.total = atoi(line+i+1);
-              pthread_mutex_unlock (&mutex);
               break;
             }
           }
         }else if(line[6] == 'r'){ // processes running
           for(i = 4;i < len;i++){
             if(line[i] == ' '){
-              pthread_mutex_lock (&mutex);
               processes.running = atoi(line+i+1);
-              pthread_mutex_unlock (&mutex);
               break;
             }
           }
         }else if(line[6] == 'b'){ // processes blocked
           for(i = 4;i < len;i++){
             if(line[i] == ' '){
-              pthread_mutex_lock (&mutex);
               processes.blocked = atoi(line+i+1);
-              pthread_mutex_unlock (&mutex);
               break;
             }
           }
@@ -149,13 +153,11 @@ void cpu_usage()
     fclose(fp);
  
     
-    pthread_mutex_lock (&mutex);
     for( i = 0;i < ncpus; i++){
       cpuloads[i] = 1 - (double)(current[i][3] - last[i][3]) / (double)(current[i][0] + current[i][1] + current[i][2] + current[i][3] - 
                                   last[i][0] - last[i][1] - last[i][2] - last[i][3]);
       for(j = 0;j < 4;j++)
         last[i][j] = current[i][j];
     }
-    pthread_mutex_unlock (&mutex);
 }
 
