@@ -88,23 +88,6 @@ void drawstw()
   Bool audiomute, audiophones, netonline, ethonline, walnonline, wlaneasy;
   // catching information
   pthread_mutex_lock (&mutex);
-  battstat    = battery.stat;
-  battre_h    = battery.remain.h;
-  battre_m    = battery.remain.m;
-  temperature = thermal;
-  battmode    = battery.mode;
-  light       = backlight.per;
-  audioper    = audio.percent;
-  audiophones = audio.headphones;
-  audiomute   = audio.mute;
-  netonline   = net.connected;
-  ethonline   = net.eth0.online;
-  walnonline  = net.wlan0.online;
-  wlanstat    = net.wlan0.strength;
-  wlaneasy    = net.wlan0.easy_online;
-  lor         = net.lo.between.receive.bytes_per_sec;
-  lot         = net.lo.between.transmit.bytes_per_sec;
-  eth0r       = net.eth0.between.receive.bytes_per_sec;
   eth0t       = net.eth0.between.transmit.bytes_per_sec;
   wlan0r      = net.wlan0.between.receive.bytes_per_sec;
   wlan0t      = net.wlan0.between.transmit.bytes_per_sec;
@@ -171,22 +154,22 @@ void drawstw()
   sprintf(stwbuffer, "  |    |    +--blocked:  %d", pro_blocked);
   wprintln(stwbuffer);
   wprintln("  |    |");
-  sprintf(stwbuffer, "  |    +--battery:  %d%c", (int)(battstat*100), '%');
+  sprintf(stwbuffer, "  |    +--battery:  %d%c", (int)(battery.stat*100), '%');
   wprintln(stwbuffer);
                                         wprintln("  |         |");
-  if(battmode == CHARGING)                wprintln("  |         +--mode:  charging");
-  else if(battmode == DISCHARGING)        wprintln("  |         +--mode:  discharging");    
-  else if(battmode == CHARGED)            wprintln("  |         +--mode:  charged");    
+  if(battery.mode == CHARGING)                wprintln("  |         +--mode:  charging");
+  else if(battery.mode == DISCHARGING)        wprintln("  |         +--mode:  discharging");    
+  else if(battery.mode == CHARGED)            wprintln("  |         +--mode:  charged");    
 
-  sprintf(stwbuffer, "  |         +--remain:  %02d:%02d", battre_h,battre_m);
+  sprintf(stwbuffer, "  |         +--remain:  %02d:%02d", battery.remain.h,battery.remain.m);
   wprintln(stwbuffer);
   wprintln("  |");
   wprintln("  +--net");
   wprintln("       |");
   wprint("       +--lo");
 
-  calc_timline_max(&netstat.lot, lot, netstat.length);
-  calc_timline_max(&netstat.lor, lor, netstat.length);
+  calc_timline_max(&netstat.lot, net.lo.between.transmit.bytes_per_sec, netstat.length);
+  calc_timline_max(&netstat.lor, net.lo.between.receive.bytes_per_sec, netstat.length);
   if(netstat.lor.max == 0 && netstat.lot.max == 0){                                 
     wprintln(":  inactive");
   }else{
@@ -195,13 +178,13 @@ void drawstw()
     if(netstat.lot.max == 0)    
       wprintln("       |    +--up:  inactiv");
     else{  
-      human_readable(lot, False, hread);
+      human_readable(net.lo.between.transmit.bytes_per_sec, False, hread);
       human_readable(netstat.lot.max, False, maxhread);
       sprintf(stwbuffer, "       |    +--up:  %s  @  %s ", hread, maxhread);
       wprintln(stwbuffer);
       wprintln("       |    |    |");
       wprint("       |    |    +--");
-      wprinttimelineln(lot, netstat.length, 1, 
+      wprinttimelineln(net.lo.between.transmit.bytes_per_sec, netstat.length, 1, 
       &netstat.lot,stw.sbar[SBarCpuLine], 
       stw.sbar[SBarCpuPoint],netstat.lot.max);
       wprintln("       |    |");
@@ -210,13 +193,13 @@ void drawstw()
     if(netstat.lor.max == 0)    
       wprintln("       |    +--down:  inactiv");
     else{  
-      human_readable(lor, False, hread);
+      human_readable(net.lo.between.receive.bytes_per_sec, False, hread);
       human_readable(netstat.lor.max, False, maxhread);
       sprintf(stwbuffer, "       |    +--down:  %s  @  %s ", hread, maxhread);
       wprintln(stwbuffer);
       wprintln("       |         |");
       wprint("       |         +--");
-      wprinttimelineln(lor, netstat.length, 1, 
+      wprinttimelineln(net.lo.between.receive.bytes_per_sec, netstat.length, 1, 
       &netstat.lor,stw.sbar[SBarCpuLine], 
       stw.sbar[SBarCpuPoint],netstat.lor.max);
     }
@@ -227,12 +210,12 @@ void drawstw()
   calc_timline_max(&netstat.eth0r, eth0t, netstat.length);
   calc_timline_max(&netstat.eth0t, eth0t, netstat.length);
   if(netstat.eth0r.max == 0 && netstat.eth0t.max == 0){                                 
-    if(ethonline)
+    if(net.eth0.online)
       wprintln(":  inactive");  
     else
       wprintln(":  down");
   }else{ 
-    if(!ethonline)   
+    if(!net.eth0.online)   
       wprintln(":  down");
     else
       wprintln(":  connected");
@@ -257,13 +240,13 @@ void drawstw()
     if(netstat.eth0r.max == 0)    
       wprintln("       |    +--down:  inactiv");
     else{
-      human_readable(eth0r, False, hread);
+      human_readable(net.eth0.between.receive.bytes_per_sec, False, hread);
       human_readable(netstat.eth0r.max, False, maxhread);
       sprintf(stwbuffer, "       |    +--down:  %s  @  %s ", hread, maxhread);
       wprintln(stwbuffer);
       wprintln("       |         |");
       wprint("       |         +--");
-      wprinttimelineln(eth0r, netstat.length, 1, 
+      wprinttimelineln(net.eth0.between.receive.bytes_per_sec, netstat.length, 1, 
       &netstat.eth0r,stw.sbar[SBarCpuLine], 
       stw.sbar[SBarCpuPoint],netstat.eth0r.max);
     }
@@ -273,23 +256,23 @@ void drawstw()
   calc_timline_max(&netstat.wlan0t, wlan0t, netstat.length);
   calc_timline_max(&netstat.wlan0r, wlan0r, netstat.length);
   if(netstat.wlan0r.max == 0 && netstat.wlan0t.max == 0){                                 
-    if(walnonline) 
+    if(net.wlan0.online) 
       wprintln(":  inactive");
-    else if(wlaneasy)      
+    else if(net.wlan0.easy_online)      
       wprintln(":  disconnected");
     else   
       wprintln(":  down");
   }else{ 
-    if(!wlaneasy) 
+    if(!net.wlan0.easy_online) 
       wprintln(":  down");
-    else if(!walnonline)  
+    else if(!net.wlan0.online)  
       wprintln(":  disconnected");
     else  
       wprintln(":  connected");
     
     wprintln("            |");
-    if(walnonline){    
-      sprintf(stwbuffer, "            +--signal:  %d%c",(int)(wlanstat*100),'%');
+    if(net.wlan0.online){    
+      sprintf(stwbuffer, "            +--signal:  %d%c",(int)(net.wlan0.strength*100),'%');
       wprintln(stwbuffer);
     }
 
