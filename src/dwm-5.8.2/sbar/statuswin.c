@@ -88,10 +88,6 @@ void drawstw()
   Bool audiomute, audiophones, netonline, ethonline, walnonline, wlaneasy;
   // catching information
   pthread_mutex_lock (&mutex);
-  upd         = tbar_uptime.d;
-  uph         = tbar_uptime.h;
-  upm         = tbar_uptime.m;
-  ups         = tbar_uptime.s;
   used        = memory.used;
   buffer      = memory.buffer;
   cached      = memory.cached;
@@ -101,7 +97,6 @@ void drawstw()
   pcached     = memory.pcached;
   ramtotal    = memory.total;
   swapused    = memory.swapused;
-  pswapused   = memory.pswapused;
   pswapfree   = memory.pswapfree;
   swaptotal   = memory.swaptotal;
   battstat    = battery.stat;
@@ -167,13 +162,13 @@ void drawstw()
   wprintln(stwbuffer);
   wprintln("  |    |");
 
-  if(swapused/1024 == 0){       sprintf(stwbuffer, "  |    +--swap:  %d MB / %d MB  -  %d%c", swapused/1024, swaptotal/1024, (int)(pswapused*100),'%');
+  if(swapused/1024 == 0){       sprintf(stwbuffer, "  |    +--swap:  %d MB / %d MB  -  %d%c", swapused/1024, swaptotal/1024, (int)(memory.pswapused*100),'%');
     wprintln(stwbuffer);  
   }else{                                    wprint("  |    +--swap:  ");
 
-    wprintcolln(pswapused, 100, 0.65, 2 );
+    wprintcolln(memory.pswapused, 100, 0.65, 2 );
     wprintln("  |    |    |");
-    sprintf(stwbuffer, "  |    |    +--used:  %d MB / %d MB  -  %d%c", swapused/1024, swaptotal/1024, (int)(pswapused*100),'%');
+    sprintf(stwbuffer, "  |    |    +--used:  %d MB / %d MB  -  %d%c", swapused/1024, swaptotal/1024, (int)(memory.pswapused*100),'%');
     wprintln(stwbuffer);  
     wprintln("  |    |");
   }
