@@ -88,17 +88,6 @@ void drawstw()
   Bool audiomute, audiophones, netonline, ethonline, walnonline, wlaneasy;
   // catching information
   pthread_mutex_lock (&mutex);
-  used        = memory.used;
-  buffer      = memory.buffer;
-  cached      = memory.cached;
-  pused       = memory.pused;
-  pfree       = memory.pfree;
-  pbuffer     = memory.pbuffer;
-  pcached     = memory.pcached;
-  ramtotal    = memory.total;
-  swapused    = memory.swapused;
-  pswapfree   = memory.pswapfree;
-  swaptotal   = memory.swaptotal;
   battstat    = battery.stat;
   battre_h    = battery.remain.h;
   battre_m    = battery.remain.m;
@@ -149,26 +138,26 @@ void drawstw()
  
   wprintln("  |    |");
   wprint("  |    +--ram:  ");
-  double percent[3] = {pused,pbuffer,pcached}; 
+  double percent[3] = {memory.pused,memory.pbuffer,memory.pcached}; 
   unsigned long colors[3] = { stw.sel[ColFG],
   stw.sbar[SBarCpuLine], stw.sbar[SBarCpuPoint] };
   wprintcolsln(&percent, &colors, 3, 100, 0.65,2);
   wprintln("  |    |    |");
-  sprintf(stwbuffer, "  |    |    +--used:  %d MB / %d MB  -  %d%c", used/1024, ramtotal/1024,(int)(pused*100),'%');
+  sprintf(stwbuffer, "  |    |    +--used:  %d MB / %d MB  -  %d%c", memory.used/1024, memory.total/1024,(int)(memory.pused*100),'%');
   wprintln(stwbuffer);  
-  sprintf(stwbuffer, "  |    |    +--buffer:  %d MB", buffer/1024);
+  sprintf(stwbuffer, "  |    |    +--buffer:  %d MB", memory.buffer/1024);
   wprintln(stwbuffer);
-  sprintf(stwbuffer, "  |    |    +--cached:  %d MB", cached/1024);
+  sprintf(stwbuffer, "  |    |    +--cached:  %d MB", memory.cached/1024);
   wprintln(stwbuffer);
   wprintln("  |    |");
 
-  if(swapused/1024 == 0){       sprintf(stwbuffer, "  |    +--swap:  %d MB / %d MB  -  %d%c", swapused/1024, swaptotal/1024, (int)(memory.pswapused*100),'%');
+  if(memory.swapused/1024 == 0){       sprintf(stwbuffer, "  |    +--swap:  %d MB / %d MB  -  %d%c", memory.swapused/1024, memory.swaptotal/1024, (int)(memory.pswapused*100),'%');
     wprintln(stwbuffer);  
   }else{                                    wprint("  |    +--swap:  ");
 
     wprintcolln(memory.pswapused, 100, 0.65, 2 );
     wprintln("  |    |    |");
-    sprintf(stwbuffer, "  |    |    +--used:  %d MB / %d MB  -  %d%c", swapused/1024, swaptotal/1024, (int)(memory.pswapused*100),'%');
+    sprintf(stwbuffer, "  |    |    +--used:  %d MB / %d MB  -  %d%c", memory.swapused/1024, memory.swaptotal/1024, (int)(memory.pswapused*100),'%');
     wprintln(stwbuffer);  
     wprintln("  |    |");
   }
