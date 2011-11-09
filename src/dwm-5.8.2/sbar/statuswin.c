@@ -77,34 +77,19 @@ void drawstw()
   XCopyArea(dpy, background, stw.drawable, stw.gc, 0, 0, stw.w, stw.h, 0, 0 );
   stwwrite.xc = stwwrite.xs;
   stwwrite.yc = stwwrite.ys;
-
   
 
-  // catching values
+  // values
   char stwbuffer[100], hread[12], maxhread[12];
-  double battstat, light, audioper, wlanstat, *loadcpu, pused, pbuffer, pcached, pfree, pswapused, pswapfree;
-  loadcpu = (double*)malloc(sizeof(double)*ncpus);
-  int upd,uph,upm,ups,used, buffer, cached, swapused, swaptotal, ramtotal, i, battre_h, battre_m, battmode, swapusedper, pos, temperature, lor,lot,eth0r, eth0t, wlan0r,wlan0t, pro_total, pro_running, pro_blocked ;
-  Bool audiomute, audiophones, netonline, ethonline, walnonline, wlaneasy;
-  // catching information
-  pthread_mutex_lock (&mutex);
-  eth0t       = net.eth0.between.transmit.bytes_per_sec;
-  wlan0r      = net.wlan0.between.receive.bytes_per_sec;
-  wlan0t      = net.wlan0.between.transmit.bytes_per_sec;
-  pro_blocked = processes.blocked;
-  pro_running = processes.running;
-  pro_total   = processes.total;
-  sprintf(stwbuffer,"Chief @ ArchLinux  -  online since:  %s", tbar_uptime.since);
-  for(i = 0;i < ncpus;i++) loadcpu[i] = cpuloads[i];
-  pthread_mutex_unlock (&mutex);
+  int i;
   
   XGCValues gcv;
   gcv.foreground = stw.sel[ColFG];
   XChangeGC(dpy, stw.gc, GCForeground, &gcv);
 
-
     
   // statusmesage
+  sprintf(stwbuffer,"Chief @ ArchLinux  -  online since:  %s", tbar_uptime.since);
   wprintln("");
   wprintln(stwbuffer);
   wprintln("  |");
@@ -114,9 +99,8 @@ void drawstw()
   wprintln("  |    |    |");
 
   for(i = 0; i < ncpus; i++){;
-    sprintf(stwbuffer, "  |    |    +--cpu%d:  %d%c",i+1, (int)(loadcpu[i]*100), '%');
+    sprintf(stwbuffer, "  |    |    +--cpu%d:  %d%c",i+1, (int)(cpuloads[i]*100), '%');
     wprintln(stwbuffer);
-    //wprintcolln(loadcpu[i], 100, 0.65, 2);
   }
  
   wprintln("  |    |");
@@ -147,11 +131,11 @@ void drawstw()
 
   wprintln("  |    +--processes  ");
   wprintln("  |    |    |");
-  sprintf(stwbuffer, "  |    |    +--amount:  %d", pro_total);
+  sprintf(stwbuffer, "  |    |    +--amount:  %d", processes.total);
   wprintln(stwbuffer);  
-  sprintf(stwbuffer, "  |    |    +--running:  %d", pro_running);
+  sprintf(stwbuffer, "  |    |    +--running:  %d", processes.running);
   wprintln(stwbuffer);                                        
-  sprintf(stwbuffer, "  |    |    +--blocked:  %d", pro_blocked);
+  sprintf(stwbuffer, "  |    |    +--blocked:  %d", processes.blocked);
   wprintln(stwbuffer);
   wprintln("  |    |");
   sprintf(stwbuffer, "  |    +--battery:  %d%c", (int)(battery.stat*100), '%');
@@ -207,8 +191,8 @@ void drawstw()
   }                      
 
   wprint("       +--eth0");
-  calc_timline_max(&netstat.eth0r, eth0t, netstat.length);
-  calc_timline_max(&netstat.eth0t, eth0t, netstat.length);
+  calc_timline_max(&netstat.eth0r, net.eth0.between.transmit.bytes_per_sec, netstat.length);
+  calc_timline_max(&netstat.eth0t, net.eth0.between.transmit.bytes_per_sec, netstat.length);
   if(netstat.eth0r.max == 0 && netstat.eth0t.max == 0){                                 
     if(net.eth0.online)
       wprintln(":  inactive");  
@@ -225,13 +209,13 @@ void drawstw()
     if(netstat.eth0t.max == 0)   
       wprintln("       |    +--up:  inactiv");
     else{
-      human_readable(eth0t, False, hread);
+      human_readable(net.eth0.between.transmit.bytes_per_sec, False, hread);
       human_readable(netstat.eth0t.max, False, maxhread);
       sprintf(stwbuffer, "       |    +--up:  %s  @  %s ", hread, maxhread);
       wprintln(stwbuffer);
       wprintln("       |    |    |");
       wprint("       |    |    +--");
-      wprinttimelineln(eth0t, netstat.length, 1, 
+      wprinttimelineln(net.eth0.between.transmit.bytes_per_sec, netstat.length, 1, 
       &netstat.eth0t,stw.sbar[SBarCpuLine], 
       stw.sbar[SBarCpuPoint],netstat.eth0t.max);
       wprintln("       |    |");
@@ -253,8 +237,8 @@ void drawstw()
     wprintln("       |");   
   }
                                           wprint("       +--wlan0");
-  calc_timline_max(&netstat.wlan0t, wlan0t, netstat.length);
-  calc_timline_max(&netstat.wlan0r, wlan0r, netstat.length);
+  calc_timline_max(&netstat.wlan0t, net.wlan0.between.transmit.bytes_per_sec, netstat.length);
+  calc_timline_max(&netstat.wlan0r, net.wlan0.between.receive.bytes_per_sec, netstat.length);
   if(netstat.wlan0r.max == 0 && netstat.wlan0t.max == 0){                                 
     if(net.wlan0.online) 
       wprintln(":  inactive");
@@ -279,13 +263,13 @@ void drawstw()
     if(netstat.wlan0t.max == 0)     
       wprintln("            +--up:  inactiv");
     else{       
-      human_readable(wlan0t, False, hread);
+      human_readable(net.wlan0.between.transmit.bytes_per_sec, False, hread);
       human_readable(netstat.wlan0t.max, False, maxhread);
       sprintf(stwbuffer, "            +--up:  %s  @  %s ", hread, maxhread);
       wprintln(stwbuffer);
       wprintln("            |    |");
       wprint("            |    +--");
-      wprinttimelineln(wlan0t, netstat.length, 1, 
+      wprinttimelineln(net.wlan0.between.transmit.bytes_per_sec, netstat.length, 1, 
       &netstat.wlan0t,stw.sbar[SBarCpuLine], 
       stw.sbar[SBarCpuPoint],netstat.wlan0t.max);
       wprintln("            |");
@@ -294,13 +278,13 @@ void drawstw()
     if(netstat.wlan0r.max == 0)        
       wprintln("            +--down:  inactiv");
     else{  
-      human_readable(wlan0r, False, hread);
+      human_readable(net.wlan0.between.receive.bytes_per_sec, False, hread);
       human_readable(netstat.wlan0r.max, False, maxhread);
       sprintf(stwbuffer, "            +--down:  %s  @  %s ", hread, maxhread);
       wprintln(stwbuffer);
       wprintln("                 |");
       wprint("                 +--");
-      wprinttimelineln(wlan0r, netstat.length, 1, 
+      wprinttimelineln(net.wlan0.between.receive.bytes_per_sec, netstat.length, 1, 
       &netstat.wlan0r,stw.sbar[SBarCpuLine], 
       stw.sbar[SBarCpuPoint],netstat.wlan0r.max);
     }                                         
