@@ -19,13 +19,13 @@ typedef struct {
   Statistic last, current, between;
   int linkcur, linkmax, bytespersec;
   double strength;
-  Bool online, easy_online;
+  Bool online, easy_online, exists;
 } Wlan;
 
 typedef struct {
   int bytespersec;
   Statistic last, current, between;
-  Bool online;  
+  Bool online, exists;  
 } LAN;
 
 
