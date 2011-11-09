@@ -13,7 +13,10 @@ int draw_net(int y, int pos)
   // calc symbol
   // TODO interface off includen via Fn-key
   if(!net.connected)
-    sprintf(buffer_net,"Ô offline");
+    if(!net.wlan0.easy_online)
+      sprintf(buffer_net,"Ô down");
+    else
+      sprintf(buffer_net,"Ô of");
   else if(net.eth0.online){
     human_readable(net.eth0.between.receive.bytes_per_sec, False, buffer_speed);
     sprintf(buffer_net,"\x19  %s", buffer_speed);
@@ -193,7 +196,6 @@ int draw_uptime(int y, int pos)
 
 int draw_battery(int y, int pos)
 {
-printf("\n\nin Moadchose\n");
   int buffer_len;
   char buffer[8];
 
@@ -202,7 +204,6 @@ printf("\n\nin Moadchose\n");
           (255 - ((int)(battery.stat * 255))) * statusstyle.rl;
   XChangeGC(dpy, dc.gc, GCForeground, &gcv);
   
-printf("\n\nin Moadchose2\n");
   // calculating battery stat
   if(battery.mode == CHARGING){
      sprintf(buffer, "%c %02d:%02d", (char)23, battery.remain.h, battery.remain.m);
@@ -222,7 +223,6 @@ printf("\n\nin Moadchose2\n");
 
   }
 
-printf("\n\nin Moadchose3\n");
   // update pos
   buffer_len = strlen(buffer);
   pos -= textnw(buffer, buffer_len);
@@ -233,7 +233,6 @@ printf("\n\nin Moadchose3\n");
   else
     XDrawString(dpy, dc.drawable, dc.gc, pos, y, buffer, buffer_len);
 
-printf("\n\nin Moadchose4\n");
   return pos; 
 }
 
