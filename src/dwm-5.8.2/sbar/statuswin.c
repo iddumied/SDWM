@@ -55,7 +55,19 @@ DiskStatistic diskstat[MAXPARTITIONS];
 void setup_stw();
 void drawstw();
 void calc_timline_max(Timeline *timeline, int bytes, int length);
+void togglestw();
 
+
+void togglestw(){
+  draw_status_win = !draw_status_win;
+
+	Monitor *m;
+
+	for(m = mons; m; m = m->next){
+    if(draw_status_win) XMapWindow(dpy,m->statuswin);
+    else XUnmapWindow(dpy,m->statuswin);
+  }
+}
 
 
 
@@ -301,6 +313,7 @@ void drawstw()
       }                                         
     } 
   }else{
+    wprintln("  |");
     wprintln("  +--net: error");
   }  
 char ebuf[5][20];

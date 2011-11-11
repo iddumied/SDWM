@@ -1204,7 +1204,10 @@ drawbar(Monitor *m) {
 	}
   
 	XCopyArea(dpy, dc.drawable, m->barwin, dc.gc, 0, 0, m->ww, bh, 0, 0);
-  drawstw();
+  
+  if(draw_status_win)
+    drawstw();
+  
 	XSync(dpy, False);
 	
 }

@@ -33,19 +33,12 @@ static int cpu_posx                 = 600;
 static const int cpu_length         = 60;         // length of one cpu consider this if you have more
 static const int distance_x         = 5;          // distance betwen mem and swap and between cpus if you have more than one
 static const int distance_y         = 2;          // distance between top and bottom of bar
-static const int mem_posx           = 1000;
-static const int mem_length         = 60;
-static const int swap_length        = 30;
-static const int battery_length     = 30;
-static const int battery_pos_x      = 1190;
 
 static const char memused_col[]      = "#00aaff";   //"#18B218";
 static const char membuff_col[]      = "#ffffff";   //"#0F3FBA";
 static const char memcach_col[]      = "#005588";   //"#FFFF00";
 
 static const int status_refresh     = 1;           // refresh zyklus in seconds
-
-static const Bool simply_style      = True;
 static const Bool show_year         = True;
 
 static const char mainsymbol[]      = "\x18";
@@ -54,7 +47,6 @@ static const Bool shift_left        = True;
 
 
 static const Bool utime_seconds     = False;
-static const int  uptime_posx       = 900;
 static const int  tbar_distancex    = 12;
 
 static const unsigned int gappx     = 6;
@@ -64,6 +56,7 @@ static const int max_link_quality   = 70; // max wlan quality found out by calli
 
 
 // satuswin
+static Bool draw_status_win           = True;
 static const char swnormbordercolor[] = "#005588";  // border of inactiv window
 static const char swnormbgcolor[]     = "#000000";  // color of statsusbar
 static const char swnormfgcolor[]     = "#ffffff";  // font color of statusbar
