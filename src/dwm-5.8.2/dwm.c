@@ -1565,6 +1565,22 @@ killclient(const Arg *arg) {
 		XSetErrorHandler(xerror);
 		XUngrabServer(dpy);
 	}
+
+	Client *c;
+  Monitor *m;
+  m = selmon;
+  int win_nf = 0; // number of windows not floating
+
+	for(c = m->stack; c; c = c->snext)
+		if(!c->isfloating && ISVISIBLE(c)) 
+      win_nf++;        
+    
+  // if there is no more not floating window turn statuswin back on
+  if(!draw_status_win && win_nf == 1 && !selmon->sel->isfloating) togglestw();
+
+  printf("\n\nwin_nf: %d\n\n",win_nf);
+
+	XSync(dpy, False);
 }
 
 void
@@ -1898,21 +1914,27 @@ restack(Monitor *m) {
 		XRaiseWindow(dpy, m->sel->win);
 	if(m->lt[m->sellt]->arrange) {
 
-    printf("\n\nnot floatinf?\n\n\n");
-
+    int win_nf = 0; // number of windows not floating
 
 		wc.stack_mode = Below;
 		wc.sibling = m->barwin;
 		for(c = m->stack; c; c = c->snext)
 			if(!c->isfloating && ISVISIBLE(c)) {
-        // set statuswin invisible
-        draw_status_win = False;
-        for(m = mons; m; m = m->next)
-          XUnmapWindow(dpy,m->statuswin);
+        win_nf++;        
+
+        if(draw_status_win){
+          // set statuswin invisible
+          draw_status_win = False;
+          for(m = mons; m; m = m->next)
+            XUnmapWindow(dpy,m->statuswin);
+        }
 
 				XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
 				wc.sibling = c->win;
 			}
+    
+    // if there is no more not floating window turn statuswin back on
+    if(!draw_status_win && win_nf == 0) togglestw();
 	}
 	XSync(dpy, False);
 	while(XCheckMaskEvent(dpy, EnterWindowMask, &ev));
