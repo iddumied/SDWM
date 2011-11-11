@@ -2012,7 +2012,7 @@ setlayout(const Arg *arg) {
 	else
 		drawbar(selmon);
   
- 
+  // map statuswin if Layout is Floating 
   if(((Layout *)arg->v)->arrange == NULL && !draw_status_win)
     togglestw();
 }
