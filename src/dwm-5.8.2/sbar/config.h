@@ -1,8 +1,6 @@
 #define ANZ_TEXT_BARS 1
 #define ANZ_STYL_BARS 1
 #define MAX_TABS 9
-#define SATANDART_TEXT True
-#define STANADART_BAR 0
 #include "typedef.c"
 
 // order of SBar Status Symbols. first = right

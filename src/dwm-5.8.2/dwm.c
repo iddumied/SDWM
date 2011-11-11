@@ -313,7 +313,6 @@ static int globalborder;
 /* configuration, allows nested code to access above variables */
 #include "./sbar/sbar.c"
 #include "config.h"
-#include "./sbar/drawsbar.c"
 #include "./sbar/drawstatus.c"
 //#include "./sbar/drawtbartext.c"
 
@@ -808,12 +807,12 @@ buttonpress(XEvent *e) {
 	if(ev->window == selmon->barwin || ev->window == selmon->statuswin) {
     
 		i = 0;
-		x = text_bar ? TEXTW(mainsymbol) : 0;
+		x = TEXTW(mainsymbol);
     
 		do { 
 			// calculates on witch tab mous was pressed
-			x = text_bar ? x + TEXTW(tags[i]) : sbars[ab].tabs[i].w + sbars[ab].tabs[i].pos_x;
-		} while(ev->x >= x && ++i < (text_bar ? LENGTH(tags) : sbars[ab].ntabs));
+			x = x + TEXTW(tags[i]);
+		} while(ev->x >= x && ++i < LENGTH(tags));
 		if(ev->x < TEXTW(mainsymbol))
       click = ClkMainSymbol;
     else if(i < (LENGTH(tags))){
@@ -1143,65 +1142,58 @@ drawbar(Monitor *m) {
 	  if(c->isurgent)
 	    urg |= c->tags;
 	}
-	
-
   
-	if(!text_bar)
-	{
-	  drawsbar(m, occ);
-	}else // text bar
-	{
-    dc.x = TEXTW(mainsymbol);
-	  for(i = 0; i < LENGTH(tags); i++) {
-		  dc.w = TEXTW(tags[i]);
-		  col = m->tagset[m->seltags] & 1 << i ? dc.sel : dc.norm;
-		  drawtext(tags[i], col, urg & 1 << i);
-		  drawsquare(m == selmon && selmon->sel && selmon->sel->tags & 1 << i,
-			  occ & 1 << i, urg & 1 << i, col);
-		  dc.x += dc.w;
-	  }
-	  dc.w = blw = TEXTW(m->ltsymbol);
-	  drawtext(m->ltsymbol, dc.norm, False);
+
+  dc.x = TEXTW(mainsymbol);
+  for(i = 0; i < LENGTH(tags); i++) {
+	  dc.w = TEXTW(tags[i]);
+	  col = m->tagset[m->seltags] & 1 << i ? dc.sel : dc.norm;
+	  drawtext(tags[i], col, urg & 1 << i);
+	  drawsquare(m == selmon && selmon->sel && selmon->sel->tags & 1 << i,
+		  occ & 1 << i, urg & 1 << i, col);
 	  dc.x += dc.w;
-	  x = dc.x;
-	  if(m == selmon) { // status is only drawn on selected monitor 
-			/*char * text = "test";
-      if(!readFromXroot){
-        dc.w = TEXTW(tbar_date.date);
-        dc.x = m->ww - dc.w;
-        if(dc.x < x) {
-          dc.x = x;
-          dc.w = m->ww - x;
-        }
-        drawtext(tbar_date.date, dc.norm, False); 
-        dc.w = cpu_posx - distance_x*2;
-	    }else{
-				dc.w = TEXTW(stext);
-				dc.x = m->ww - dc.w;
-				if(dc.x < x) {
-					dc.x = x;
-					dc.w = m->ww - x;
-				}
-				
-				drawtext(stext, dc.norm, False); 
-			}*/
+  }
+  dc.w = blw = TEXTW(m->ltsymbol);
+  drawtext(m->ltsymbol, dc.norm, False);
+  dc.x += dc.w;
+  x = dc.x;
+  if(m == selmon) { // status is only drawn on selected monitor 
+		/*char * text = "test";
+     if(!readFromXroot){
+       dc.w = TEXTW(tbar_date.date);
+       dc.x = m->ww - dc.w;
+       if(dc.x < x) {
+         dc.x = x;
+         dc.w = m->ww - x;
+       }
+       drawtext(tbar_date.date, dc.norm, False); 
+       dc.w = cpu_posx - distance_x*2;
+    }else{
+			dc.w = TEXTW(stext);
+			dc.x = m->ww - dc.w;
+			if(dc.x < x) {
+				dc.x = x;
+				dc.w = m->ww - x;
+			}
+			
+			drawtext(stext, dc.norm, False); 
+		}*/
+  }
+  else
+	  dc.x = m->ww;
+  if((dc.w = dc.x - x) > bh) { // draws the window name in statusbar
+	  dc.x = x;
+	  if(m->sel) {
+		  col = m == selmon ? dc.sel : dc.norm;
+		  drawtext(m->sel->name, col, False);
+		  drawsquare(m->sel->isfixed, m->sel->isfloating, False, col);
 	  }
 	  else
-		  dc.x = m->ww;
-	  if((dc.w = dc.x - x) > bh) { // draws the window name in statusbar
-		  dc.x = x;
-		  if(m->sel) {
-			  col = m == selmon ? dc.sel : dc.norm;
-			  drawtext(m->sel->name, col, False);
-			  drawsquare(m->sel->isfixed, m->sel->isfloating, False, col);
-		  }
-		  else
-			  drawtext(NULL, dc.norm, False);
-	  }
+		  drawtext(NULL, dc.norm, False);
+  }
 	  
-	  // draws the status in the text bar
-	  //drawstatus();
-	}
+  // draws the status in the text bar
+  //drawstatus();
   
 	XCopyArea(dpy, dc.drawable, m->barwin, dc.gc, 0, 0, m->ww, bh, 0, 0);
   

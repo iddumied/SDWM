@@ -31,7 +31,7 @@ void update_stats();
 void merge_mount_path();
 void update_disk();
 
-#ifndef STANADART_BAR
+#ifdef DISK_MAIN
 int main()
 {
   setup_disk();

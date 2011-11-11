@@ -11,8 +11,6 @@ void setup_sbar();
 static SBarColor sbarcolor;
 static SBar sbars[ANZ_STYL_BARS];
 static TBar tbar;
-static int ab;
-static Bool text_bar;
 static Bool topbar;    			 /* False means bottom bar */
 static int screenWidth, screenHeight;
 static Bool sbarloaded;
@@ -55,9 +53,6 @@ void setup_sbar()
      
   setup_stw();
     
-  text_bar = SATANDART_TEXT;
-  ab = STANADART_BAR;
-
 
   sbarcolor.red            = getcolor("#FF0000");
   sbarcolor.green          = getcolor("#00FF00");
@@ -124,6 +119,7 @@ void setup_sbar()
   }//hier timline initialisieren mit fillrectangle
 
   
+
   gettimeofday(&end_time, 0);
   printf("\nsbar Setup needed:  %f Seconds\n", calc_time_div(end_time, start_time));  
 }
