@@ -1897,7 +1897,6 @@ restack(Monitor *m) {
 	if(m->sel->isfloating || !m->lt[m->sellt]->arrange)
 		XRaiseWindow(dpy, m->sel->win);
 	if(m->lt[m->sellt]->arrange) {
-    /* Don't know for what this is but it works anyway
 		wc.stack_mode = Below;
 		wc.sibling = m->barwin;
 		for(c = m->stack; c; c = c->snext)
@@ -1905,14 +1904,6 @@ restack(Monitor *m) {
 				XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
 				wc.sibling = c->win;
 			}
-		
-		wc.stack_mode = Below;
-    wc.sibling = m->statuswin;
-    for(c = m->stack; c; c = c->snext)
-      if(!c->isfloating && ISVISIBLE(c)) {
-        XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
-        wc.sibling = c->win;
-      }*/
 	}
 	XSync(dpy, False);
 	while(XCheckMaskEvent(dpy, EnterWindowMask, &ev));
