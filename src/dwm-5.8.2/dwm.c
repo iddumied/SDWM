@@ -1897,10 +1897,19 @@ restack(Monitor *m) {
 	if(m->sel->isfloating || !m->lt[m->sellt]->arrange)
 		XRaiseWindow(dpy, m->sel->win);
 	if(m->lt[m->sellt]->arrange) {
+
+    printf("\n\nnot floatinf?\n\n\n");
+
+
 		wc.stack_mode = Below;
 		wc.sibling = m->barwin;
 		for(c = m->stack; c; c = c->snext)
 			if(!c->isfloating && ISVISIBLE(c)) {
+        // set statuswin invisible
+        draw_status_win = False;
+        for(m = mons; m; m = m->next)
+          XUnmapWindow(dpy,m->statuswin);
+
 				XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
 				wc.sibling = c->win;
 			}
