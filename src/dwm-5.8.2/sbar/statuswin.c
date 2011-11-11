@@ -135,13 +135,13 @@ void drawstw()
 
   char pipe = (sbar_status_symbols[DrawBattery].active ? '|' : ' ');
   wprintln("  |    +--processes  ");
-  sprintf(stwbuffer, "  %c    |    |", pipe);
+  sprintf(stwbuffer, "  |    %c    |", pipe);
   wprintln(stwbuffer);
-  sprintf(stwbuffer, "  %c    |    +--amount:  %d",pipe , processes.total);
+  sprintf(stwbuffer, "  |    %c    +--amount:  %d",pipe , processes.total);
   wprintln(stwbuffer);  
-  sprintf(stwbuffer, "  %c    |    +--running:  %d",pipe , processes.running);
+  sprintf(stwbuffer, "  |    %c    +--running:  %d",pipe , processes.running);
   wprintln(stwbuffer);                                        
-  sprintf(stwbuffer, "  %c    |    +--blocked:  %d",pipe , processes.blocked);
+  sprintf(stwbuffer, "  |    %c    +--blocked:  %d",pipe , processes.blocked);
   wprintln(stwbuffer);
 
   if(sbar_status_symbols[DrawBattery].active){
@@ -301,7 +301,7 @@ void drawstw()
       }                                         
     } 
   }else{
-    wprintln("+--net: error");
+    wprintln("  +--net: error");
   }  
 char ebuf[5][20];
 int countdisks, mj, mi = 0;
