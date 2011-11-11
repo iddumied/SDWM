@@ -2011,6 +2011,10 @@ setlayout(const Arg *arg) {
 		arrange(selmon);
 	else
 		drawbar(selmon);
+  
+ 
+  if(((Layout *)arg->v)->arrange == NULL && !draw_status_win)
+    togglestw();
 }
 
 /* arg > 1.0 will set mfact absolutly */
