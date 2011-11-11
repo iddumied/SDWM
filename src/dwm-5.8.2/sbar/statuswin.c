@@ -123,7 +123,7 @@ void drawstw()
 
     if(memory.swapused/1024 == 0){       sprintf(stwbuffer, "  |    +--swap:  %d MB / %d MB  -  %d%c", memory.swapused/1024, memory.swaptotal/1024, (int)(memory.pswapused*100),'%');
       wprintln(stwbuffer);  
-    }else{                                    
+    }else if(memory.swaptotal > 0){                                    
       wprint("  |    +--swap:  ");
       wprintcolln(memory.pswapused, 100, 0.65, 2 );
       wprintln("  |    |    |");
@@ -133,17 +133,19 @@ void drawstw()
     }
   }  
 
+  char pipe = (sbar_status_symbols[DrawBattery].active ? '|' : ' ');
   wprintln("  |    +--processes  ");
-  wprintln("  |    |    |");
-  sprintf(stwbuffer, "  |    |    +--amount:  %d", processes.total);
-  wprintln(stwbuffer);  
-  sprintf(stwbuffer, "  |    |    +--running:  %d", processes.running);
-  wprintln(stwbuffer);                                        
-  sprintf(stwbuffer, "  |    |    +--blocked:  %d", processes.blocked);
+  sprintf(stwbuffer, "  %c    |    |", pipe);
   wprintln(stwbuffer);
-  wprintln("  |    |");
+  sprintf(stwbuffer, "  %c    |    +--amount:  %d",pipe , processes.total);
+  wprintln(stwbuffer);  
+  sprintf(stwbuffer, "  %c    |    +--running:  %d",pipe , processes.running);
+  wprintln(stwbuffer);                                        
+  sprintf(stwbuffer, "  %c    |    +--blocked:  %d",pipe , processes.blocked);
+  wprintln(stwbuffer);
 
   if(sbar_status_symbols[DrawBattery].active){
+    wprintln("  |    |");
     sprintf(stwbuffer, "  |    +--battery:  %d%c", (int)(battery.stat*100), '%');
     wprintln(stwbuffer);
                                         wprintln("  |         |");
@@ -298,6 +300,8 @@ void drawstw()
         stw.sbar[SBarCpuPoint],netstat.wlan0r.max);
       }                                         
     } 
+  }else{
+    wprintln("+--net: error");
   }  
 char ebuf[5][20];
 int countdisks, mj, mi = 0;
