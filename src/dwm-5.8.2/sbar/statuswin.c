@@ -305,7 +305,7 @@ void drawstw()
   }  
 char ebuf[5][20];
 int countdisks, mj, mi = 0;
-stwwrite.xs = stwwrite.xc  = 1100;
+stwwrite.xs = stwwrite.xc  = screenWidth-266;//1100;
 stwwrite.ys = stwwrite.yc = (stw.font.height + gappx);
 stwwrite.xe = stwwrite.w = stw.w - gappx;
 stwwrite.ye = stwwrite.h = stw.h;
