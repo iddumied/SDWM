@@ -68,38 +68,38 @@ void setup_sbar()
   sbarcolor.cpu_line       = getcolor(cpu_line_color);
     
   // normal apperance
-  sbarcolor.normbordercolor = dc.norm[ColBorder]    = getcolor(normbordercolor);
-  sbarcolor.normbgcolor     = dc.norm[ColBG]        = getcolor(normbgcolor);
-  sbarcolor.normfgcolor     = dc.norm[ColFG]        = getcolor(normfgcolor);
-  sbarcolor.selbordercolor  = dc.sel[ColBorder]     = getcolor(selbordercolor);
-  sbarcolor.selbgcolor      = dc.sel[ColBG]         = getcolor(selbgcolor);
-  sbarcolor.selfgcolor      = dc.sel[ColFG]         = getcolor(selfgcolor);
-  sbarcolor.botbordercolor  = dc.sbar[SBarBorder]   = getcolor(botbordercolor);
-  sbarcolor.cpu_line        = dc.sbar[SBarCpuLine]  = getcolor(cpu_line_color);
-  sbarcolor.cpu_point       = dc.sbar[SBarCpuPoint] = getcolor(cpu_point_color);
+  sbarcolor.normbordercolor = dc.norm[ColBorder]    = getcolor(themes[CurTheme].normal.normbordercolor);
+  sbarcolor.normbgcolor     = dc.norm[ColBG]        = getcolor(themes[CurTheme].normal.normbgcolor);
+  sbarcolor.normfgcolor     = dc.norm[ColFG]        = getcolor(themes[CurTheme].normal.normfgcolor);
+  sbarcolor.selbordercolor  = dc.sel[ColBorder]     = getcolor(themes[CurTheme].normal.selbordercolor);
+  sbarcolor.selbgcolor      = dc.sel[ColBG]         = getcolor(themes[CurTheme].normal.selbgcolor);
+  sbarcolor.selfgcolor      = dc.sel[ColFG]         = getcolor(themes[CurTheme].normal.selfgcolor);
+  sbarcolor.botbordercolor  = dc.sbar[SBarBorder]   = getcolor(themes[CurTheme].normal.botbordercolor);
+  sbarcolor.cpu_line        = dc.sbar[SBarCpuLine]  = getcolor(themes[CurTheme].normal.timeln_line_color);
+  sbarcolor.cpu_point       = dc.sbar[SBarCpuPoint] = getcolor(themes[CurTheme].normal.timeln_point_color);
     
   // apperance by low battery
-  sbarcolor.bnormbgcolor      = getcolor(bnormbgcolor);
-  sbarcolor.bnormbordercolor  = getcolor(bnormbordercolor);
-  sbarcolor.bnormfgcolor      = getcolor(bnormfgcolor);
-  sbarcolor.bselbgcolor       = getcolor(bselbgcolor);
-  sbarcolor.bselbordercolor   = getcolor(bselbordercolor);
-  sbarcolor.bselfgcolor       = getcolor(bselfgcolor);
-  sbarcolor.bbotbordercolor   = getcolor(bbotbordercolor);
-  sbarcolor.bcpu_line         = getcolor(bcpu_line_color);
-  sbarcolor.bcpu_point        = getcolor(bcpu_point_color);
+  sbarcolor.bnormbgcolor      = getcolor(themes[CurTheme].low.normbgcolor);
+  sbarcolor.bnormbordercolor  = getcolor(themes[CurTheme].low.normbordercolor);
+  sbarcolor.bnormfgcolor      = getcolor(themes[CurTheme].low.normfgcolor);
+  sbarcolor.bselbgcolor       = getcolor(themes[CurTheme].low.selbgcolor);
+  sbarcolor.bselbordercolor   = getcolor(themes[CurTheme].low.selbordercolor);
+  sbarcolor.bselfgcolor       = getcolor(themes[CurTheme].low.selfgcolor);
+  sbarcolor.bbotbordercolor   = getcolor(themes[CurTheme].low.botbordercolor);
+  sbarcolor.bcpu_line         = getcolor(themes[CurTheme].low.timeln_line_color);
+  sbarcolor.bcpu_point        = getcolor(themes[CurTheme].low.timeln_point_color);
 
   // apperance by very low battery
-  sbarcolor.bbnormbgcolor     = getcolor(bbnormbgcolor);
-  sbarcolor.bbnormbordercolor = getcolor(bbnormbordercolor);
-  sbarcolor.bbnormfgcolor     = getcolor(bbnormfgcolor);
-  sbarcolor.bbnormfgcolor     = getcolor(bbnormfgcolor);
-  sbarcolor.bbselbgcolor      = getcolor(bbselbgcolor);
-  sbarcolor.bbselbordercolor  = getcolor(bbselbordercolor);
-  sbarcolor.bbselfgcolor      = getcolor(bbselfgcolor);
-  sbarcolor.bbbotbordercolor  = getcolor(bbbotbordercolor);
-  sbarcolor.bbcpu_line        = getcolor(bbcpu_line_color);
-  sbarcolor.bbcpu_point       = getcolor(bbcpu_point_color);
+  sbarcolor.bbnormbgcolor     = getcolor(themes[CurTheme].verylow.normbgcolor);
+  sbarcolor.bbnormbordercolor = getcolor(themes[CurTheme].verylow.normbordercolor);
+  sbarcolor.bbnormfgcolor     = getcolor(themes[CurTheme].verylow.normfgcolor);
+  sbarcolor.bbnormfgcolor     = getcolor(themes[CurTheme].verylow.normfgcolor);
+  sbarcolor.bbselbgcolor      = getcolor(themes[CurTheme].verylow.selbgcolor);
+  sbarcolor.bbselbordercolor  = getcolor(themes[CurTheme].verylow.selbordercolor);
+  sbarcolor.bbselfgcolor      = getcolor(themes[CurTheme].verylow.selfgcolor);
+  sbarcolor.bbbotbordercolor  = getcolor(themes[CurTheme].verylow.botbordercolor);
+  sbarcolor.bbcpu_line        = getcolor(themes[CurTheme].verylow.timeln_line_color);
+  sbarcolor.bbcpu_point       = getcolor(themes[CurTheme].verylow.timeln_point_color);
     
   // int bar length
   bh = dc.h = dc.font.height + 2;

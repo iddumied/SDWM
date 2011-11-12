@@ -499,15 +499,15 @@ void setup_stw()
     int h, i, j;
   
     // initializing stw
-    stw.norm[ColBorder]    = getcolor(swnormbordercolor);
-    stw.norm[ColBG]        = getcolor(swnormbgcolor);
-    stw.norm[ColFG]        = getcolor(swnormfgcolor);
-    stw.sel[ColBorder]     = getcolor(swselbordercolor);
-    stw.sel[ColBG]         = getcolor(swselbgcolor);
-    stw.sel[ColFG]         = getcolor(swselfgcolor);
-    stw.sbar[SBarBorder]   = getcolor(swbotbordercolor);
-    stw.sbar[SBarCpuLine]  = getcolor(swcpu_line_color);
-    stw.sbar[SBarCpuPoint] = getcolor(swcpu_point_color);
+    stw.norm[ColBorder]    = getcolor(themes[CurTheme].stw.normbordercolor);
+    stw.norm[ColBG]        = getcolor(themes[CurTheme].stw.normbgcolor);
+    stw.norm[ColFG]        = getcolor(themes[CurTheme].stw.normfgcolor);
+    stw.sel[ColBorder]     = getcolor(themes[CurTheme].stw.selbordercolor);
+    stw.sel[ColBG]         = getcolor(themes[CurTheme].stw.selbgcolor);
+    stw.sel[ColFG]         = getcolor(themes[CurTheme].stw.selfgcolor);
+    stw.sbar[SBarBorder]   = getcolor(themes[CurTheme].stw.botbordercolor);
+    stw.sbar[SBarCpuLine]  = getcolor(themes[CurTheme].stw.timeln_line_color);
+    stw.sbar[SBarCpuPoint] = getcolor(themes[CurTheme].stw.timeln_point_color);
     
     
     stw.font.ascent  = dc.font.ascent;
