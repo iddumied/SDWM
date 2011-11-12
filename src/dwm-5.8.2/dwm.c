@@ -183,6 +183,8 @@ int draw_termal(int y, int pos);
 int draw_backlight(int y, int pos);
 int draw_audio(int y, int pos);
 int draw_net(int y, int pos);
+void dmenucmd();
+void termcmd();
 
 
 // dwm functions
@@ -249,7 +251,7 @@ static void setmfact(const Arg *arg);
 static void setup(void);
 static void showhide(Client *c);
 static void sigchld(int unused);
-static void spawn(const Arg *arg);
+static void spawn(Arg *arg);
 static void tag(const Arg *arg);
 static void tagmon(const Arg *arg);
 static int textnw(const char *text, unsigned int len);
@@ -1077,13 +1079,9 @@ drawbar(Monitor *m) {
   unsigned int i;
   
   if(sbar_status_symbols[DrawBattery].active){
-    // if battery low change style
-    double batstat = battery.stat;
-    int batmode = battery.adapter;
+    // if battery low, change style
   
-
-  
-    if(batmode){ //normal colors
+    if(battery.adapter){ //normal colors
       dc.norm[ColBorder]    = sbarcolor.normbordercolor;
       dc.norm[ColBG]        = sbarcolor.normbgcolor;
       dc.norm[ColFG]        = sbarcolor.normfgcolor;
@@ -1094,12 +1092,12 @@ drawbar(Monitor *m) {
       dc.sbar[SBarCpuLine]  = sbarcolor.cpu_line; 
       dc.sbar[SBarCpuPoint] = sbarcolor.cpu_point;
       
-    }else if(batstat <= bat_suspend){
+    }else if(battery.stat <= bat_suspend){
       Arg arg = SHCMD("sudo pm-suspend");
       spawn(&arg);
   
         
-    }else if(batstat <= bverylowstat){
+    }else if(battery.stat <= bverylowstat){
       dc.norm[ColBorder]    = sbarcolor.bbnormbordercolor;
       dc.norm[ColBG]        = sbarcolor.bbnormbgcolor;
       dc.norm[ColFG]        = sbarcolor.bbnormfgcolor;
@@ -1110,7 +1108,7 @@ drawbar(Monitor *m) {
       dc.sbar[SBarCpuLine]  = sbarcolor.bbcpu_line; 
       dc.sbar[SBarCpuPoint] = sbarcolor.bbcpu_point;
       
-    }else if(batstat <= blowstat){
+    }else if(battery.stat <= blowstat){
       dc.norm[ColBorder]    = sbarcolor.bnormbordercolor;
       dc.norm[ColBG]        = sbarcolor.bnormbgcolor;
       dc.norm[ColFG]        = sbarcolor.bnormfgcolor;
@@ -2119,7 +2117,7 @@ sigchld(int unused) {
 }
 
 void
-spawn(const Arg *arg) {
+spawn(Arg *arg) {
 	if(fork() == 0) {
 		if(dpy)
 			close(ConnectionNumber(dpy));
@@ -2129,6 +2127,65 @@ spawn(const Arg *arg) {
 		perror(" failed");
 		exit(0);
 	}
+}
+
+void dmenucmd(){
+  char *cmd;
+  cmd = (char *)malloc(sizeof(char) * (strlen(font) + strlen(themes[CurTheme].verylow.normbgcolor) +
+                                       strlen(themes[CurTheme].verylow.normfgcolor) +
+                                       strlen(themes[CurTheme].verylow.selbgcolor) +
+                                       strlen(themes[CurTheme].verylow.selfgcolor) + 50));
+
+  if(sbar_status_symbols[DrawBattery].active && battery.stat <= bverylowstat && !battery.adapter){
+    sprintf(cmd, "dmenu_run -fn '%s' -nb '%s' -nf '%s' -sb '%s' -sf '%s'", 
+            font, themes[CurTheme].verylow.normbgcolor,
+            themes[CurTheme].verylow.normfgcolor, 
+            themes[CurTheme].verylow.selbgcolor, 
+            themes[CurTheme].verylow.selfgcolor);
+
+  }else if(sbar_status_symbols[DrawBattery].active && battery.stat <= blowstat && !battery.adapter){
+    sprintf(cmd, "dmenu_run -fn '%s' -nb '%s' -nf '%s' -sb '%s' -sf '%s'", 
+            font, themes[CurTheme].low.normbgcolor,
+            themes[CurTheme].low.normfgcolor, 
+            themes[CurTheme].low.selbgcolor, 
+            themes[CurTheme].low.selfgcolor);
+
+  }else{
+    sprintf(cmd, "dmenu_run -fn '%s' -nb '%s' -nf '%s' -sb '%s' -sf '%s'", 
+            font, themes[CurTheme].normal.normbgcolor,
+            themes[CurTheme].normal.normfgcolor, 
+            themes[CurTheme].normal.selbgcolor, 
+            themes[CurTheme].normal.selfgcolor);
+  }
+  
+  popen(cmd,"w");
+}
+
+void termcmd(){
+  char *cmd;
+  cmd = (char *)malloc(sizeof(char) * (strlen(xtermfont) + strlen(themes[CurTheme].verylow.selbgcolor) +
+                                       strlen(themes[CurTheme].verylow.selfgcolor)*2 + 50));
+
+  if(sbar_status_symbols[DrawBattery].active && battery.stat <= bverylowstat && !battery.adapter){
+    sprintf(cmd, "uxterm -bc -bg '%s' -cr '%s' -fg '%s' -fn '%s'", 
+            themes[CurTheme].verylow.selbgcolor, 
+            themes[CurTheme].verylow.selfgcolor,
+            themes[CurTheme].verylow.selfgcolor, xtermfont);
+
+  }else if(sbar_status_symbols[DrawBattery].active && battery.stat <= blowstat && !battery.adapter){
+    sprintf(cmd, "uxterm -bc -bg '%s' -cr '%s' -fg '%s' -fn '%s'",
+            themes[CurTheme].low.selbgcolor, 
+            themes[CurTheme].low.selfgcolor,
+            themes[CurTheme].low.selfgcolor, xtermfont);
+
+  }else{
+    sprintf(cmd, "uxterm -bc -bg '%s' -cr '%s' -fg '%s' -fn '%s'",
+            themes[CurTheme].normal.selbgcolor, 
+            themes[CurTheme].normal.selfgcolor,
+            themes[CurTheme].normal.selfgcolor, xtermfont);
+  }
+  
+  popen(cmd,"w");
 }
 
 void

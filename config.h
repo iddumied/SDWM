@@ -12,7 +12,7 @@ static const int nmaster            = 1;  /* default number of clients in the ma
 
 
 /* tagging */
-static const char *tags[] = { "main", "term", "dev", "img", "misc" };
+static const char *tags[] = { "main", "term", "dev", "img", "misc", "more" };
 
 static const Rule rules[] = {
 	/* class      instance    title       tags mask     isfloating   monitor */
@@ -53,8 +53,8 @@ static const Layout layouts[] = {
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 
 /* commands */
-static const char *dmenucmd[] = { "dmenu_run", "-fn", font, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbgcolor, "-sf", selfgcolor, NULL };
-static const char *termcmd[]  = { "uxterm", "-bc", "-bg", selbgcolor, "-cr" ,selfgcolor, "-fg", selfgcolor, "-fn", xtermfont, NULL };
+//static const char *dmenucmd[] = { "dmenu_run", "-fn", font, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbgcolor, "-sf", selfgcolor, NULL };
+//static const char *termcmd[]  = { "uxterm", "-bc", "-bg", selbgcolor, "-cr" ,selfgcolor, "-fg", selfgcolor, "-fn", xtermfont, NULL };
 
  
 static Key keys[] = {
@@ -93,8 +93,8 @@ static Key keys[] = {
   { MODKEY|ControlMask|ShiftMask, XK_s,             spawn,            SHCMD("slock & sudo pm-suspend")},
   { MODKEY,                       XK_l,             spawn,            SHCMD("slock")},
   { MODKEY|ShiftMask,             XK_i,             spawn,            SHCMD("tabbed")},
-	{ MODKEY,                       XK_p,             spawn,            {.v = dmenucmd } },
-	{ MODKEY|ShiftMask,             XK_Return,        spawn,            {.v = termcmd } },
+	{ MODKEY,                       XK_p,             dmenucmd,         {} },
+	{ MODKEY|ShiftMask,             XK_Return,        termcmd,          {} },
   { MODKEY|ShiftMask,             XK_z,             spawn,            SHCMD("transset-df -a") },
 	{ MODKEY,                       XK_b,             togglebar,        {0} },
 	{ MODKEY|ShiftMask,             XK_b,             togglestw,        {} },
