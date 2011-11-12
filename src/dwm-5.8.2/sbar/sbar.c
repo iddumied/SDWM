@@ -7,6 +7,7 @@
 
 double calc_time_div(struct timeval t_end, struct timeval t_star);
 void setup_sbar();
+void changeTheme();
 
 static SBarColor sbarcolor;
 static SBar sbars[ANZ_STYL_BARS];
@@ -124,3 +125,79 @@ void setup_sbar()
   printf("\nsbar Setup needed:  %f Seconds\n", calc_time_div(end_time, start_time));  
 }
 
+
+void changeTheme(){
+
+  char *bgimgcmd;
+  bgimgcmd = (char *)malloc(sizeof(char) * (strlen(themes[CurTheme].image) + 20));
+  sprintf(bgimgcmd,"feh --bg-fill '%s'",themes[CurTheme].image);
+
+  printf("\n\n1. feh --bg-fill '%s'\n\n",themes[CurTheme].image);
+  FILE *fp;
+  char *line = NULL;
+  size_t len = 0;
+  ssize_t read;
+  Monitor *m;
+  Client *c;
+
+  printf("\n\n2. feh --bg-fill '%s'\n\n",themes[CurTheme].image);
+  fp = popen(bgimgcmd,"r");
+  while((read = getline(&line,&len,fp)) != -1);
+  free(line);
+  fclose(fp);
+
+  printf("\n\n3. feh --bg-fill '%s'\n\n",themes[CurTheme].image);
+
+
+  // status win apperance
+  stw.norm[ColBorder]    = getcolor(themes[CurTheme].stw.normbordercolor);
+  stw.norm[ColBG]        = getcolor(themes[CurTheme].stw.normbgcolor);
+  stw.norm[ColFG]        = getcolor(themes[CurTheme].stw.normfgcolor);
+  stw.sel[ColBorder]     = getcolor(themes[CurTheme].stw.selbordercolor);
+  stw.sel[ColBG]         = getcolor(themes[CurTheme].stw.selbgcolor);
+  stw.sel[ColFG]         = getcolor(themes[CurTheme].stw.selfgcolor);
+  stw.sbar[SBarBorder]   = getcolor(themes[CurTheme].stw.botbordercolor);
+  stw.sbar[SBarCpuLine]  = getcolor(themes[CurTheme].stw.timeln_line_color);
+  stw.sbar[SBarCpuPoint] = getcolor(themes[CurTheme].stw.timeln_point_color);
+
+  // normal apperance
+  sbarcolor.normbordercolor = dc.norm[ColBorder]    = getcolor(themes[CurTheme].normal.normbordercolor);
+  sbarcolor.normbgcolor     = dc.norm[ColBG]        = getcolor(themes[CurTheme].normal.normbgcolor);
+  sbarcolor.normfgcolor     = dc.norm[ColFG]        = getcolor(themes[CurTheme].normal.normfgcolor);
+  sbarcolor.selbordercolor  = dc.sel[ColBorder]     = getcolor(themes[CurTheme].normal.selbordercolor);
+  sbarcolor.selbgcolor      = dc.sel[ColBG]         = getcolor(themes[CurTheme].normal.selbgcolor);
+  sbarcolor.selfgcolor      = dc.sel[ColFG]         = getcolor(themes[CurTheme].normal.selfgcolor);
+  sbarcolor.botbordercolor  = dc.sbar[SBarBorder]   = getcolor(themes[CurTheme].normal.botbordercolor);
+  sbarcolor.cpu_line        = dc.sbar[SBarCpuLine]  = getcolor(themes[CurTheme].normal.timeln_line_color);
+  sbarcolor.cpu_point       = dc.sbar[SBarCpuPoint] = getcolor(themes[CurTheme].normal.timeln_point_color);
+    
+  // apperance by low battery
+  sbarcolor.bnormbgcolor      = getcolor(themes[CurTheme].low.normbgcolor);
+  sbarcolor.bnormbordercolor  = getcolor(themes[CurTheme].low.normbordercolor);
+  sbarcolor.bnormfgcolor      = getcolor(themes[CurTheme].low.normfgcolor);
+  sbarcolor.bselbgcolor       = getcolor(themes[CurTheme].low.selbgcolor);
+  sbarcolor.bselbordercolor   = getcolor(themes[CurTheme].low.selbordercolor);
+  sbarcolor.bselfgcolor       = getcolor(themes[CurTheme].low.selfgcolor);
+  sbarcolor.bbotbordercolor   = getcolor(themes[CurTheme].low.botbordercolor);
+  sbarcolor.bcpu_line         = getcolor(themes[CurTheme].low.timeln_line_color);
+  sbarcolor.bcpu_point        = getcolor(themes[CurTheme].low.timeln_point_color);
+
+  // apperance by very low battery
+  sbarcolor.bbnormbgcolor     = getcolor(themes[CurTheme].verylow.normbgcolor);
+  sbarcolor.bbnormbordercolor = getcolor(themes[CurTheme].verylow.normbordercolor);
+  sbarcolor.bbnormfgcolor     = getcolor(themes[CurTheme].verylow.normfgcolor);
+  sbarcolor.bbnormfgcolor     = getcolor(themes[CurTheme].verylow.normfgcolor);
+  sbarcolor.bbselbgcolor      = getcolor(themes[CurTheme].verylow.selbgcolor);
+  sbarcolor.bbselbordercolor  = getcolor(themes[CurTheme].verylow.selbordercolor);
+  sbarcolor.bbselfgcolor      = getcolor(themes[CurTheme].verylow.selfgcolor);
+  sbarcolor.bbbotbordercolor  = getcolor(themes[CurTheme].verylow.botbordercolor);
+  sbarcolor.bbcpu_line        = getcolor(themes[CurTheme].verylow.timeln_line_color);
+  sbarcolor.bbcpu_point       = getcolor(themes[CurTheme].verylow.timeln_point_color);
+
+  printf("\n\n4. feh --bg-fill '%s'\n\n",themes[CurTheme].image);
+	for(c = selmon->stack; c; c = c->snext)
+		if(ISVISIBLE(c)) 
+      XUnmapWindow(dpy,c->win);
+
+  printf("\n\n5. feh --bg-fill '%s'\n\n",themes[CurTheme].image);
+}
