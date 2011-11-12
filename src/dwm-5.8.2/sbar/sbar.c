@@ -132,21 +132,17 @@ void changeTheme(){
   bgimgcmd = (char *)malloc(sizeof(char) * (strlen(themes[CurTheme].image) + 20));
   sprintf(bgimgcmd,"feh --bg-fill '%s'",themes[CurTheme].image);
 
-  printf("\n\n1. feh --bg-fill '%s'\n\n",themes[CurTheme].image);
   FILE *fp;
   char *line = NULL;
   size_t len = 0;
   ssize_t read;
-  Monitor *m;
   Client *c;
 
-  printf("\n\n2. feh --bg-fill '%s'\n\n",themes[CurTheme].image);
   fp = popen(bgimgcmd,"r");
   while((read = getline(&line,&len,fp)) != -1);
   free(line);
   fclose(fp);
 
-  printf("\n\n3. feh --bg-fill '%s'\n\n",themes[CurTheme].image);
 
 
   // status win apperance
@@ -194,10 +190,18 @@ void changeTheme(){
   sbarcolor.bbcpu_line        = getcolor(themes[CurTheme].verylow.timeln_line_color);
   sbarcolor.bbcpu_point       = getcolor(themes[CurTheme].verylow.timeln_point_color);
 
-  printf("\n\n4. feh --bg-fill '%s'\n\n",themes[CurTheme].image);
-	for(c = selmon->stack; c; c = c->snext)
-		if(ISVISIBLE(c)) 
-      XUnmapWindow(dpy,c->win);
+	for(c = selmon->stack; c; c = c->snext){
+    XDestroyWindow(dpy,c->win);
+/*    XEvent ev;
 
-  printf("\n\n5. feh --bg-fill '%s'\n\n",themes[CurTheme].image);
+	  ev.type = ClientMessage;
+	  ev.xclient.window = c->win;
+	  ev.xclient.message_type = wmatom[WMProtocols];
+	  ev.xclient.format = 32;
+	  ev.xclient.data.l[0] = wmatom[WMDelete];
+	  ev.xclient.data.l[1] = CurrentTime;
+	  XSendEvent(dpy, selmon->sel->win, False, NoEventMask, &ev);
+	  XSync(dpy, False);*/
+    printf("\n\nclient killed\n\n");
+	}
 }
