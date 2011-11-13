@@ -125,6 +125,10 @@ void setup_sbar()
   printf("\nsbar Setup needed:  %f Seconds\n", calc_time_div(end_time, start_time));  
 }
 
+void toggletheme(){
+  CurTheme = (CurTheme+1)%ThemeLast;
+  changeTheme();
+}
 
 void changeTheme(){
 
@@ -138,12 +142,26 @@ void changeTheme(){
   ssize_t read;
   Client *c;
 
+  // destroying all Clients
+	for(c = selmon->stack; c; c = c->snext)
+    XDestroyWindow(dpy,c->win);
+
+  // unmap status win if mapped
+  if(draw_status_win)
+    togglestw();
+
+  // applaing new bg-image
   fp = popen(bgimgcmd,"r");
   while((read = getline(&line,&len,fp)) != -1);
   free(line);
   fclose(fp);
 
 
+	XSync(dpy, False);
+  XFlush(dpy);
+  sleep(1);
+  // coping new Image to stws bg
+  XCopyArea(dpy, root, background, stw.gc, stw.x, stw.y, stw.w, stw.h, 0,0 );
 
   // status win apperance
   stw.norm[ColBorder]    = getcolor(themes[CurTheme].stw.normbordercolor);
@@ -190,18 +208,8 @@ void changeTheme(){
   sbarcolor.bbcpu_line        = getcolor(themes[CurTheme].verylow.timeln_line_color);
   sbarcolor.bbcpu_point       = getcolor(themes[CurTheme].verylow.timeln_point_color);
 
-	for(c = selmon->stack; c; c = c->snext){
-    XDestroyWindow(dpy,c->win);
-/*    XEvent ev;
+  // map status win
+  if(!draw_status_win)
+    togglestw();
 
-	  ev.type = ClientMessage;
-	  ev.xclient.window = c->win;
-	  ev.xclient.message_type = wmatom[WMProtocols];
-	  ev.xclient.format = 32;
-	  ev.xclient.data.l[0] = wmatom[WMDelete];
-	  ev.xclient.data.l[1] = CurrentTime;
-	  XSendEvent(dpy, selmon->sel->win, False, NoEventMask, &ev);
-	  XSync(dpy, False);*/
-    printf("\n\nclient killed\n\n");
-	}
 }

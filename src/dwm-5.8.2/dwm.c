@@ -1576,8 +1576,6 @@ killclient(const Arg *arg) {
   // if there is no more not floating window turn statuswin back on
   if(!draw_status_win && win_nf == 1 && !selmon->sel->isfloating) togglestw();
 
-  printf("\n\nwin_nf: %d\n\n",win_nf);
-
 	XSync(dpy, False);
 }
 
@@ -2050,8 +2048,6 @@ setup(void) {
   //struct timeval start_time, end_time;
   gettimeofday(&start_time, 0);
 
-
-
 	updategeom();
 	/* init atoms */
 	wmatom[WMProtocols]         = XInternAtom(dpy, "WM_PROTOCOLS", False);
@@ -2067,9 +2063,9 @@ setup(void) {
 	cursor[CurMove]   = XCreateFontCursor(dpy, XC_fleur);
 	/* init appearance */
 
-	
-	dc.drawable = XCreatePixmap(dpy, root, DisplayWidth(dpy, screen), bh, DefaultDepth(dpy, screen));  // this creates the pixelmap for the statusbar
-  
+
+  // this creates the pixelmap for the statusbar
+	dc.drawable = XCreatePixmap(dpy, root, DisplayWidth(dpy, screen), bh, DefaultDepth(dpy, screen));
 
 
 	dc.gc = XCreateGC(dpy, root, 0, NULL);
