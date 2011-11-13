@@ -124,6 +124,10 @@ void drawstw()
     unsigned long colors[3] = { stw.sel[ColFG],
     stw.sbar[SBarCpuLine], stw.sbar[SBarCpuPoint] };
     wprintcolsln(&percent, &colors, 3, 100, 0.65,2);
+
+    gcv.foreground = stw.sel[ColFG];
+    XChangeGC(dpy, stwwrite.gc, GCForeground, &gcv);
+
     wprintln("  |    |    |");
     sprintf(stwbuffer, "  |    |    +--used:  %d MB / %d MB  -  %d%c", memory.used/1024, memory.total/1024,(int)(memory.pused*100),'%');
     wprintln(stwbuffer);  
