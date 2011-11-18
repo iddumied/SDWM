@@ -20,6 +20,7 @@ static Pixmap *timeline;
 static Bool status_symbol_mode[DrawLast];
 
 #include "statuswin.c"
+#include "freestylebar.c"
 
 double calc_time_div(struct timeval t_end, struct timeval t_star)
 {
@@ -51,9 +52,21 @@ void setup_sbar()
 
   screenWidth  = DisplayWidth(dpy, DefaultScreen(dpy));
   screenHeight = DisplayHeight(dpy, DefaultScreen(dpy));
-     
+
+   // int bar length
+  if(bottomborder) bh++;
+  topbar = texttopbar;
+  sbarloaded = False;
+
+  // setup status calculating need bh
+  setup_status();
+
+  // cpu_posx calculation need setup_cpu
+  if(cpu_in_middle) cpu_posx = screenWidth/2 - (cpu_length*ncpus  + (ncpus-1)*distance_x)/2;
+
   setup_stw();
-    
+  setup_freestylebar();    
+
 
   sbarcolor.red            = getcolor("#FF0000");
   sbarcolor.green          = getcolor("#00FF00");
@@ -102,21 +115,11 @@ void setup_sbar()
   sbarcolor.bbcpu_line        = getcolor(themes[CurTheme].verylow.timeln_line_color);
   sbarcolor.bbcpu_point       = getcolor(themes[CurTheme].verylow.timeln_point_color);
     
-  // int bar length
-  bh = dc.h = dc.font.height + 2;
-  if(bottomborder) bh++;
-  topbar = texttopbar;
-  sbarloaded = False;
-  // setup status calculating need bh
-  setup_status();
-      
-  if(cpu_in_middle) cpu_posx = screenWidth/2 - (cpu_length*ncpus  + (ncpus-1)*distance_x)/2;
-
   if(cpumem_timeline){
     timeline = (Pixmap*)malloc(sizeof(Pixmap)*ncpus+1);
         
-  for(i = 0;i < ncpus+1;i++)
-    timeline[i] = XCreatePixmap(dpy, root, cpu_length, bh-1, DefaultDepth(dpy, screen));
+    for(i = 0;i < ncpus+1;i++)
+      timeline[i] = XCreatePixmap(dpy, root, cpu_length, bh-1, DefaultDepth(dpy, screen));
   }//hier timline initialisieren mit fillrectangle
 
   

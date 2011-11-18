@@ -11,9 +11,6 @@ static const int nmaster            = 1;  /* default number of clients in the ma
 #include "nmaster.c"
 
 
-/* tagging */
-static const char *tags[] = { "main", "term", "dev", "img", "misc", "more" };
-
 static const Rule rules[] = {
 	/* class      instance    title       tags mask     isfloating   monitor */
 	{ "Gimp",     NULL,       NULL,       0,            True,        -1 },

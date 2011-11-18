@@ -1193,6 +1193,7 @@ drawbar(Monitor *m) {
   // draws the status in the text bar
   //drawstatus();
   
+  draw_freestylebar();
 	XCopyArea(dpy, dc.drawable, m->barwin, dc.gc, 0, 0, m->ww, bh, 0, 0);
   
   if(draw_status_win)
@@ -2041,7 +2042,10 @@ setup(void) {
 	initfont(font);
 	sw = DisplayWidth(dpy, screen);
 	sh = DisplayHeight(dpy, screen);
-	
+
+  // init bar heigth	
+  bh = dc.h = dc.font.height + 2;
+
 	// load sbar
 	setup_sbar();
 	
@@ -2538,6 +2542,7 @@ updatestatus(void) {
   }else {
     update_status();
     drawstatus();
+    draw_freestylebar();
   }
 	drawbar(selmon);                                                        
 }
