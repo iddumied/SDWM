@@ -520,13 +520,13 @@ void setup_stw()
     stw.font.set     = dc.font.set;
     stw.font.xfont   = dc.font.xfont;
     
-    stw.w = stwwidth;
+    stw.w = screenWidth;
     stw.y = dc.font.height + 3;
-    stw.x = screenWidth-stwwidth;
+    stw.x = gappx;
     stw.h = screenHeight-bh;
     
-    stw.drawable = XCreatePixmap(dpy, root, stwwidth, stw.h, DefaultDepth(dpy, screen));
-    background  = XCreatePixmap(dpy, root, stwwidth, stw.h, DefaultDepth(dpy, screen));
+    stw.drawable = XCreatePixmap(dpy, root, screenWidth, stw.h, DefaultDepth(dpy, screen));
+    background  = XCreatePixmap(dpy, root, screenWidth, stw.h, DefaultDepth(dpy, screen));
     stw.gc = XCreateGC(dpy, root, 0, NULL);
 
     XGCValues gcv;

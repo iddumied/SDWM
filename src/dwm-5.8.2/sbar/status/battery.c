@@ -146,8 +146,8 @@ void check_stat()
   }else{
     if((read = getline(&line, &len, fp)) != -1){
       if(line[0] == 'D') battery.mode = DISCHARGING;
-      else if(line[6] == 'd') battery.mode = CHARGED;
-      else if(line[6] == 'n') battery.mode = CHARGING;
+      else if(line[0] == 'C') battery.mode = CHARGING;
+      else battery.mode = CHARGED;
     }
 
     fclose(fp);

@@ -173,6 +173,9 @@ void gaplessgrid(Monitor *m);              // [#]
 void movestack(const Arg *arg);            // move window in stack
 int get_stackposition(Client *c, Client *stack);
 int get_next_stackposition(Client* sel, Client* stack);
+static void ntile(Monitor *m);
+static void ncol(Monitor *m);
+static void nbstack(Monitor *m);
 static void mytest();
 // SBar Staus Symbol functions
 int draw_time(int y, int pos);

@@ -25,19 +25,6 @@ static const Rule rules[] = {
 static const float mfact      = 0.55; /* factor of master area size [0.05..0.95] */
 static const Bool resizehints = False; /* True means respect size hints in tiled resizals */
 
-static const Layout layouts[] = {
-	/* symbol     arrange function */
-	{ "\x04",      ntile },    /* first entry is default */
-	{ "\x03",      NULL },    /* no layout function means floating behavior */
-	{ "\x01",      monocle },
-  { "\x05",      nbstack },
-  { "\x08",      bstackhoriz },
-  { "\x09",      spiral },
-  { "\x1b",      dwindle },
-  { "\x07",      gaplessgrid },
-// TODO remove title and bsack
-};
-
 /* key definitions */ //Mod4Mask == Winkey
 #define MODKEY Mod1Mask
 #define TAGKEYS(KEY,TAG) \

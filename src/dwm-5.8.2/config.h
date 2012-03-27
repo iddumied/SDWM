@@ -11,9 +11,6 @@ static const int nmaster            = 1;  /* default number of clients in the ma
 #include "nmaster.c"
 
 
-/* tagging */
-static const char *tags[] = { "main", "term", "dev", "img", "misc" };
-
 static const Rule rules[] = {
 	/* class      instance    title       tags mask     isfloating   monitor */
 	{ "Gimp",     NULL,       NULL,       0,            True,        -1 },
@@ -28,19 +25,6 @@ static const Rule rules[] = {
 static const float mfact      = 0.55; /* factor of master area size [0.05..0.95] */
 static const Bool resizehints = False; /* True means respect size hints in tiled resizals */
 
-static const Layout layouts[] = {
-	/* symbol     arrange function */
-	{ "\x04",      ntile },    /* first entry is default */
-	{ "\x03",      NULL },    /* no layout function means floating behavior */
-	{ "\x01",      monocle },
-  { "\x05",      nbstack },
-  { "\x08",      bstackhoriz },
-  { "\x09",      spiral },
-  { "\x1b",      dwindle },
-  { "\x07",      gaplessgrid },
-// TODO remove title and bsack
-};
-
 /* key definitions */ //Mod4Mask == Winkey
 #define MODKEY Mod1Mask
 #define TAGKEYS(KEY,TAG) \
@@ -53,8 +37,8 @@ static const Layout layouts[] = {
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 
 /* commands */
-static const char *dmenucmd[] = { "dmenu_run", "-fn", font, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbgcolor, "-sf", selfgcolor, NULL };
-static const char *termcmd[]  = { "uxterm", "-bc", "-bg", selbgcolor, "-cr" ,selfgcolor, "-fg", selfgcolor, "-fn", xtermfont, NULL };
+//static const char *dmenucmd[] = { "dmenu_run", "-fn", font, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbgcolor, "-sf", selfgcolor, NULL };
+//static const char *termcmd[]  = { "uxterm", "-bc", "-bg", selbgcolor, "-cr" ,selfgcolor, "-fg", selfgcolor, "-fn", xtermfont, NULL };
 
  
 static Key keys[] = {
@@ -93,11 +77,11 @@ static Key keys[] = {
   { MODKEY|ControlMask|ShiftMask, XK_s,             spawn,            SHCMD("slock & sudo pm-suspend")},
   { MODKEY,                       XK_l,             spawn,            SHCMD("slock")},
   { MODKEY|ShiftMask,             XK_i,             spawn,            SHCMD("tabbed")},
-	{ MODKEY,                       XK_p,             spawn,            {.v = dmenucmd } },
-	{ MODKEY|ShiftMask,             XK_Return,        spawn,            {.v = termcmd } },
+	{ MODKEY,                       XK_p,             dmenucmd,         {} },
+	{ MODKEY|ShiftMask,             XK_Return,        termcmd,          {} },
   { MODKEY|ShiftMask,             XK_z,             spawn,            SHCMD("transset-df -a") },
-	{ MODKEY|ShiftMask,             XK_b,             togglesbar_mode,  {}},
 	{ MODKEY,                       XK_b,             togglebar,        {0} },
+	{ MODKEY|ShiftMask,             XK_b,             togglestw,        {} },
 	{ MODKEY,                       XK_s,             focusstack,       {.i = +1 } },
 	{ MODKEY,                       XK_a,             focusstack,       {.i = -1 } },
 	{ MODKEY,                       XK_minus,         setmfact,         {.f = +0.05} },
@@ -124,6 +108,7 @@ static Key keys[] = {
 	{ MODKEY|ShiftMask,             XK_comma,         tagmon,           {.i = -1 } },
 	{ MODKEY|ShiftMask,             XK_period,        tagmon,           {.i = +1 } },
 	{ MODKEY,                       XK_F12,           mytest,           {} },
+	{ MODKEY,                       XK_F11,           toggletheme,      {} },
 	TAGKEYS(                        XK_1,                               0)
 	TAGKEYS(                        XK_2,                               1)
 	TAGKEYS(                        XK_3,                               2)
