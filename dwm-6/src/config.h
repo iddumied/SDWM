@@ -1,15 +1,12 @@
 /* See LICENSE file for copyright and license details. */
 
 /* appearance */
-static const char font[]            = /*"-nsb-lokaltog-medium-r-normal--10-100-75-75-c-60-iso10646-1";*/ "-artwiz-cureextra-medium-r-normal--11-110-75-75-p-90-iso8859-1"; /*"-gbdfed-Unknown-Medium-R-Normal--16-120-96-96-P-100-FontSpecific-0";*/// "-*-clean-*-*-*-*-*-*-*-*-*-*-*-3";//"-*-terminus-medium-r-*-*-16-*-*-*-*-*-*-*";
+static const char font[]            = "-artwiz-cureextra-medium-r-normal--11-110-75-75-p-90-iso8859-1"; 
 static const char xtermfont[]       = "-nsb-lokaltog-medium-r-normal--10-100-75-75-c-60-iso10646-1";
 static const unsigned int borderpx  = 1;          /* border pixel of windows */
 static const unsigned int snap      = 32;         /* snap pixel */
 static const Bool showbar           = True;       /* False means no bar */
 static const int nmaster            = 1;  /* default number of clients in the master area */
-
-#include "nmaster.c"
-
 
 static const Rule rules[] = {
 	/* class      instance    title       tags mask     isfloating   monitor */
@@ -36,11 +33,6 @@ static const Bool resizehints = False; /* True means respect size hints in tiled
 /* helper for spawning shell commands in the pre dwm-5.0 fashion */
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 
-/* commands */
-//static const char *dmenucmd[] = { "dmenu_run", "-fn", font, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbgcolor, "-sf", selfgcolor, NULL };
-//static const char *termcmd[]  = { "uxterm", "-bc", "-bg", selbgcolor, "-cr" ,selfgcolor, "-fg", selfgcolor, "-fn", xtermfont, NULL };
-
- 
 static Key keys[] = {
 	/* modifier                     key        function        argument */
   { 0,                            XFnToggleMute,    toggle_mute,      {} },
@@ -55,22 +47,22 @@ static Key keys[] = {
   { MODKEY,                       XK_y,             incnmaster,       {.i = +1 } },
   { MODKEY,                       XK_x,             incnmaster,       {.i = -1 } },
   { MODKEY,                       XK_z,             setnmaster,       {.i = 2 } },
-  { MODKEY,                       XK_Down,          moveresize,       {.v = (int []){ 0, 25, 0, 0 }}},
-  { MODKEY,                       XK_Up,            moveresize,       {.v = (int []){ 0, -25, 0, 0 }}},
-  { MODKEY,                       XK_Right,         moveresize,       {.v = (int []){ 25, 0, 0, 0 }}},
-  { MODKEY,                       XK_Left,          moveresize,       {.v = (int []){ -25, 0, 0, 0 }}},
-  { MODKEY|ShiftMask,             XK_Down,          moveresize,       {.v = (int []){ 0, 0, 0, 25 }}},
-  { MODKEY|ShiftMask,             XK_Up,            moveresize,       {.v = (int []){ 0, 0, 0, -25 }}},
-  { MODKEY|ShiftMask,             XK_Right,         moveresize,       {.v = (int []){ 0, 0, 25, 0 }}},
-  { MODKEY|ShiftMask,             XK_Left,          moveresize,       {.v = (int []){ 0, 0, -25, 0 }}},
-  { MODKEY|ControlMask,           XK_Down,          moveresize,       {.v = (int []){ 0, 1, 0, 0 }}},
-  { MODKEY|ControlMask,           XK_Up,            moveresize,       {.v = (int []){ 0, -1, 0, 0 }}},
-  { MODKEY|ControlMask,           XK_Right,         moveresize,       {.v = (int []){ 1, 0, 0, 0 }}},
-  { MODKEY|ControlMask,           XK_Left,          moveresize,       {.v = (int []){ -1, 0, 0, 0 }}},
-  { MODKEY|ControlMask|ShiftMask, XK_Down,          moveresize,       {.v = (int []){ 0, 0, 0, 1 }}},
-  { MODKEY|ControlMask|ShiftMask, XK_Up,            moveresize,       {.v = (int []){ 0, 0, 0, -1 }}},
-  { MODKEY|ControlMask|ShiftMask, XK_Right,         moveresize,       {.v = (int []){ 0, 0, 1, 0 }}},
-  { MODKEY|ControlMask|ShiftMask, XK_Left,          moveresize,       {.v = (int []){ 0, 0, -1, 0 }}},
+  { MODKEY,                       XK_Down,          moveresize,       {.v = (int []){ 0, 25, 0, 0, 1 }}},
+  { MODKEY,                       XK_Up,            moveresize,       {.v = (int []){ 0, -25, 0, 0, 2 }}},
+  { MODKEY,                       XK_Right,         moveresize,       {.v = (int []){ 25, 0, 0, 0, 3 }}},
+  { MODKEY,                       XK_Left,          moveresize,       {.v = (int []){ -25, 0, 0, 0, 4 }}},
+  { MODKEY|ShiftMask,             XK_Down,          moveresize,       {.v = (int []){ 0, 0, 0, 25, 10 }}},
+  { MODKEY|ShiftMask,             XK_Up,            moveresize,       {.v = (int []){ 0, 0, 0, -25, 20 }}},
+  { MODKEY|ShiftMask,             XK_Right,         moveresize,       {.v = (int []){ 0, 0, 25, 0, 30 }}},
+  { MODKEY|ShiftMask,             XK_Left,          moveresize,       {.v = (int []){ 0, 0, -25, 0, 40 }}},
+  { MODKEY|ControlMask,           XK_Down,          moveresize,       {.v = (int []){ 0, 1, 0, 0, 100 }}},
+  { MODKEY|ControlMask,           XK_Up,            moveresize,       {.v = (int []){ 0, -1, 0, 0, 200 }}},
+  { MODKEY|ControlMask,           XK_Right,         moveresize,       {.v = (int []){ 1, 0, 0, 0, 300 }}},
+  { MODKEY|ControlMask,           XK_Left,          moveresize,       {.v = (int []){ -1, 0, 0, 0, 400 }}},
+  { MODKEY|ControlMask|ShiftMask, XK_Down,          moveresize,       {.v = (int []){ 0, 0, 0, 1, 1000 }}},
+  { MODKEY|ControlMask|ShiftMask, XK_Up,            moveresize,       {.v = (int []){ 0, 0, 0, -1, 2000 }}},
+  { MODKEY|ControlMask|ShiftMask, XK_Right,         moveresize,       {.v = (int []){ 0, 0, 1, 0, 3000 }}},
+  { MODKEY|ControlMask|ShiftMask, XK_Left,          moveresize,       {.v = (int []){ 0, 0, -1, 0, 4000 }}},
   { MODKEY|ControlMask|ShiftMask, XK_p,             spawn,            SHCMD("sudo shutdown -h now")},
   { MODKEY,                       XK_u,             spawn,            SHCMD("xmodmap ~/.xmodmap")},
   { MODKEY|ControlMask|ShiftMask, XK_r,             spawn,            SHCMD("sudo reboot")},
@@ -107,7 +99,7 @@ static Key keys[] = {
 	{ MODKEY,                       XK_period,        focusmon,         {.i = +1 } },
 	{ MODKEY|ShiftMask,             XK_comma,         tagmon,           {.i = -1 } },
 	{ MODKEY|ShiftMask,             XK_period,        tagmon,           {.i = +1 } },
-	{ MODKEY,                       XK_F12,           mytest,           {} },
+	{ MODKEY,                       XK_F12,           black_floading,   {} },
 	{ MODKEY,                       XK_F11,           toggletheme,      {} },
 	TAGKEYS(                        XK_1,                               0)
 	TAGKEYS(                        XK_2,                               1)
@@ -119,6 +111,7 @@ static Key keys[] = {
 	TAGKEYS(                        XK_8,                               7)
 	TAGKEYS(                        XK_9,                               8)
 	{ MODKEY|ShiftMask,             XK_q,             quit,             {0} },
+	{ MODKEY|ControlMask|ShiftMask, XK_q,             black_floadquit,  {0} },
 };
 
 /* button definitions */
@@ -137,5 +130,4 @@ static Button buttons[] = {
 	{ ClkTagBar,            MODKEY,         Button1,        tag,            {0} },
 	{ ClkTagBar,            MODKEY,         Button3,        toggletag,      {0} },
 };
-
 
