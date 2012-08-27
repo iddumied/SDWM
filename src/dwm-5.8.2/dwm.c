@@ -1123,16 +1123,11 @@ drawbar(Monitor *m) {
       dc.sbar[SBarCpuPoint] = sbarcolor.bcpu_point;
     }
   }
-        
-
   
-  
-/*
-  gettimeofday(&end_time, 0);
+  /**
+   * Dwm Stuff (tags drawing)
+   */
 
-  gettimeofday(&end_time, 0);
-  printf("\nDrawbar:  %f Seconds\n", calc_time_div(end_time, start_time));  
-*/
 	int x;
 	unsigned int occ = 0, urg = 0;
 	unsigned long *col;
@@ -1158,50 +1153,10 @@ drawbar(Monitor *m) {
   drawtext(m->ltsymbol, dc.norm, False);
   dc.x += dc.w;
   x = dc.x;
-  if(m == selmon) { // status is only drawn on selected monitor 
-		/*char * text = "test";
-     if(!readFromXroot){
-       dc.w = TEXTW(tbar_date.date);
-       dc.x = m->ww - dc.w;
-       if(dc.x < x) {
-         dc.x = x;
-         dc.w = m->ww - x;
-       }
-       drawtext(tbar_date.date, dc.norm, False); 
-       dc.w = cpu_posx - distance_x*2;
-    }else{
-			dc.w = TEXTW(stext);
-			dc.x = m->ww - dc.w;
-			if(dc.x < x) {
-				dc.x = x;
-				dc.w = m->ww - x;
-			}
-			
-			drawtext(stext, dc.norm, False); 
-		}*/
-  }
-  else
+  if(m != selmon)  
 	  dc.x = m->ww;
-  if((dc.w = dc.x - x) > bh) { // draws the window name in statusbar
-	  dc.x = x;
-	  if(m->sel) {
-		  col = m == selmon ? dc.sel : dc.norm;
-		  drawtext(m->sel->name, col, False);
-		  drawsquare(m->sel->isfixed, m->sel->isfloating, False, col);
-	  }
-	  else
-		  drawtext(NULL, dc.norm, False);
-  }
 	  
-  // draws the status in the text bar
-  //drawstatus();
-  
-  //draw_freestylebar();
 	XCopyArea(dpy, dc.drawable, m->barwin, dc.gc, 0, 0, m->ww, bh, 0, 0);
-  
-//  if(draw_status_win)
-//    drawstw();
-  
 	XSync(dpy, False);
 	
 }
@@ -1908,8 +1863,11 @@ restack(Monitor *m) {
 	XWindowChanges wc;
 
 	drawbar(m);
-	if(!m->sel)
+	if(!m->sel){
+    // there is no window turn statuswin back on (if of)
+    if(!draw_status_win) togglestw();
 		return;
+  }
 	if(m->sel->isfloating || !m->lt[m->sellt]->arrange)
 		XRaiseWindow(dpy, m->sel->win);
 	if(m->lt[m->sellt]->arrange) {
@@ -1922,12 +1880,8 @@ restack(Monitor *m) {
 			if(!c->isfloating && ISVISIBLE(c)) {
         win_nf++;        
 
-        if(draw_status_win){
-          // set statuswin invisible
-          draw_status_win = False;
-          for(m = mons; m; m = m->next)
-            XUnmapWindow(dpy,m->statuswin);
-        }
+        // set statuswin invisible if nedded
+        if(draw_status_win) togglestw();
 
 				XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
 				wc.sibling = c->win;
