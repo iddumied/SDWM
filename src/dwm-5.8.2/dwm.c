@@ -55,14 +55,14 @@
 #define TEXTW(X)                (textnw(X, strlen(X)) + dc.font.height)
 
 /* enums */
-enum { CurNormal, CurResize, CurMove, CurLast };        /* cursor */
-enum { ColBorder, ColFG, ColBG, ColLast };              /* color */
-enum { SBarCpuPoint, SBarCpuLine, SBarBorder, SBarLast }; // sbarcolors
+enum { CurNormal, CurResize, CurMove, CurLast };                        /* cursor */
+enum { ColBorder, ColFG, ColBG, ColLast };                              /* color */
+enum { SBarCpuPoint, SBarCpuLine, SBarBorder, SBarLast };               /* sbarcolors */
 enum { NetSupported, NetWMName, NetWMState,
-       NetWMFullscreen, NetLast };                      /* EWMH atoms */
-enum { WMProtocols, WMDelete, WMState, WMLast };        /* default atoms */
+       NetWMFullscreen, NetLast };                                      /* EWMH atoms */
+enum { WMProtocols, WMDelete, WMState, WMLast };                        /* default atoms */
 enum { ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle,
-       ClkClientWin, ClkRootWin, ClkLast, ClkMainSymbol };             /* clicks */
+       ClkClientWin, ClkRootWin, ClkMainSymbol, ClkLast };              /* clicks */
 
 typedef union {
 	int i;
@@ -1196,11 +1196,11 @@ drawbar(Monitor *m) {
   // draws the status in the text bar
   //drawstatus();
   
-  draw_freestylebar();
+  //draw_freestylebar();
 	XCopyArea(dpy, dc.drawable, m->barwin, dc.gc, 0, 0, m->ww, bh, 0, 0);
   
-  if(draw_status_win)
-    drawstw();
+//  if(draw_status_win)
+//    drawstw();
   
 	XSync(dpy, False);
 	
@@ -2546,6 +2546,8 @@ updatestatus(void) {
     update_status();
     drawstatus();
     draw_freestylebar();
+    if(draw_status_win)
+      drawstw();
   }
 	drawbar(selmon);                                                        
 }
