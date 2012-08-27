@@ -58,7 +58,7 @@
 /* enums */
 enum { CurNormal, CurResize, CurMove, CurLast };              /* cursor */
 enum { ColBorder, ColFG, ColBG, ColLast };                    /* color */
-enum { SBarCpuPoint, SBarCpuLine, SBarBorder, SBarLast };     /* sbarcolors */
+enum { SBarCpuPoint, SBarLine, SBarBorder, SBarLast };     /* sbarcolors */
 enum { NetSupported, NetWMName, NetWMState,
        NetWMFullscreen, NetActiveWindow, NetWMWindowType,
        NetWMWindowTypeDialog, NetLast };                      /* EWMH atoms */
@@ -1222,7 +1222,7 @@ drawbar(Monitor *m) {
      dc.sel[ColBG]         = sbarcolor.selbgcolor;
      dc.sel[ColFG]         = sbarcolor.selfgcolor;
      dc.sbar[SBarBorder]   = sbarcolor.botbordercolor;
-     dc.sbar[SBarCpuLine]  = sbarcolor.cpu_line; 
+     dc.sbar[SBarLine]  = sbarcolor.cpu_line; 
      dc.sbar[SBarCpuPoint] = sbarcolor.cpu_point;
      
    }else if(battery.stat <= bat_suspend){
@@ -1238,7 +1238,7 @@ drawbar(Monitor *m) {
      dc.sel[ColBG]         = sbarcolor.bbselbgcolor;
      dc.sel[ColFG]         = sbarcolor.bbselfgcolor;
      dc.sbar[SBarBorder]   = sbarcolor.bbbotbordercolor;
-     dc.sbar[SBarCpuLine]  = sbarcolor.bbcpu_line; 
+     dc.sbar[SBarLine]  = sbarcolor.bbcpu_line; 
      dc.sbar[SBarCpuPoint] = sbarcolor.bbcpu_point;
      
    }else if(battery.stat <= blowstat){
@@ -1249,7 +1249,7 @@ drawbar(Monitor *m) {
      dc.sel[ColBG]         = sbarcolor.bselbgcolor;
      dc.sel[ColFG]         = sbarcolor.bselfgcolor;
      dc.sbar[SBarBorder]   = sbarcolor.bbotbordercolor;
-     dc.sbar[SBarCpuLine]  = sbarcolor.bcpu_line; 
+     dc.sbar[SBarLine]  = sbarcolor.bcpu_line; 
      dc.sbar[SBarCpuPoint] = sbarcolor.bcpu_point;
    }
  }
