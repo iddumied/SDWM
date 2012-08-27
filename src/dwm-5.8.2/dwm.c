@@ -603,7 +603,6 @@ Monitor *m = selmon;
         break;
     }
      
-     
   }else{
   resize(m->sel, m->sel->x + ((int *)arg->v)[0],
     m->sel->y + ((int *)arg->v)[1],
