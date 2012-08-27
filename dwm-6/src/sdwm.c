@@ -165,8 +165,7 @@ typedef struct {
 // from patches and me
 static void moveresize(const Arg *arg);
 static void attachaside(Client *c);        // next window not in master area
-static void bstack(Monitor *m);            // TTT 
-static void bstackhoriz(Monitor *m);       // ===
+static void nbstackhoriz(Monitor *m);       // ===
 void spiral(Monitor *mon);                 // [@]
 void dwindle(Monitor *mon);                // [//]
 void fibonacci(Monitor *mon, int s);       // calculationg of [@] and [//]
@@ -177,7 +176,6 @@ int get_next_stackposition(Client* sel, Client* stack);
 static void incnmaster(const Arg *arg);
 static void setnmaster(const Arg *arg);
 static void ntile(Monitor *m);
-static void ncol(Monitor *m);
 static void nbstack(Monitor *m);
 static void black_floading();
 static void black_floadquit();
@@ -407,47 +405,6 @@ ntile(Monitor *m) {
 }
 
 static void
-ncol(Monitor *m) {
-	int x, y, h, w, mw, nm;
-	unsigned int i, n;
-	Client *c;
-
-	initnmaster();
-	for(n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
-	c = nexttiled(m->clients);
-	nm = m->curtag <= MaxMon ? nmasters[m->curtag-1] : nmaster;
-	if(nm > n)
-		nm = n;
-	/* master */
-	if(nm > 0) {
-		mw = (n == nm) ? m->ww : m->mfact * m->ww;
-		w = mw / nm;
-        x = m->wx;
-		for(i = 0; i < nm; i++, c = nexttiled(c->next)) {
-			resize(c, x, m->wy, w - 2 * c->bw, m->wh - 2 * c->bw, False);
-            x = c->x + WIDTH(c);
-		}
-		n -= nm;
-	} else
-		mw = 0;
-	if(n == 0)
-		return;
-	/* tile stack */
-	x = m->wx + mw;
-	y = m->wy;
-	w = m->ww - mw;
-	h = m->wh / n;
-	if(h < bh)
-		h = m->wh;
-	for(i = 0; c; c = nexttiled(c->next), i++) {
-		resize(c, x, y, w - 2 * c->bw,
-		       ((i + 1 == n) ? m->wy + m->wh - y : h) - 2 * c->bw, False);
-		if(h != m->wh)
-			y = c->y + HEIGHT(c);
-	}
-}
-
-static void
 nbstack(Monitor *m) {
 	int x, y, h, w, mh, nm;
 	unsigned int i, n;
@@ -491,6 +448,53 @@ nbstack(Monitor *m) {
 			x = c->x + WIDTH(c);
 	}
 }
+
+static void
+nbstackhoriz(Monitor *m) {
+  int x, y, h, w, mh, nm;
+  unsigned int i, n;
+  Client *c;
+
+  initnmaster();
+	for(n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
+	c = nexttiled(m->clients);
+	nm = m->curtag <= MaxMon ? nmasters[m->curtag-1] : nmaster;
+	if(nm > n)
+		nm = n;
+	/* master */
+	if(nm > 0) {
+		mh = m->mfact * m->wh;
+		w = m->ww / nm;
+		if(w < bh)
+			w = m->ww;
+		x = m->wx;
+		for(i = 0; i < nm; i++, c = nexttiled(c->next)) {
+			resize(c, x, m->wy, ((i + 1 == nm) ? m->wx + m->ww - x : w) - 2 * c->bw,
+			       (n == nm ? m->wh : mh) - 2 * c->bw, False);
+			if(w != m->ww)
+				x = c->x + WIDTH(c);
+		}
+		n -= nm;
+	} else
+		mh = 0;
+	if(n == 0)
+		return;
+  /* tile stack */
+	x = m->wx;
+	y = m->wy + mh;
+	w = m->ww;
+	h = m->wh - mh;
+  h /= n;
+  if(h < bh)
+    h = m->wh;
+  for(i = 0; c;  c = nexttiled(c->next), i++) {
+     resize(c, x, y, w - 2 * c->bw, /* remainder */ ((i + 1 == n)
+            ? m->wy + m->wh - y - 2 * c->bw : h - 2 * c->bw), False);
+     if(h != m->wh)
+      y = c->y + HEIGHT(c);
+  }
+}
+
 void
 movestack(const Arg *arg) {
  Client *c = NULL, *p = NULL, *pc = NULL, *i;
@@ -645,68 +649,6 @@ spiral(Monitor *mon) {
  fibonacci(mon, 0);
 }
 
-
-static void
-bstack(Monitor *m) {
- int x, y, h, w, mh;
- unsigned int i, n;
- Client *c;
-
- for(n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
- if(n == 0)
-   return;
- /* master */
- c = nexttiled(m->clients);
- mh = m->mfact * m->wh;
- resize(c, m->wx, m->wy, m->ww - 2 * c->bw, (n == 1 ? m->wh : mh) - 2 * c->bw, False);
- if(--n == 0)
-   return;
- /* tile stack */
- x = m->wx;
- y = (m->wy + mh > c->y + c->h) ? c->y + c->h + 2 * c->bw : m->wy + mh;
- w = m->ww / n;
- h = (m->wy + mh > c->y + c->h) ? m->wy + m->wh - y : m->wh - mh;
- if(w < bh)
-   w = m->ww;
- for(i = 0, c = nexttiled(c->next); c; c = nexttiled(c->next), i++) {
-   resize(c, x, y, /* remainder */ ((i + 1 == n)
-          ? m->wx + m->ww - x - 2 * c->bw : w - 2 * c->bw), h - 2 * c->bw, False);
-   if(w != m->ww)
-     x = c->x + WIDTH(c);
- }
-}
-
-static void
-bstackhoriz(Monitor *m) {
- int x, y, h, w, mh;
- unsigned int i, n;
- Client *c;
-
- for(n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
- if(n == 0)
-   return;
- /* master */
- c = nexttiled(m->clients);
- mh = m->mfact * m->wh;
- resize(c, m->wx, m->wy, m->ww - 2 * c->bw, (n == 1 ? m->wh : mh) - 2 * c->bw, False);
- if(--n == 0)
-   return;
- /* tile stack */
- x = m->wx;
- y = (m->wy + mh > c->y + c->h) ? c->y + c->h + 2 * c->bw : m->wy + mh;
- w = m->ww;
- h = (m->wy + mh > c->y + c->h) ? m->wy + m->wh - y : m->wh - mh;
- h /= n;
- if(h < bh)
-   h = m->wh;
- for(i = 0, c = nexttiled(c->next); c; c = nexttiled(c->next), i++) {
-    resize(c, x, y, w - 2 * c->bw, /* remainder */ ((i + 1 == n)
-           ? m->wy + m->wh - y - 2 * c->bw : h - 2 * c->bw), False);
-    if(h != m->wh)
-     y = c->y + HEIGHT(c);
- }
-}
-
 void
 attachaside(Client *c) {
  Client *at = nexttiled(c->mon->clients);;
@@ -737,6 +679,14 @@ Monitor *m = selmon;
       case 2: // MODKEY + UP
         newarg.i = -1;
         focusstack(&newarg);
+        break;
+      case 3: // MODKEY + RIGHT
+        newarg.i = -1;
+        incnmaster(&newarg);
+        break;
+      case 4: // MODKEY + LEFT
+        newarg.i = +1;
+        incnmaster(&newarg);
         break;
       case 10: // MODKEY + SHIFT + DOWN
         newarg.i = +1;
