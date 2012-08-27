@@ -1,7 +1,0 @@
-[Desktop Entry]
-Encoding=UTF-8
-Name=SDWM
-Comment=Stylish Dynamic Window Manager
-Exec=sdwm
-Icon=sdwm
-Type=XSession

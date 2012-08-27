@@ -1,1 +1,0 @@
-gcc systeminfo.c -o systeminfo -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/libgtop-2.0 -lgtop-2.0 -lglib-2.0
