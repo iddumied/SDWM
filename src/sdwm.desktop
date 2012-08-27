@@ -1,7 +1,7 @@
 [Desktop Entry]
 Encoding=UTF-8
-Name=Dwm
-Comment=Dynamic window manager
-Exec=dwm
-Icon=dwm
+Name=SDWM
+Comment=Slylish Dynamic Window Manager
+Exec=sdwm
+Icon=sdwm
 Type=XSession
