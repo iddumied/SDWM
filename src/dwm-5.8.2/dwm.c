@@ -176,7 +176,8 @@ int get_next_stackposition(Client* sel, Client* stack);
 static void ntile(Monitor *m);
 static void ncol(Monitor *m);
 static void nbstack(Monitor *m);
-static void mytest();
+static void black_floading();
+static void black_floadquit();
 // SBar Staus Symbol functions
 int draw_time(int y, int pos);
 int draw_battery(int y, int pos);
@@ -579,22 +580,29 @@ Monitor *m = selmon;
   if(!(m->sel && arg && arg->v))
     return;
   if(m->lt[m->sellt]->arrange && !m->sel->isfloating){
-    int i, next_stack_pos, cur_stack_pos = get_stackposition(m->sel, m->clients);
-    Arg marg;  
     
-    
-   if(m->lts[m->curtag]->arrange == ntile){
-     if(((int *)arg->v)[0] == -1 && nmasters[m->curtag-1] < cur_stack_pos+1 ){ // LeftArrow
-       next_stack_pos = get_next_stackposition(m->sel, m->clients);
-       marg.i = next_stack_pos - cur_stack_pos;
-       for(i = cur_stack_pos - next_stack_pos;i > 0;i--) movestack(&marg);
-       
-       
-       printf("\nwin %d %d %d %d",m->sel->x,m->sel->y,m->sel->w,m->sel->h);
-       printf("\n next position: %d\n",next_stack_pos);
-     }//else if((int *)arg->v)[1] == -1 &&
+    Arg newarg;
+
+    // if not floating use Keys to navigate in stack
+    switch(((int *)arg->v)[4]) {
+      case 1: // MODKEY + DOWN
+        newarg.i = +1;
+        focusstack(&newarg);
+        break;
+      case 2: // MODKEY + UP
+        newarg.i = -1;
+        focusstack(&newarg);
+        break;
+      case 10: // MODKEY + SHIFT + DOWN
+        newarg.i = +1;
+        movestack(&newarg);
+        break;
+      case 20: // MODKEY + SHIFT + UP
+        newarg.i = -1;
+        movestack(&newarg);
+        break;
+    }
      
-   }
      
   }else{
   resize(m->sel, m->sel->x + ((int *)arg->v)[0],
@@ -607,7 +615,7 @@ Monitor *m = selmon;
 
 }
 
-void mytest()
+void black_floading()
 {
 	srand(time(NULL));
 	int *pointx;
@@ -650,6 +658,11 @@ void mytest()
 		}
 		
 	}
+}
+void black_floadquit()
+{
+  black_floading();
+  quit(NULL);
 }
 
 // DWM FUNCTIONS
