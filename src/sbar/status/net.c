@@ -14,6 +14,13 @@ typedef struct {
   Packgages receive, transmit;
 } Statistic;
 
+typedef struct {
+  int *bytes, max;
+} Timeline;
+
+typedef struct {
+  Timeline r, t; /* tmeline for recived and transimted bytes */
+} NetTimeline;
 
 typedef struct {
   Statistic last, current, between;
@@ -22,6 +29,7 @@ typedef struct {
   double strength;
   Bool online, easy_online, exists;
   char name[25];
+  NetTimeline timeline;
 } Interface;
 
 
@@ -29,6 +37,7 @@ typedef struct {
   Bool connected;
   int refresh, num_interfaces;
   Interface interfaces[30];
+  int timeline_length;
 } Net;
 
 Net net;
@@ -49,7 +58,7 @@ void toogle_wlan()
   get_interface_stat();
   
   for (i = 0; i < net.num_interfaces; i++)
-    if (strcomp(net.interfaces[i].name, "wlan0"))
+    if (strcmp(net.interfaces[i].name, "wlan0"))
       break;
 
   net.interfaces[i].easy_online = !net.interfaces[i].easy_online;
@@ -65,7 +74,7 @@ void toogle_wlan()
 Interface *interface_by_name(char *name) {
   int i;
   for (i = 0; i < net.num_interfaces; i++) {
-    if (strcomp(net.interfaces[i].name, name))
+    if (strcmp(net.interfaces[i].name, name))
       return &net.interfaces[i];
   }
   
@@ -543,7 +552,7 @@ void get_interface_stat()
 
   if ((read = getline(&line, &len, fp)) != -1) {
     for (i = 0; i < net.num_interfaces; i++) {
-      if (strcomp(net.interfaces[i].name, "wlan0")) {
+      if (strcmp(net.interfaces[i].name, "wlan0")) {
 
         if(line[0] == '1'){ //up
           net.interfaces[i].easy_online = True;

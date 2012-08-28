@@ -35,24 +35,25 @@ static const Layout layouts[] = {
 
 
 
-static const Bool sbartopbar        = True;         // False means bottom bar
-static const int cpus_length        = 255;          // length of all cpu timelines
-static const Bool cpu_shift_left    = True;         // Shift cpu timeline left (else right)
-static const int cpu_distance_x     = 5;            // distance betwen cpu-cores if you have more than one
-static const int symbol_distance_y  = 2;            // distance between symbols and top and bottom of bar
-static const int symbol_distance_x  = 6;            // distance between two symbols on the x line
-
-static const int status_refresh     = 1;            // refresh zyklus in seconds
-static const Bool show_year         = True;
-
-static const char mainsymbol[]      = "\x18";
-
-
-static const Bool utime_seconds     = False;
-static const int  sbar_distancex    = 12;
-
-static const unsigned int gappx     = 6;
-static const int max_link_quality   = 70;           // max wlan quality found out by calling iwconfig
+static const Bool sbartopbar          = True;         // False means bottom bar
+static const int cpus_length          = 255;          // length of all cpu timelines
+static const Bool cpu_shift_left      = True;         // Shift cpu timeline left (else right)
+static const int cpu_distance_x       = 5;            // distance betwen cpu-cores if you have more than one
+static const int symbol_distance_y    = 2;            // distance between symbols and top and bottom of bar
+static const int symbol_distance_x    = 6;            // distance between two symbols on the x line
+static const int timeline_length      = 100;          // length of net transmit and recive and of disk read and write timelines
+                                      
+static const int status_refresh       = 1;            // refresh zyklus in seconds
+static const Bool show_year           = True;
+                                       
+static const char mainsymbol[]        = "\x18";
+                                      
+                                      
+static const Bool utime_seconds       = False;
+static const int  sbar_distancex      = 12;
+                                      
+static const unsigned int gappx       = 6;
+static const int max_link_quality     = 70;           // max wlan quality found out by calling iwconfig
 
 #define MAXPARTITIONS 20                            // max number of posible partitions mounted if you mount more it will crash
 
