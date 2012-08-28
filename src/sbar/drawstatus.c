@@ -17,19 +17,19 @@ void drawstatus(){
 	int i, cpu_curr_pos, statusheigh = (bh-distance_y*2 - 1), cpuload, cpu_timeline_lineheight, x1,y1,x2,y2;
 	
 	for(i = 0; i < cpuinfo.ncpus;i++){
-		cpu_curr_pos = (sbar.cpu_posx + cpu_length*i + distance_x*i);
+		cpu_curr_pos = (sbar.cpu_posx + sbar.cpu_length*i + distance_x*i);
 		
 		// calculating how long to draw
-		cpuload = ((int)((double)(cpu_length-3) * cpuinfo.cpuloads[i]));
+		cpuload = ((int)((double)(sbar.cpu_length-3) * cpuinfo.cpuloads[i]));
 		
     // shifting
     XCopyArea(dpy, sbar.cpu_timeline[i], sbar.cpu_timeline[i], dc.gc, (cpu_shift_left ? 1 : 0),
-              0, cpu_length-1, bh-1, (cpu_shift_left ? 0 : 1), 0);
+              0, sbar.cpu_length-1, bh-1, (cpu_shift_left ? 0 : 1), 0);
     
     if(cpu_shift_left){
-      x1 = cpu_length-1;
+      x1 = sbar.cpu_length-1;
       y1 = 0;
-      x2 = cpu_length-1;
+      x2 = sbar.cpu_length-1;
       y2 = bh-1;
     }
     else{
@@ -56,7 +56,7 @@ void drawstatus(){
                 cpu_timeline_lineheight+1 ,x2,y2);
     }
     
-    XCopyArea(dpy, sbar.cpu_timeline[i], dc.drawable, dc.gc, 0, 0, cpu_length, bh-1, cpu_curr_pos, 0);
+    XCopyArea(dpy, sbar.cpu_timeline[i], dc.drawable, dc.gc, 0, 0, sbar.cpu_length, bh-1, cpu_curr_pos, 0);
 	}
 	
 	drawsymbolstatus();

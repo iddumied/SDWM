@@ -37,7 +37,7 @@ static const Layout layouts[] = {
 
 static const Bool sbartopbar        = True;         // False means bottom bar
 static const Bool showbattery       = True;
-static const int cpu_length         = 60;           // length of one cpu consider this if you have more
+static const int cpus_length        = 255;           // length of all cpu timelines
 static const Bool cpu_shift_left    = True;         // Shift cpu timeline left (else right)
 static const int distance_x         = 5;            // distance betwen cpu-cores if you have more than one
 static const int distance_y         = 2;            // distance between symbols and top and bottom of bar

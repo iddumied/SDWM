@@ -17,7 +17,7 @@ typedef struct {
   Bool sbarloaded;
   Bool status_symbol_mode[DrawLast];
   Pixmap *cpu_timeline;
-  int cpu_posx;
+  int cpu_posx, cpu_length;             /* length of one cpu */
 } SBar;
 
 SBar sbar;
@@ -61,7 +61,8 @@ void setup_sbar()
   setup_status();
 
   // cpu_posx calculation need setup_cpu
-  sbar.cpu_posx = screenWidth/2 - (cpu_length*cpuinfo.ncpus  + (cpuinfo.ncpus-1)*distance_x)/2;
+  sbar.cpu_posx = screenWidth/2 - cpus_length/2;
+  sbar.cpu_length = (cpus_length - (cpuinfo.ncpus-1)*distance_x) / cpuinfo.ncpus; 
 
   setup_stw();
   setup_freestylebar();    
@@ -117,7 +118,7 @@ void setup_sbar()
   sbar.cpu_timeline = (Pixmap*)malloc(sizeof(Pixmap)*cpuinfo.ncpus+1);
       
   for(i = 0;i < cpuinfo.ncpus+1;i++)
-    sbar.cpu_timeline[i] = XCreatePixmap(dpy, root, cpu_length, bh-1, DefaultDepth(dpy, screen));
+    sbar.cpu_timeline[i] = XCreatePixmap(dpy, root, sbar.cpu_length, bh-1, DefaultDepth(dpy, screen));
 
   gettimeofday(&end_time, 0);
   printf("\nsbar Setup needed:  %f Seconds\n", calc_time_div(end_time, start_time));  
