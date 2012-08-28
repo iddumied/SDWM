@@ -55,16 +55,17 @@ static const int  sbar_distancex      = 12;
 static const unsigned int gappx       = 6;
 static const int max_link_quality     = 70;           // max wlan quality found out by calling iwconfig
 
-#define MAXPARTITIONS 20                            // max number of posible partitions mounted if you mount more it will crash
+#define MAXPARTITIONS 50                              // max number of posible partitions mounted if you mount more it will propably crash
+#define MAX_NET_INTERFACES 30                         // max number of possible net_interfaces if you have more it will propably crash
 
 
 /******* SECTION INVORMATIONS *******/
 
 // statuswin
 static Bool draw_status_win           = True;
-static const double blowstat          = 0.1;        // defines the warning stat of battery
-static const double bverylowstat      = 0.12;      // 1 is full 0 is empty
-static const double bat_suspend       = 0.075;       // percent when go to suspend
+static const double blowstat          = 0.1;          // defines the warning stat of battery
+static const double bverylowstat      = 0.12;         // 1 is full 0 is empty
+static const double bat_suspend       = 0.075;        // percent when go to suspend
 
 
 
