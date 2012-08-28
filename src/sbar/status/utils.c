@@ -4,6 +4,8 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <fcntl.h>
 int xtoi(const char* xs, int szlen);
 void human_readable(unsigned long long bytes, Bool bits, char* result);
 void human_readable_disk(unsigned long long bytes, char* result);
@@ -115,4 +117,33 @@ int xtoi(const char* xs, int szlen)
 
  // Nothing to convert
  return -1;
+}
+
+/**
+ * Reads an Line from an file handel
+ * returns 0 when EOF is retached
+ */
+int get_line(int fp, char *buffer, int *len) {
+  int error;
+  char tmp[10];
+  
+  *len = 0;
+  while (1) {
+    error = read(fp, tmp, 1);
+    if (error == 0 || error == -1) {
+      error = *len;
+      break;
+    }
+    
+    buffer[*len] = tmp[0];
+    if (tmp[0] == '\n') {
+      error = *len;
+      (*len)++;
+      break;
+    }
+    (*len)++;
+  }
+
+  buffer[*len] = '\x00';
+  return error;
 }
