@@ -1,9 +1,26 @@
-void setup_net();
-void get_interface_stat();
-void get_net_statistic();
-void toogle_wlan();
-void calculate_wlan_strength();
-void update_net();
+#ifdef DEBUG_NET
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include <locale.h>
+#include <stdarg.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <X11/cursorfont.h>
+#include <X11/keysym.h>
+#include <X11/Xatom.h>
+#include <X11/Xlib.h>
+#include <X11/Xproto.h>
+#include <X11/Xutil.h>
+#define MAX_NET_INTERFACES 30
+static const int status_refresh = 1;
+#endif
+#include "utils.c"
 
 typedef struct {
   int bytes, total, error, drop, fifo, frame, colls, compressed, carrier, multicast;
@@ -19,7 +36,7 @@ typedef struct {
 } Timeline;
 
 typedef struct {
-  Timeline r, t; /* tmeline for recived and transimted bytes */
+  Timeline r, t; /* timeline for recived and transimted bytes */
 } NetTimeline;
 
 typedef struct {
@@ -40,228 +57,66 @@ typedef struct {
   int timeline_length;
 } Net;
 
-Net net;
+static Net net;
 
+// functions
+void update_net();
+void setup_net();
+void get_net_statistic();
+void calculate_wlan_strength();
+void get_interface_stat();
+void toogle_wlan();
+Interface *interface_by_name(char *name);
+Bool net_lan_online();
+int net_lan_bytes_per_sec();
+int net_wlan_bytes_per_sec();
+int net_all_bytes_per_sec();
+Bool net_wlan_online();
+double net_wlan_strength();
+void new_interface(Interface *interface, char *line, int len);
+
+#ifdef DEBUG_NET
+int main() {
+  printf("Siezof Net: %d Bytes\n", sizeof(Net));
+
+  setup_net();
+
+  while(1==1){
+    sleep(1);
+    update_net();
+
+    int i;
+    for (i = 0; i < net.num_interfaces; i++) {
+      printf("%5s: %d\n", net.interfaces[i].name, net.interfaces[i].online);
+    }
+
+  }
+
+
+  return 0;
+}
+#endif
 
 void update_net()
 {
-  printf("\n0\n\n");
   get_net_statistic();
-  printf("\n1\n\n");
   calculate_wlan_strength();
-  printf("\n2\n\n");
   get_interface_stat();
-  printf("\n3\n\n");
 }
 
-void calculate_wlan_strength() {
-
-  FILE * fp;
-  char * line = NULL;
-  size_t len = 0;
-  ssize_t read;
-  int l, k, j, i = 0;
-  Bool notspace = False;
-
-  fp = fopen("/proc/net/wireless", "r");
-  if (fp == NULL){
-        printf("\nfailed to read /proc/net/wireless\n");
-        sbar_status_symbols[DrawNet].active = False;
-        return;
-  }
-
-  while ((read = getline(&line, &len, fp)) != -1) {
-    if (i < 2) {
-      i++;
-      continue;
-    }
-    for (j = 0; j < net.num_interfaces; j++) {
-      if (strstr(line, net.interfaces[j].name)) {
-        l = 0;
-        for (k = 0; k < len; k++) {
-          if (line[k] != ' ' && !notspace) {
-            l++;
-            notspace = True;
-          } else
-            notspace = False;
-
-          if (l == 3) {
-            net.interfaces[j].linkcur = atoi(line + k);
-            net.interfaces[j].strength = (double)net.interfaces[j].linkcur / (double)net.interfaces[j].linkmax;
-            break;
-          }
-        }
-        break;
-      }
-    }
-  }
-  
-  fclose(fp);
-}
-
-
-void get_interface_stat()
+void setup_net()
 {
-  FILE * fp;
-  char * line = NULL;
-  size_t len = 0;
-  ssize_t read;
   int i;
-  char cmd[100];
-
-  for (i = 0; i < net.num_interfaces; i++) {
-    sprintf(cmd, "/sys/class/net/%s/operstate", net.interfaces[i].name);
-
-    fp = fopen(cmd, "r");
-    if (fp == NULL){
-          printf("\nfailed to read %s\n", cmd);
-          sbar_status_symbols[DrawNet].active = False;
-          return;
-    }
- 
-    printf("\n2.0.1:   %d\n", fp);
-    while ((read = getline(&line, &len, fp)) != -1) {
-      printf("\n2.0.2\n");
-      if(line[0] == 'u'){ //up
-        net.interfaces[i].online = True;
-      }else{ //down
-        net.interfaces[i].online = False;
-      }
-      break;
-    }
- 
-    fclose(fp);
-  }
+  net.refresh = status_refresh;
   
-  fp = fopen("/proc/easy_wifi_kill", "r");
-  if (fp == NULL){
-        printf("\nfailed to read /proc/easy_wifi_kill\n");
-        sbar_status_symbols[DrawNet].active = False;
-        return;
-  }
+  for(i = 0; i < MAX_NET_INTERFACES; i++) 
+    net.interfaces[i].name[0] = '\x00';
 
-  printf("\n2.1\n");
-  if ((read = getline(&line, &len, fp)) != -1) {
-    printf("\n2.2\n");
-    for (i = 0; i < net.num_interfaces; i++) {
-      if (strcmp(net.interfaces[i].name, "wlan0")) {
-
-        if(line[0] == '1'){ //up
-          net.interfaces[i].easy_online = True;
-        }else{ //down
-          net.interfaces[i].easy_online = False;
-        }
-        break;
-      }
-
-    }
-  }
-  
-  for (i = 0; i < net.num_interfaces; i++) {
-    if (net.interfaces[i].online) {
-      net.connected = True;
-      break;
-    }
-  }
-  
-  fclose(fp);
+  update_net();
 }
 
-
-void toogle_wlan()
+void new_interface(Interface *interface, char *line, int len) 
 {
-  Arg sarg;
-  int i;
-  
-  get_interface_stat();
-  
-  for (i = 0; i < net.num_interfaces; i++)
-    if (strcmp(net.interfaces[i].name, "wlan0"))
-      break;
-
-  net.interfaces[i].easy_online = !net.interfaces[i].easy_online;
-
-  if(net.interfaces[i].easy_online)
-    sarg.v = (const char*[]){ "/bin/sh", "-c",  "echo 1 > /proc/easy_wifi_kill", NULL };
-  else
-    sarg.v = (const char*[]){ "/bin/sh", "-c",  "echo 0 > /proc/easy_wifi_kill", NULL }; 
-
-  spawn(&sarg);
-}
-
-Interface *interface_by_name(char *name) {
-  int i;
-  for (i = 0; i < net.num_interfaces; i++) {
-    if (strcmp(net.interfaces[i].name, name))
-      return &net.interfaces[i];
-  }
-  
-  return NULL;
-}
-
-Bool net_lan_online() {
-  int i;
-  for (i = 0; i < net.num_interfaces; i++) {
-    if (!net.interfaces[i].wireless && net.interfaces[i].online)
-      return True;
-  }
-  return False;
-}
-
-
-int net_lan_bytes_per_sec() {
-  int i, bytes_per_sec = 0;
-
-  for (i = 0; i < net.num_interfaces; i++) {
-    if (!net.interfaces[i].wireless && net.interfaces[i].online)
-      bytes_per_sec += net.interfaces[i].between.receive.bytes_per_sec;
-  }
-
-  return bytes_per_sec;
-}
-
-int net_wlan_bytes_per_sec() {
-  int i, bytes_per_sec = 0;
-
-  for (i = 0; i < net.num_interfaces; i++) {
-    if (net.interfaces[i].wireless && net.interfaces[i].online)
-      bytes_per_sec += net.interfaces[i].between.receive.bytes_per_sec;
-  }
-
-  return bytes_per_sec;
-}
-
-int net_all_bytes_per_sec() {
-  int i, bytes_per_sec = 0;
-
-  for (i = 0; i < net.num_interfaces; i++) {
-    if (net.interfaces[i].online)
-      bytes_per_sec += net.interfaces[i].between.receive.bytes_per_sec;
-  }
-
-  return bytes_per_sec;
-}
-
-Bool net_wlan_online() {
-  int i;
-  for (i = 0; i < net.num_interfaces; i++) {
-    if (net.interfaces[i].wireless && net.interfaces[i].online)
-      return True;
-  }
-  return False;
-}
-
-double net_wlan_strength() {
-  int i;
-  double strength = 0.0;
-  for (i = 0; i < net.num_interfaces; i++) {
-    if (net.interfaces[i].wireless && net.interfaces[i].online && net.interfaces[i].strength > strength)
-      strength = net.interfaces[i].strength;
-  }
-  return strength;
-}
-
-void new_interface(Interface *interface, char *line, int len) {
   int i, x;
   Bool start = False, started = False;
   FILE * fp;
@@ -286,8 +141,10 @@ void new_interface(Interface *interface, char *line, int len) {
 
   fp = popen(cmd, "r");
   if (fp == NULL){
-        printf("\n172: failed to read iwconfig output\n");
+        printf("\nfailed to read iwconfig output\n");
+        #ifndef DEBUG_NET
         sbar_status_symbols[DrawNet].active = False;
+        #endif
         return;
   }
 
@@ -297,33 +154,36 @@ void new_interface(Interface *interface, char *line, int len) {
     interface->wireless = False;
   }
 
-  if (line2) free(line2);
-  close(fp);
+  fclose(fp);
 
   if (interface->wireless) {
 
     sprintf(cmd, "iwconfig %s | grep \"Link Quality\"", interface->name);
     fp = popen(cmd, "r");
     if (fp == NULL){
-          printf("\n194: failed to read iwconfig output\n");
+          printf("\nfailed to read iwconfig output\n");
+          #ifndef DEBUG_NET
           sbar_status_symbols[DrawNet].active = False;
+          #endif
           return;
     }
  
     if ((read = getline(&line2, &len2, fp)) != -1) {
       for (i = 0; i < len2; i++) {
         if (line2[i] == '/')
-          interface->linkmax = atoi(line + i + 1);
+          interface->linkmax = atoi(line2 + i + 1);
 
       }
     } else {
-      printf("\n206: failed to read iwconfig output\n");
+      printf("\nfailed to read iwconfig output\n");
+      #ifndef DEBUG_NET
       sbar_status_symbols[DrawNet].active = False;
+      #endif
       return;
     }
   }
 
-  for(i = 0;i < len;i++){
+  for(i = 0; i < len; i++){
     if (!start) {
       if (line[i] == ':')
         start = True;
@@ -411,38 +271,37 @@ void new_interface(Interface *interface, char *line, int len) {
 
 void get_net_statistic()
 {
-  FILE * fp;
-  char * line = NULL;
-  size_t len = 0;
-  ssize_t read;
+  char line[256];
   Statistic *save, *last, *cur, *between;
-  int i, j, x;
+  int fp, len, i, j, x;
   i = j = x = 0;
   net.num_interfaces = 0;
   Bool start = False;
 
-  fp = fopen("/proc/net/dev", "r");
-  if (fp == NULL){
+  fp = open("/proc/net/dev", O_RDONLY);
+  if (fp == -1){
         printf("\nfailed to read /proc/net/dev\n");
+        #ifndef DEBUG_NET
         sbar_status_symbols[DrawNet].active = False;
+        #endif
         return;
   }
 
-  while ((read = getline(&line, &len, fp)) != -1) {
+  while (get_line(fp, line, &len)) {
     if(i < 2){
       i++;
       continue;
     }
-    net.num_interfaces++;
     if (net.interfaces[i].name[0] == '\x00' || !strstr(line, net.interfaces[i-2].name))
-       new_interface(&net.interfaces[i-2], line, len);
+       new_interface(&net.interfaces[net.num_interfaces], line, len);
 
-    save = &net.interfaces[i-2].current;
+    save = &net.interfaces[net.num_interfaces].current;
+    net.num_interfaces++;
     
     x = 0;
     for(j = 0;j < len;j++){
       if (!start) {
-        if (line[i] == ':')
+        if (line[j] == ':')
           start = True;
      
         continue;
@@ -524,12 +383,9 @@ void get_net_statistic()
       }
       
     }
-    if(i == 4) break;
-    i++;
   }
   
-  if (line) free(line);
-  fclose(fp);
+  close(fp);
   
   
   // claculate new and bytes per second
@@ -578,14 +434,225 @@ void get_net_statistic()
   }
 }
 
+void calculate_wlan_strength() 
+{
 
-void setup_net()
+  char line[256];
+  int fp, len, l, k, j, i = 0;
+  Bool notspace = False;
+
+  fp = open("/proc/net/wireless", O_RDONLY);
+  if (fp == -1){
+        printf("\nfailed to read /proc/net/wireless\n");
+        #ifndef DEBUG_NET
+        sbar_status_symbols[DrawNet].active = False;
+        #endif
+        return;
+  }
+
+  while (get_line(fp, line, &len)) {
+    if (i < 2) {
+      i++;
+      continue;
+    }
+    for (j = 0; j < net.num_interfaces; j++) {
+      if (strstr(line, net.interfaces[j].name)) {
+        l = 0;
+        for (k = 0; k < len; k++) {
+          if (line[k] != ' ' && !notspace) {
+            l++;
+            notspace = True;
+          } else
+            notspace = False;
+
+          if (l == 3) {
+            net.interfaces[j].linkcur = atoi(line + k);
+            net.interfaces[j].strength = (double)net.interfaces[j].linkcur / (double)net.interfaces[j].linkmax;
+            break;
+          }
+        }
+        break;
+      }
+    }
+  }
+  
+  close(fp);
+}
+
+void get_interface_stat()
+{
+  int fp;
+  char buffer[50];
+  buffer[0] = '\x00';
+  int i;
+  char cmd[100];
+
+  for (i = 0; i < net.num_interfaces; i++) {
+    sprintf(cmd, "/sys/class/net/%s/operstate", net.interfaces[i].name);
+
+    fp = open(cmd, O_RDONLY);
+    if (fp == -1){
+          printf("\nfailed to read %s\n", cmd);
+          #ifndef DEBUG_NET
+          sbar_status_symbols[DrawNet].active = False;
+          #endif
+          return;
+    }
+ 
+    if (read(fp, buffer, 1) != -1) {
+      if(buffer[0] == 'u'){ //up
+        net.interfaces[i].online = True;
+      }else{ //down
+        net.interfaces[i].online = False;
+      }
+    }
+ 
+    close(fp);
+    buffer[0] = '\x00';
+  }
+  
+  fp = open("/proc/easy_wifi_kill", O_RDONLY);
+  if (fp == -1){
+        printf("\nfailed to read /proc/easy_wifi_kill\n");
+        #ifndef DEBUG_NET
+        sbar_status_symbols[DrawNet].active = False;
+        #endif
+        return;
+  }
+
+  if (read(fp, buffer, 1) != -1) {
+    for (i = 0; i < net.num_interfaces; i++) {
+      if (strcmp(net.interfaces[i].name, "wlan0")) {
+
+        if(buffer[0] != '0'){ //up
+          net.interfaces[i].easy_online = True;
+        }else{ //down
+          net.interfaces[i].easy_online = False;
+        }
+        break;
+      }
+
+    }
+  }
+  
+  for (i = 0; i < net.num_interfaces; i++) {
+    if (net.interfaces[i].online) {
+      net.connected = True;
+      break;
+    }
+  }
+  
+  close(fp);
+}
+
+void toogle_wlan()
+{
+  #ifndef DEBUG_NET
+  Arg sarg;
+  #endif
+  int i;
+  
+  get_interface_stat();
+  
+  for (i = 0; i < net.num_interfaces; i++)
+    if (strcmp(net.interfaces[i].name, "wlan0"))
+      break;
+
+  net.interfaces[i].easy_online = !net.interfaces[i].easy_online;
+
+  if(net.interfaces[i].easy_online) { 
+    #ifndef DEBUG_NET
+    sarg.v = (const char*[]){ "/bin/sh", "-c",  "echo 1 > /proc/easy_wifi_kill", NULL };
+    #else
+    printf("/bin/sh -c echo 1 > /proc/easy_wifi_kill\n");
+    #endif
+  } else {
+   #ifndef DEBUG_NET
+    sarg.v = (const char*[]){ "/bin/sh", "-c",  "echo 0 > /proc/easy_wifi_kill", NULL }; 
+    #else
+    printf("/bin/sh -c echo 0 > /proc/easy_wifi_kill\n");
+    #endif
+  }
+
+  #ifndef DEBUG_NET
+  spawn(&sarg);
+  #endif
+}
+
+Interface *interface_by_name(char *name) 
 {
   int i;
-  net.refresh = status_refresh;
+  for (i = 0; i < net.num_interfaces; i++) {
+    if (strcmp(net.interfaces[i].name, name))
+      return &net.interfaces[i];
+  }
   
-  for(i = 0; i < MAX_NET_INTERFACES; i++) 
-    net.interfaces[i].name[0] = '\x00';
+  return NULL;
+}
 
-  update_net();
+Bool net_lan_online() 
+{
+  int i;
+  for (i = 0; i < net.num_interfaces; i++) {
+    if (!net.interfaces[i].wireless && net.interfaces[i].online)
+      return True;
+  }
+  return False;
+}
+
+int net_lan_bytes_per_sec() 
+{
+  int i, bytes_per_sec = 0;
+
+  for (i = 0; i < net.num_interfaces; i++) {
+    if (!net.interfaces[i].wireless && net.interfaces[i].online)
+      bytes_per_sec += net.interfaces[i].between.receive.bytes_per_sec;
+  }
+
+  return bytes_per_sec;
+}
+
+int net_wlan_bytes_per_sec() 
+{
+  int i, bytes_per_sec = 0;
+
+  for (i = 0; i < net.num_interfaces; i++) {
+    if (net.interfaces[i].wireless && net.interfaces[i].online)
+      bytes_per_sec += net.interfaces[i].between.receive.bytes_per_sec;
+  }
+
+  return bytes_per_sec;
+}
+
+int net_all_bytes_per_sec() 
+{
+  int i, bytes_per_sec = 0;
+
+  for (i = 0; i < net.num_interfaces; i++) {
+    if (net.interfaces[i].online)
+      bytes_per_sec += net.interfaces[i].between.receive.bytes_per_sec;
+  }
+
+  return bytes_per_sec;
+}
+
+Bool net_wlan_online() 
+{
+  int i;
+  for (i = 0; i < net.num_interfaces; i++) {
+    if (net.interfaces[i].wireless && net.interfaces[i].online)
+      return True;
+  }
+  return False;
+}
+
+double net_wlan_strength() 
+{
+  int i;
+  double strength = 0.0;
+  for (i = 0; i < net.num_interfaces; i++) {
+    if (net.interfaces[i].wireless && net.interfaces[i].online && net.interfaces[i].strength > strength)
+      strength = net.interfaces[i].strength;
+  }
+  return strength;
 }
