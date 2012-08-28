@@ -140,7 +140,12 @@ void drawstw()
       calc_timline_max(&net.interfaces[i].timeline.t, net.interfaces[i].between.transmit.bytes_per_sec, net.timeline_length);
       calc_timline_max(&net.interfaces[i].timeline.r, net.interfaces[i].between.receive.bytes_per_sec, net.timeline_length);
       if(net.interfaces[i].timeline.r.max == 0 && net.interfaces[i].timeline.t.max == 0){                                 
-        wprintln(":  inactive");
+        if (net.interfaces[i].online || net.interfaces[i].easy_online)
+          wprintln(":  inactive");
+        else if (net.interfaces[i].state_unknowen)
+          wprintln(":  unknowen");
+        else 
+          wprintln(":  down");
       }else{
         wprintln("");
         wprintln("       |    |");
@@ -409,7 +414,7 @@ void setup_stw()
     net.timeline_length = timeline_length;
     
     
-    for (j = 0; j < net.num_interfaces; j++) {
+    for (j = 0; j < MAX_NET_INTERFACES; j++) {
       net.interfaces[j].timeline.r.bytes = (int*)malloc(sizeof(int)*timeline_length);    
       net.interfaces[j].timeline.t.bytes = (int*)malloc(sizeof(int)*timeline_length);
      
