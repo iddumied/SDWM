@@ -12,22 +12,23 @@ int draw_net(int y, int pos)
 
   // calc symbol
   if(!net.connected)
-    if(!net.wlan0.easy_online)
+    if(!(interface_by_name("wlan0")->easy_online))
       sprintf(buffer_net,"Ô down");
     else
       sprintf(buffer_net,"Ô of");
-  else if(net.eth0.online){
-    human_readable(net.eth0.between.receive.bytes_per_sec, False, buffer_speed);
+  else if(net_lan_online()){
+    human_readable(net_all_bytes_per_sec(), False, buffer_speed);
     sprintf(buffer_net,"\x19  %s", buffer_speed);
-  }else if(net.wlan0.online){
-    if(net.wlan0.strength < 0.25)
-      sprintf(buffer_net,"\x13 %d%c", (int)(net.wlan0.strength*100),'%');
-    else if(net.wlan0.strength < 0.5)
-      sprintf(buffer_net,"\x14 %d%c", (int)(net.wlan0.strength*100),'%');
-    else if(net.wlan0.strength < 0.75)
-      sprintf(buffer_net,"\x15 %d%c", (int)(net.wlan0.strength*100),'%');
+  }else if(net_wlan_online()){
+    double strength = net_wlan_strength();
+    if(strength < 0.25)
+      sprintf(buffer_net,"\x13 %d%c", (int)(strength*100),'%');
+    else if(strength < 0.5)
+      sprintf(buffer_net,"\x14 %d%c", (int)(strength*100),'%');
+    else if(strength < 0.75)
+      sprintf(buffer_net,"\x15 %d%c", (int)(strength*100),'%');
     else
-      sprintf(buffer_net,"\x16 %d%c", (int)(net.wlan0.strength*100),'%');
+      sprintf(buffer_net,"\x16 %d%c", (int)(strength*100),'%');
   }else
     sprintf(buffer_net,"Error");
     

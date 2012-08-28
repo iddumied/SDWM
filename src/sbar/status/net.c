@@ -18,22 +18,17 @@ typedef struct {
 typedef struct {
   Statistic last, current, between;
   int linkcur, linkmax, bytespersec;
+  Bool wireless;
   double strength;
   Bool online, easy_online, exists;
-} Wlan;
-
-typedef struct {
-  int bytespersec;
-  Statistic last, current, between;
-  Bool online, exists;  
-} LAN;
+  char name[25];
+} Interface;
 
 
 typedef struct {
   Bool connected;
-  int refresh;
-  Wlan wlan0;
-  LAN eth0, lo;
+  int refresh, num_interfaces;
+  Interface interfaces[30];
 } Net;
 
 Net net;
@@ -44,21 +39,22 @@ void update_net()
   get_interface_stat();
   get_wireless_sterngth();
   get_net_statistic();
-  
-
 }
 
 void toogle_wlan()
 {
-  Bool easy_on;
   Arg sarg;
+  int i;
   
   get_interface_stat();
   
-  easy_on = !net.wlan0.easy_online;
-  net.wlan0.easy_online = easy_on;
+  for (i = 0; i < net.num_interfaces; i++)
+    if (strcomp(net.interfaces[i].name, "wlan0"))
+      break;
 
-  if(easy_on)
+  net.interfaces[i].easy_online = !net.interfaces[i].easy_online;
+
+  if(net.interfaces[i].easy_online)
     sarg.v = (const char*[]){ "/bin/sh", "-c",  "echo 1 > /proc/easy_wifi_kill", NULL };
   else
     sarg.v = (const char*[]){ "/bin/sh", "-c",  "echo 0 > /proc/easy_wifi_kill", NULL }; 
@@ -66,6 +62,227 @@ void toogle_wlan()
   spawn(&sarg);
 }
 
+Interface *interface_by_name(char *name) {
+  int i;
+  for (i = 0; i < net.num_interfaces; i++) {
+    if (strcomp(net.interfaces[i].name, name))
+      return &net.interfaces[i];
+  }
+  
+  return NULL;
+}
+
+Bool net_lan_online() {
+  int i;
+  for (i = 0; i < net.num_interfaces; i++) {
+    if (!net.interfaces[i].wireless && net.interfaces[i].online)
+      return True;
+  }
+  return False;
+}
+
+
+int net_lan_bytes_per_sec() {
+  int i, bytes_per_sec = 0;
+
+  for (i = 0; i < net.num_interfaces; i++) {
+    if (!net.interfaces[i].wireless && net.interfaces[i].online)
+      bytes_per_sec += net.interfaces[i].between.receive.bytes_per_sec;
+  }
+
+  return bytes_per_sec;
+}
+
+int net_wlan_bytes_per_sec() {
+  int i, bytes_per_sec = 0;
+
+  for (i = 0; i < net.num_interfaces; i++) {
+    if (net.interfaces[i].wireless && net.interfaces[i].online)
+      bytes_per_sec += net.interfaces[i].between.receive.bytes_per_sec;
+  }
+
+  return bytes_per_sec;
+}
+
+int net_all_bytes_per_sec() {
+  int i, bytes_per_sec = 0;
+
+  for (i = 0; i < net.num_interfaces; i++) {
+    if (net.interfaces[i].online)
+      bytes_per_sec += net.interfaces[i].between.receive.bytes_per_sec;
+  }
+
+  return bytes_per_sec;
+}
+
+Bool net_wlan_online() {
+  int i;
+  for (i = 0; i < net.num_interfaces; i++) {
+    if (net.interfaces[i].wireless && net.interfaces[i].online)
+      return True;
+  }
+  return False;
+}
+
+double net_wlan_strength() {
+  int i;
+  double strength = 0.0;
+  for (i = 0; i < net.num_interfaces; i++) {
+    if (net.interfaces[i].wireless && net.interfaces[i].online && net.interfaces[i].strength > strength)
+      strength = net.interfaces[i].strength;
+  }
+  return strength;
+}
+
+void new_interface(Interface *interface, char *line, int len) {
+  int i, x;
+  Bool start = False, started = False;
+  FILE * fp;
+  char * line2 = NULL;
+  size_t len2 = 0;
+  ssize_t read;
+  char cmd[100];
+
+  for (i = 0; i < len && i < 10; i++) {
+
+    if (line[i] == ' ' && started) break;
+
+    if (line[i] != ' ') {
+      if (!started) x = i;
+      started = True;
+      interface->name[i-x] = line[i];
+    }
+  }
+  interface->name[i-x] = '\x00';
+
+  sprintf(cmd, "iwconfig %s", interface->name);
+
+  fp = popen(cmd, "r");
+  if (fp == NULL){
+        printf("\nfailed to read iwconfig output\n");
+        sbar_status_symbols[DrawNet].active = False;
+        return;
+  }
+
+  if ((read = getline(&line2, &len2, fp)) != -1)
+    interface->wireless = (strstr(line2, "no wireless extensions")) ? False : True;
+  else {
+    printf("\nfailed to read iwconfig output\n");
+    sbar_status_symbols[DrawNet].active = False;
+    return;
+  }
+
+  if (line2) free(line2);
+  close(fp);
+
+  if (interface->wireless) {
+
+    sprintf(cmd, "iwconfig %s | grep \"Link Quality\"", interface->name);
+    fp = popen(cmd, "r");
+    if (fp == NULL){
+          printf("\nfailed to read iwconfig output\n");
+          sbar_status_symbols[DrawNet].active = False;
+          return;
+    }
+ 
+    if ((read = getline(&line2, &len2, fp)) != -1) {
+      for (i = 0; i < len2; i++) {
+        if (line2[i] == '/')
+          interface->linkmax = atoi(line + i + 1);
+
+      }
+    } else {
+      printf("\nfailed to read iwconfig output\n");
+      sbar_status_symbols[DrawNet].active = False;
+      return;
+    }
+  }
+
+  for(i = 0;i < len;i++){
+    if (!start) {
+      if (line[i] == ':')
+        start = True;
+
+      continue;
+    }
+
+    if(line[i] != ' '){
+      switch(x){
+        
+        case 0:
+          interface->last.receive.bytes = atoi(line+i);
+          break;
+          
+        case 1:
+          interface->last.receive.total = atoi(line+i);
+          break;
+          
+        case 2:
+          interface->last.receive.error = atoi(line+i);
+          break;
+          
+        case 3:
+          interface->last.receive.drop = atoi(line+i);
+          break;    
+          
+        case 4:
+          interface->last.receive.fifo = atoi(line+i);
+          break;
+                        
+        case 5:
+          interface->last.receive.frame = atoi(line+i);
+          break;
+                                                    
+        case 6:
+          interface->last.receive.compressed = atoi(line+i);
+          break;
+
+        case 7:
+          interface->last.receive.multicast = atoi(line+i);
+          break;
+                        
+        case 8:
+          interface->last.transmit.bytes = atoi(line+i);
+          break;
+          
+        case 9:
+          interface->last.transmit.total = atoi(line+i);
+          break;
+          
+        case 10:
+          interface->last.transmit.error = atoi(line+i);
+          break;
+          
+        case 11:
+          interface->last.transmit.drop = atoi(line+i);
+          break;    
+          
+        case 12:
+          interface->last.transmit.fifo = atoi(line+i);
+          break;
+                        
+        case 13:
+          interface->last.receive.colls = atoi(line+i);
+          break;
+                        
+        case 14:
+          interface->last.transmit.carrier = atoi(line+i);
+          break;
+                        
+        case 15:
+          interface->last.transmit.compressed = atoi(line+i);
+          break;
+                  
+      }
+      for(;i < len;i++){ // jump to next space
+        if(line[i] == ' ') break;
+      }
+      x++;
+    }
+    
+  }
+  
+}
 
 void get_net_statistic()
 {
@@ -76,6 +293,8 @@ void get_net_statistic()
   Statistic *save, *last, *cur, *between;
   int i, j, x;
   i = j = x = 0;
+  net.num_interfaces = 0;
+  Bool start = False;
 
   fp = fopen("/proc/net/dev", "r");
   if (fp == NULL){
@@ -88,15 +307,22 @@ void get_net_statistic()
     if(i < 2){
       i++;
       continue;
-    }else if(i == 2)
-      save = &net.lo.current;
-    else if(i == 3)
-      save = &net.eth0.current;
-    else if(i == 4)
-      save = &net.wlan0.current;
+    }
+    net.num_interfaces++;
+    if (!strstr(line, net.interfaces[i-2].name))
+       new_interface(&net.interfaces[i-2], line, len);
+
+    save = &net.interfaces[i-2].current;
     
     x = 0;
-    for(j = 7;j < len;j++){
+    for(j = 0;j < len;j++){
+      if (!start) {
+        if (line[i] == ':')
+          start = True;
+     
+        continue;
+      }
+
       if(line[j] != ' '){
         switch(x){
           
@@ -182,20 +408,10 @@ void get_net_statistic()
   
   
   // claculate new and bytes per second
-  for(i = 0; i < 3;i++){
-    if(i == 0){ // eth0
-      cur     = &net.lo.current;
-      last    = &net.lo.last;
-      between = &net.lo.between;
-    }else if(i == 1){
-      cur     = &net.eth0.current;
-      last    = &net.eth0.last;
-      between = &net.eth0.between;
-    }else if(i == 2){
-      cur     = &net.wlan0.current;
-      last    = &net.wlan0.last;
-      between = &net.wlan0.between;
-    }
+  for(i = 0; i < net.num_interfaces;i++){
+    cur     = &net.interfaces[i].current;
+    last    = &net.interfaces[i].last;
+    between = &net.interfaces[i].between;
     
          
     between->receive.bytes       = cur->receive.bytes       - last->receive.bytes;
@@ -244,7 +460,8 @@ void get_wireless_sterngth()
   char * line = NULL;
   size_t len = 0;
   ssize_t read;
-  int i = 0;
+  int l, k, j, i = 0;
+  Bool notspace = False;
 
   fp = fopen("/proc/net/wireless", "r");
   if (fp == NULL){
@@ -254,14 +471,31 @@ void get_wireless_sterngth()
   }
 
   while ((read = getline(&line, &len, fp)) != -1) {
-    if(i == 2){ //up
-      net.wlan0.linkcur = atoi(line+15);
-      break;
+    if (i < 2) {
+      i++;
+      continue;
     }
-    i++;
+    for (j = 0; j < net.num_interfaces; j++) {
+      if (strstr(line, net.interfaces[j].name)) {
+        l = 0;
+        for (k = 0; k < len; k++) {
+          if (line[k] != ' ' && !notspace) {
+            l++;
+            notspace = True;
+          } else
+            notspace = False;
+
+          if (l == 3) {
+            net.interfaces[j].linkcur = atoi(line + k);
+            net.interfaces[j].strength = (double)net.interfaces[j].linkcur / (double)net.interfaces[j].linkmax;
+            break;
+          }
+        }
+        break;
+      }
+    }
   }
   
-  net.wlan0.strength = (double)net.wlan0.linkcur / (double)net.wlan0.linkmax;
   
   if (line) free(line);
   fclose(fp);
@@ -274,24 +508,31 @@ void get_interface_stat()
   char * line = NULL;
   size_t len = 0;
   ssize_t read;
+  int i;
+  char cmd[100];
 
-  fp = fopen("/sys/class/net/wlan0/operstate", "r");
-  if (fp == NULL){
-        printf("\nfailed to read /sys/class/net/wlan0/operstate\n");
-        sbar_status_symbols[DrawNet].active = False;
-        return;
-  }
+  for (i = 0; i < net.num_interfaces; i++) {
+    sprintf(cmd, "/sys/class/net/%s/operstate", net.interfaces[i].name);
 
-  while ((read = getline(&line, &len, fp)) != -1) {
-    if(line[0] == 'u'){ //up
-      net.wlan0.online = True;
-    }else{ //down
-      net.wlan0.online = False;
+    fp = fopen(cmd, "r");
+    if (fp == NULL){
+          printf("\nfailed to read %s\n", cmd);
+          sbar_status_symbols[DrawNet].active = False;
+          return;
     }
-    break;
+ 
+    while ((read = getline(&line, &len, fp)) != -1) {
+      if(line[0] == 'u'){ //up
+        net.interfaces[i].online = True;
+      }else{ //down
+        net.interfaces[i].online = False;
+      }
+      break;
+    }
+ 
+    if (line) free(line);
+    fclose(fp);
   }
-
-  fclose(fp);
   
   fp = fopen("/proc/easy_wifi_kill", "r");
   if (fp == NULL){
@@ -300,34 +541,27 @@ void get_interface_stat()
         return;
   }
 
-  while ((read = getline(&line, &len, fp)) != -1) {
-    if(line[0] == '1'){ //up
-      net.wlan0.easy_online = True;
-    }else{ //down
-      net.wlan0.easy_online = False;
-    }
-    break;
-  }
+  if ((read = getline(&line, &len, fp)) != -1) {
+    for (i = 0; i < net.num_interfaces; i++) {
+      if (strcomp(net.interfaces[i].name, "wlan0")) {
 
-  fclose(fp);
-  
-  fp = fopen("/sys/class/net/eth0/operstate", "r");
-  if (fp == NULL){
-        printf("\nfailed to read /sys/class/net/eth0/operstate\n");
-        sbar_status_symbols[DrawNet].active = False;
-        return;
-  }
+        if(line[0] == '1'){ //up
+          net.interfaces[i].easy_online = True;
+        }else{ //down
+          net.interfaces[i].easy_online = False;
+        }
+        break;
+      }
 
-  while ((read = getline(&line, &len, fp)) != -1) {
-    if(line[0] == 'u'){ //up
-      net.eth0.online = True;
-    }else{ //down
-      net.eth0.online = False;
     }
-    break;
   }
   
-  net.connected = ((net.eth0.online || net.wlan0.online) ? True : False);
+  for (i = 0; i < net.num_interfaces; i++) {
+    if (net.interfaces[i].online) {
+      net.connected = True;
+      break;
+    }
+  }
   
   if (line) free(line);
   fclose(fp);
@@ -336,114 +570,6 @@ void get_interface_stat()
 
 void setup_net()
 {
-  net.wlan0.linkmax = max_link_quality;
   net.refresh = status_refresh;
-  
-  
-  FILE * fp;
-  char * line = NULL;
-  size_t len = 0;
-  ssize_t read;
-  Statistic *save, *last, *cur, *between;
-  int i, j, x;
-  i = j = x = 0;
-
-  fp = fopen("/proc/net/dev", "r");
-  if (fp == NULL){
-        printf("\nfailed to read /proc/net/dev\n");
-        sbar_status_symbols[DrawNet].active = False;
-        return;
-  }
-
-  while ((read = getline(&line, &len, fp)) != -1) {
-    if(i == 0) // eth0
-      save = &net.lo.last;
-    else if(i == 1)
-      save = &net.eth0.last;
-    else if(i == 2)
-      save = &net.wlan0.last;
-      
-    for(i = 7;i < len;i++){
-      if(line[i] != ' '){
-        switch(x){
-          
-          case 0:
-            save->receive.bytes = atoi(line+i);
-            break;
-            
-          case 1:
-            save->receive.total = atoi(line+i);
-            break;
-            
-          case 2:
-            save->receive.error = atoi(line+i);
-            break;
-            
-          case 3:
-            save->receive.drop = atoi(line+i);
-            break;    
-            
-          case 4:
-            save->receive.fifo = atoi(line+i);
-            break;
-                          
-          case 5:
-            save->receive.frame = atoi(line+i);
-            break;
-                                                      
-          case 6:
-            save->receive.compressed = atoi(line+i);
-            break;
-
-          case 7:
-            save->receive.multicast = atoi(line+i);
-            break;
-                          
-          case 8:
-            save->transmit.bytes = atoi(line+i);
-            break;
-            
-          case 9:
-            save->transmit.total = atoi(line+i);
-            break;
-            
-          case 10:
-            save->transmit.error = atoi(line+i);
-            break;
-            
-          case 11:
-            save->transmit.drop = atoi(line+i);
-            break;    
-            
-          case 12:
-            save->transmit.fifo = atoi(line+i);
-            break;
-                          
-          case 13:
-            save->receive.colls = atoi(line+i);
-            break;
-                          
-          case 14:
-            save->transmit.carrier = atoi(line+i);
-            break;
-                          
-          case 15:
-            save->transmit.compressed = atoi(line+i);
-            break;
-                    
-        }
-        for(;i < len;i++){ // jump to next space
-          if(line[i] == ' ') break;
-        }
-        x++;
-      }
-      
-    }
-    i++;
-  }
-  
-  if (line) free(line);
-  fclose(fp);
-  
   update_net();
 }
