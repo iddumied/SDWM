@@ -8,16 +8,19 @@
 double calc_time_div(struct timeval t_end, struct timeval t_star);
 void setup_sbar();
 void changeTheme();
-
-static SBarColor sbarcolor;
-static SBar sbars[ANZ_STYL_BARS];
-static TBar tbar;
-static Bool topbar;    			 /* False means bottom bar */
+  
 static int screenWidth, screenHeight;
-static Bool sbarloaded;
-static Bool tbarloaded = False;
-static Pixmap *timeline;
-static Bool status_symbol_mode[DrawLast];
+
+typedef struct {
+  SBarColor colors;
+  Bool topbar;    			                /* False means bottom bar */
+  Bool sbarloaded;
+  Bool status_symbol_mode[DrawLast];
+  Pixmap *cpu_timeline;
+  int cpu_posx;
+} SBar;
+
+SBar sbar;
 
 #include "statuswin.c"
 #include "freestylebar.c"
@@ -38,87 +41,83 @@ double calc_time_div(struct timeval t_end, struct timeval t_star)
 }
 
 
-  static struct timeval start_time, end_time;
-
 void setup_sbar()
 {
-  //struct timeval start_time, end_time;
+  struct timeval start_time, end_time;
   gettimeofday(&start_time, 0);
   
   int i, j, status;
 
-  tbarloaded = True;
-    
 
   screenWidth  = DisplayWidth(dpy, DefaultScreen(dpy));
   screenHeight = DisplayHeight(dpy, DefaultScreen(dpy));
 
   // int bar length
   bh++; // because of bottomborder height + 1
-  topbar = texttopbar;
-  sbarloaded = False;
+  sbar.topbar = sbartopbar;
+  sbar.sbarloaded = False;
 
   // setup status calculating need bh
   setup_status();
 
   // cpu_posx calculation need setup_cpu
-  if(cpu_in_middle) cpu_posx = screenWidth/2 - (cpu_length*ncpus  + (ncpus-1)*distance_x)/2;
+  sbar.cpu_posx = screenWidth/2 - (cpu_length*cpuinfo.ncpus  + (cpuinfo.ncpus-1)*distance_x)/2;
 
   setup_stw();
   setup_freestylebar();    
 
 
-  sbarcolor.red            = getcolor("#FF0000");
-  sbarcolor.green          = getcolor("#00FF00");
-  sbarcolor.redlow         = getcolor("#010000");
-  sbarcolor.greenlow       = getcolor("#000100");
-  sbarcolor.black          = getcolor("#000000");
-  sbarcolor.white          = getcolor("#ffffff");
-  sbarcolor.blue           = getcolor("#0000ff");
-  sbarcolor.yellow         = getcolor("#ffff00");
-  sbarcolor.membuff_line   = getcolor("#aaaaaa");
-  sbarcolor.memcach_line   = getcolor("#005588");
-  sbarcolor.memcach_point  = getcolor("#002a44");
-  sbarcolor.cpu_line       = getcolor(cpu_line_color);
+  sbar.colors.red            = getcolor("#FF0000");
+  sbar.colors.green          = getcolor("#00FF00");
+  sbar.colors.redlow         = getcolor("#010000");
+  sbar.colors.greenlow       = getcolor("#000100");
+  sbar.colors.black          = getcolor("#000000");
+  sbar.colors.white          = getcolor("#ffffff");
+  sbar.colors.blue           = getcolor("#0000ff");
+  sbar.colors.yellow         = getcolor("#ffff00");
+  sbar.colors.membuff_line   = getcolor("#aaaaaa");
+  sbar.colors.memcach_line   = getcolor("#005588");
+  sbar.colors.memcach_point  = getcolor("#002a44");
+  sbar.colors.cpu_line       = getcolor(cpu_line_color);
     
   // normal apperance
-  sbarcolor.normbordercolor = dc.norm[ColBorder]    = getcolor(themes[CurTheme].normal.normbordercolor);
-  sbarcolor.normbgcolor     = dc.norm[ColBG]        = getcolor(themes[CurTheme].normal.normbgcolor);
-  sbarcolor.normfgcolor     = dc.norm[ColFG]        = getcolor(themes[CurTheme].normal.normfgcolor);
-  sbarcolor.selbordercolor  = dc.sel[ColBorder]     = getcolor(themes[CurTheme].normal.selbordercolor);
-  sbarcolor.selbgcolor      = dc.sel[ColBG]         = getcolor(themes[CurTheme].normal.selbgcolor);
-  sbarcolor.selfgcolor      = dc.sel[ColFG]         = getcolor(themes[CurTheme].normal.selfgcolor);
-  sbarcolor.botbordercolor  = dc.sbar[SBarBorder]   = getcolor(themes[CurTheme].normal.botbordercolor);
-  sbarcolor.cpu_line        = dc.sbar[SBarLine]  = getcolor(themes[CurTheme].normal.timeln_line_color);
-  sbarcolor.cpu_point       = dc.sbar[SBarCpuPoint] = getcolor(themes[CurTheme].normal.timeln_point_color);
+  sbar.colors.normbordercolor = dc.norm[ColBorder]    = getcolor(themes[CurTheme].normal.normbordercolor);
+  sbar.colors.normbgcolor     = dc.norm[ColBG]        = getcolor(themes[CurTheme].normal.normbgcolor);
+  sbar.colors.normfgcolor     = dc.norm[ColFG]        = getcolor(themes[CurTheme].normal.normfgcolor);
+  sbar.colors.selbordercolor  = dc.sel[ColBorder]     = getcolor(themes[CurTheme].normal.selbordercolor);
+  sbar.colors.selbgcolor      = dc.sel[ColBG]         = getcolor(themes[CurTheme].normal.selbgcolor);
+  sbar.colors.selfgcolor      = dc.sel[ColFG]         = getcolor(themes[CurTheme].normal.selfgcolor);
+  sbar.colors.botbordercolor  = dc.sbar[SBarBorder]   = getcolor(themes[CurTheme].normal.botbordercolor);
+  sbar.colors.cpu_line        = dc.sbar[SBarLine]  = getcolor(themes[CurTheme].normal.timeln_line_color);
+  sbar.colors.cpu_point       = dc.sbar[SBarCpuPoint] = getcolor(themes[CurTheme].normal.timeln_point_color);
     
   // apperance by low battery
-  sbarcolor.bnormbgcolor      = getcolor(themes[CurTheme].low.normbgcolor);
-  sbarcolor.bnormbordercolor  = getcolor(themes[CurTheme].low.normbordercolor);
-  sbarcolor.bnormfgcolor      = getcolor(themes[CurTheme].low.normfgcolor);
-  sbarcolor.bselbgcolor       = getcolor(themes[CurTheme].low.selbgcolor);
-  sbarcolor.bselbordercolor   = getcolor(themes[CurTheme].low.selbordercolor);
-  sbarcolor.bselfgcolor       = getcolor(themes[CurTheme].low.selfgcolor);
-  sbarcolor.bbotbordercolor   = getcolor(themes[CurTheme].low.botbordercolor);
-  sbarcolor.bcpu_line         = getcolor(themes[CurTheme].low.timeln_line_color);
-  sbarcolor.bcpu_point        = getcolor(themes[CurTheme].low.timeln_point_color);
+  sbar.colors.bnormbgcolor      = getcolor(themes[CurTheme].low.normbgcolor);
+  sbar.colors.bnormbordercolor  = getcolor(themes[CurTheme].low.normbordercolor);
+  sbar.colors.bnormfgcolor      = getcolor(themes[CurTheme].low.normfgcolor);
+  sbar.colors.bselbgcolor       = getcolor(themes[CurTheme].low.selbgcolor);
+  sbar.colors.bselbordercolor   = getcolor(themes[CurTheme].low.selbordercolor);
+  sbar.colors.bselfgcolor       = getcolor(themes[CurTheme].low.selfgcolor);
+  sbar.colors.bbotbordercolor   = getcolor(themes[CurTheme].low.botbordercolor);
+  sbar.colors.bcpu_line         = getcolor(themes[CurTheme].low.timeln_line_color);
+  sbar.colors.bcpu_point        = getcolor(themes[CurTheme].low.timeln_point_color);
 
   // apperance by very low battery
-  sbarcolor.bbnormbgcolor     = getcolor(themes[CurTheme].verylow.normbgcolor);
-  sbarcolor.bbnormbordercolor = getcolor(themes[CurTheme].verylow.normbordercolor);
-  sbarcolor.bbnormfgcolor     = getcolor(themes[CurTheme].verylow.normfgcolor);
-  sbarcolor.bbnormfgcolor     = getcolor(themes[CurTheme].verylow.normfgcolor);
-  sbarcolor.bbselbgcolor      = getcolor(themes[CurTheme].verylow.selbgcolor);
-  sbarcolor.bbselbordercolor  = getcolor(themes[CurTheme].verylow.selbordercolor);
-  sbarcolor.bbselfgcolor      = getcolor(themes[CurTheme].verylow.selfgcolor);
-  sbarcolor.bbbotbordercolor  = getcolor(themes[CurTheme].verylow.botbordercolor);
-  sbarcolor.bbcpu_line        = getcolor(themes[CurTheme].verylow.timeln_line_color);
-  sbarcolor.bbcpu_point       = getcolor(themes[CurTheme].verylow.timeln_point_color);
+  sbar.colors.bbnormbgcolor     = getcolor(themes[CurTheme].verylow.normbgcolor);
+  sbar.colors.bbnormbordercolor = getcolor(themes[CurTheme].verylow.normbordercolor);
+  sbar.colors.bbnormfgcolor     = getcolor(themes[CurTheme].verylow.normfgcolor);
+  sbar.colors.bbnormfgcolor     = getcolor(themes[CurTheme].verylow.normfgcolor);
+  sbar.colors.bbselbgcolor      = getcolor(themes[CurTheme].verylow.selbgcolor);
+  sbar.colors.bbselbordercolor  = getcolor(themes[CurTheme].verylow.selbordercolor);
+  sbar.colors.bbselfgcolor      = getcolor(themes[CurTheme].verylow.selfgcolor);
+  sbar.colors.bbbotbordercolor  = getcolor(themes[CurTheme].verylow.botbordercolor);
+  sbar.colors.bbcpu_line        = getcolor(themes[CurTheme].verylow.timeln_line_color);
+  sbar.colors.bbcpu_point       = getcolor(themes[CurTheme].verylow.timeln_point_color);
     
-  timeline = (Pixmap*)malloc(sizeof(Pixmap)*ncpus+1);
+  sbar.cpu_timeline = (Pixmap*)malloc(sizeof(Pixmap)*cpuinfo.ncpus+1);
       
-  for(i = 0;i < ncpus+1;i++)
-    timeline[i] = XCreatePixmap(dpy, root, cpu_length, bh-1, DefaultDepth(dpy, screen));
+  for(i = 0;i < cpuinfo.ncpus+1;i++)
+    sbar.cpu_timeline[i] = XCreatePixmap(dpy, root, cpu_length, bh-1, DefaultDepth(dpy, screen));
 
   gettimeofday(&end_time, 0);
   printf("\nsbar Setup needed:  %f Seconds\n", calc_time_div(end_time, start_time));  
@@ -174,38 +173,38 @@ void changeTheme(){
   stw.sbar[SBarCpuPoint] = getcolor(themes[CurTheme].stw.timeln_point_color);
 
   // normal apperance
-  sbarcolor.normbordercolor = dc.norm[ColBorder]    = getcolor(themes[CurTheme].normal.normbordercolor);
-  sbarcolor.normbgcolor     = dc.norm[ColBG]        = getcolor(themes[CurTheme].normal.normbgcolor);
-  sbarcolor.normfgcolor     = dc.norm[ColFG]        = getcolor(themes[CurTheme].normal.normfgcolor);
-  sbarcolor.selbordercolor  = dc.sel[ColBorder]     = getcolor(themes[CurTheme].normal.selbordercolor);
-  sbarcolor.selbgcolor      = dc.sel[ColBG]         = getcolor(themes[CurTheme].normal.selbgcolor);
-  sbarcolor.selfgcolor      = dc.sel[ColFG]         = getcolor(themes[CurTheme].normal.selfgcolor);
-  sbarcolor.botbordercolor  = dc.sbar[SBarBorder]   = getcolor(themes[CurTheme].normal.botbordercolor);
-  sbarcolor.cpu_line        = dc.sbar[SBarLine]  = getcolor(themes[CurTheme].normal.timeln_line_color);
-  sbarcolor.cpu_point       = dc.sbar[SBarCpuPoint] = getcolor(themes[CurTheme].normal.timeln_point_color);
+  sbar.colors.normbordercolor = dc.norm[ColBorder]    = getcolor(themes[CurTheme].normal.normbordercolor);
+  sbar.colors.normbgcolor     = dc.norm[ColBG]        = getcolor(themes[CurTheme].normal.normbgcolor);
+  sbar.colors.normfgcolor     = dc.norm[ColFG]        = getcolor(themes[CurTheme].normal.normfgcolor);
+  sbar.colors.selbordercolor  = dc.sel[ColBorder]     = getcolor(themes[CurTheme].normal.selbordercolor);
+  sbar.colors.selbgcolor      = dc.sel[ColBG]         = getcolor(themes[CurTheme].normal.selbgcolor);
+  sbar.colors.selfgcolor      = dc.sel[ColFG]         = getcolor(themes[CurTheme].normal.selfgcolor);
+  sbar.colors.botbordercolor  = dc.sbar[SBarBorder]   = getcolor(themes[CurTheme].normal.botbordercolor);
+  sbar.colors.cpu_line        = dc.sbar[SBarLine]  = getcolor(themes[CurTheme].normal.timeln_line_color);
+  sbar.colors.cpu_point       = dc.sbar[SBarCpuPoint] = getcolor(themes[CurTheme].normal.timeln_point_color);
     
   // apperance by low battery
-  sbarcolor.bnormbgcolor      = getcolor(themes[CurTheme].low.normbgcolor);
-  sbarcolor.bnormbordercolor  = getcolor(themes[CurTheme].low.normbordercolor);
-  sbarcolor.bnormfgcolor      = getcolor(themes[CurTheme].low.normfgcolor);
-  sbarcolor.bselbgcolor       = getcolor(themes[CurTheme].low.selbgcolor);
-  sbarcolor.bselbordercolor   = getcolor(themes[CurTheme].low.selbordercolor);
-  sbarcolor.bselfgcolor       = getcolor(themes[CurTheme].low.selfgcolor);
-  sbarcolor.bbotbordercolor   = getcolor(themes[CurTheme].low.botbordercolor);
-  sbarcolor.bcpu_line         = getcolor(themes[CurTheme].low.timeln_line_color);
-  sbarcolor.bcpu_point        = getcolor(themes[CurTheme].low.timeln_point_color);
+  sbar.colors.bnormbgcolor      = getcolor(themes[CurTheme].low.normbgcolor);
+  sbar.colors.bnormbordercolor  = getcolor(themes[CurTheme].low.normbordercolor);
+  sbar.colors.bnormfgcolor      = getcolor(themes[CurTheme].low.normfgcolor);
+  sbar.colors.bselbgcolor       = getcolor(themes[CurTheme].low.selbgcolor);
+  sbar.colors.bselbordercolor   = getcolor(themes[CurTheme].low.selbordercolor);
+  sbar.colors.bselfgcolor       = getcolor(themes[CurTheme].low.selfgcolor);
+  sbar.colors.bbotbordercolor   = getcolor(themes[CurTheme].low.botbordercolor);
+  sbar.colors.bcpu_line         = getcolor(themes[CurTheme].low.timeln_line_color);
+  sbar.colors.bcpu_point        = getcolor(themes[CurTheme].low.timeln_point_color);
 
   // apperance by very low battery
-  sbarcolor.bbnormbgcolor     = getcolor(themes[CurTheme].verylow.normbgcolor);
-  sbarcolor.bbnormbordercolor = getcolor(themes[CurTheme].verylow.normbordercolor);
-  sbarcolor.bbnormfgcolor     = getcolor(themes[CurTheme].verylow.normfgcolor);
-  sbarcolor.bbnormfgcolor     = getcolor(themes[CurTheme].verylow.normfgcolor);
-  sbarcolor.bbselbgcolor      = getcolor(themes[CurTheme].verylow.selbgcolor);
-  sbarcolor.bbselbordercolor  = getcolor(themes[CurTheme].verylow.selbordercolor);
-  sbarcolor.bbselfgcolor      = getcolor(themes[CurTheme].verylow.selfgcolor);
-  sbarcolor.bbbotbordercolor  = getcolor(themes[CurTheme].verylow.botbordercolor);
-  sbarcolor.bbcpu_line        = getcolor(themes[CurTheme].verylow.timeln_line_color);
-  sbarcolor.bbcpu_point       = getcolor(themes[CurTheme].verylow.timeln_point_color);
+  sbar.colors.bbnormbgcolor     = getcolor(themes[CurTheme].verylow.normbgcolor);
+  sbar.colors.bbnormbordercolor = getcolor(themes[CurTheme].verylow.normbordercolor);
+  sbar.colors.bbnormfgcolor     = getcolor(themes[CurTheme].verylow.normfgcolor);
+  sbar.colors.bbnormfgcolor     = getcolor(themes[CurTheme].verylow.normfgcolor);
+  sbar.colors.bbselbgcolor      = getcolor(themes[CurTheme].verylow.selbgcolor);
+  sbar.colors.bbselbordercolor  = getcolor(themes[CurTheme].verylow.selbordercolor);
+  sbar.colors.bbselfgcolor      = getcolor(themes[CurTheme].verylow.selfgcolor);
+  sbar.colors.bbbotbordercolor  = getcolor(themes[CurTheme].verylow.botbordercolor);
+  sbar.colors.bbcpu_line        = getcolor(themes[CurTheme].verylow.timeln_line_color);
+  sbar.colors.bbcpu_point       = getcolor(themes[CurTheme].verylow.timeln_point_color);
 
   // map status win
   if(!draw_status_win)

@@ -35,36 +35,31 @@ static const Layout layouts[] = {
 
 
 
-static const Bool texttopbar        = True;       // False means bottom bar
-static const Bool readFromXroot     = False;      // if set sbar draws a collurfull statusbar in textmode
-                                                  // with cpu and memory usage, battery clock and date
-                                                  // controled by setings above
+static const Bool sbartopbar        = True;         // False means bottom bar
 static const Bool showbattery       = True;
-static const Bool cpu_in_middle     = True;       // if True cpu is placed in middel of bar
-static int cpu_posx                 = 600;
-static const int cpu_length         = 60;         // length of one cpu consider this if you have more
-static const int distance_x         = 5;          // distance betwen cpu-cores if you have more than one
-static const int distance_y         = 2;          // distance between symbols and top and bottom of bar
-static const int symbol_distance    = 6;          // distance between two symbols on the x line
+static const int cpu_length         = 60;           // length of one cpu consider this if you have more
+static const Bool cpu_shift_left    = True;         // Shift cpu timeline left (else right)
+static const int distance_x         = 5;            // distance betwen cpu-cores if you have more than one
+static const int distance_y         = 2;            // distance between symbols and top and bottom of bar
+static const int symbol_distance    = 6;            // distance between two symbols on the x line
 
 static const char memused_col[]      = "#00aaff";   //"#18B218";
 static const char membuff_col[]      = "#ffffff";   //"#0F3FBA";
 static const char memcach_col[]      = "#005588";   //"#FFFF00";
 
-static const int status_refresh     = 1;           // refresh zyklus in seconds
+static const int status_refresh     = 1;            // refresh zyklus in seconds
 static const Bool show_year         = True;
 
 static const char mainsymbol[]      = "\x18";
-static const Bool shift_left        = True;
 
 
 static const Bool utime_seconds     = False;
-static const int  tbar_distancex    = 12;
+static const int  sbar_distancex    = 12;
 
 static const unsigned int gappx     = 6;
-static const int max_link_quality   = 70; // max wlan quality found out by calling iwconfig
+static const int max_link_quality   = 70;           // max wlan quality found out by calling iwconfig
 
-#define MAXPARTITIONS 20                    // max number of posible partitions mounted if you mount more it will crash
+#define MAXPARTITIONS 20                            // max number of posible partitions mounted if you mount more it will crash
 
 
 /******* SECTION INVORMATIONS *******/

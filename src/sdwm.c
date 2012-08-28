@@ -58,7 +58,7 @@
 /* enums */
 enum { CurNormal, CurResize, CurMove, CurLast };              /* cursor */
 enum { ColBorder, ColFG, ColBG, ColLast };                    /* color */
-enum { SBarCpuPoint, SBarLine, SBarBorder, SBarLast };     /* sbarcolors */
+enum { SBarCpuPoint, SBarLine, SBarBorder, SBarLast };     /* colorss */
 enum { NetSupported, NetWMName, NetWMState,
        NetWMFullscreen, NetActiveWindow, NetWMWindowType,
        NetWMWindowTypeDialog, NetLast };                      /* EWMH atoms */
@@ -718,7 +718,7 @@ void black_floading()
  int i, j, p1, p2, ra1, ra2;
  GC gc = XCreateGC(dpy, DefaultRootWindow(dpy), 0, NULL);
  XGCValues gcv;
-  gcv.foreground = sbarcolor.black;
+  gcv.foreground = sbar.colors.black;
   XChangeGC(dpy, gc, GCForeground, &gcv);
 
  pointx = (int*)malloc(sizeof(int)*screenWidth);
@@ -755,6 +755,12 @@ void black_floading()
 }
 void black_floadquit()
 {
+  Client *c;
+
+  // destroying all Clients
+	for(c = selmon->stack; c; c = c->snext)
+    XDestroyWindow(dpy,c->win);
+
   black_floading();
   quit(NULL);
 }
@@ -1136,7 +1142,7 @@ createmon(void) {
 	m->tagset[0] = m->tagset[1] = 1;
 	m->mfact = mfact;
 	m->showbar = showbar;
-	m->topbar = topbar;
+	m->topbar = sbar.topbar;
 	m->lt[0] = &layouts[0];
 	m->lt[1] = &layouts[1 % LENGTH(layouts)];
 	strncpy(m->ltsymbol, layouts[0].symbol, sizeof m->ltsymbol);
@@ -1214,15 +1220,15 @@ drawbar(Monitor *m) {
    // if battery low, change style
  
    if(battery.adapter){ //normal colors
-     dc.norm[ColBorder]    = sbarcolor.normbordercolor;
-     dc.norm[ColBG]        = sbarcolor.normbgcolor;
-     dc.norm[ColFG]        = sbarcolor.normfgcolor;
-     dc.sel[ColBorder]     = sbarcolor.selbordercolor;
-     dc.sel[ColBG]         = sbarcolor.selbgcolor;
-     dc.sel[ColFG]         = sbarcolor.selfgcolor;
-     dc.sbar[SBarBorder]   = sbarcolor.botbordercolor;
-     dc.sbar[SBarLine]  = sbarcolor.cpu_line; 
-     dc.sbar[SBarCpuPoint] = sbarcolor.cpu_point;
+     dc.norm[ColBorder]    = sbar.colors.normbordercolor;
+     dc.norm[ColBG]        = sbar.colors.normbgcolor;
+     dc.norm[ColFG]        = sbar.colors.normfgcolor;
+     dc.sel[ColBorder]     = sbar.colors.selbordercolor;
+     dc.sel[ColBG]         = sbar.colors.selbgcolor;
+     dc.sel[ColFG]         = sbar.colors.selfgcolor;
+     dc.sbar[SBarBorder]   = sbar.colors.botbordercolor;
+     dc.sbar[SBarLine]     = sbar.colors.cpu_line; 
+     dc.sbar[SBarCpuPoint] = sbar.colors.cpu_point;
      
    }else if(battery.stat <= bat_suspend){
      Arg arg = SHCMD("sudo pm-suspend");
@@ -1230,26 +1236,26 @@ drawbar(Monitor *m) {
  
        
    }else if(battery.stat <= bverylowstat){
-     dc.norm[ColBorder]    = sbarcolor.bbnormbordercolor;
-     dc.norm[ColBG]        = sbarcolor.bbnormbgcolor;
-     dc.norm[ColFG]        = sbarcolor.bbnormfgcolor;
-     dc.sel[ColBorder]     = sbarcolor.bbselbordercolor;
-     dc.sel[ColBG]         = sbarcolor.bbselbgcolor;
-     dc.sel[ColFG]         = sbarcolor.bbselfgcolor;
-     dc.sbar[SBarBorder]   = sbarcolor.bbbotbordercolor;
-     dc.sbar[SBarLine]  = sbarcolor.bbcpu_line; 
-     dc.sbar[SBarCpuPoint] = sbarcolor.bbcpu_point;
+     dc.norm[ColBorder]    = sbar.colors.bbnormbordercolor;
+     dc.norm[ColBG]        = sbar.colors.bbnormbgcolor;
+     dc.norm[ColFG]        = sbar.colors.bbnormfgcolor;
+     dc.sel[ColBorder]     = sbar.colors.bbselbordercolor;
+     dc.sel[ColBG]         = sbar.colors.bbselbgcolor;
+     dc.sel[ColFG]         = sbar.colors.bbselfgcolor;
+     dc.sbar[SBarBorder]   = sbar.colors.bbbotbordercolor;
+     dc.sbar[SBarLine]     = sbar.colors.bbcpu_line; 
+     dc.sbar[SBarCpuPoint] = sbar.colors.bbcpu_point;
      
    }else if(battery.stat <= blowstat){
-     dc.norm[ColBorder]    = sbarcolor.bnormbordercolor;
-     dc.norm[ColBG]        = sbarcolor.bnormbgcolor;
-     dc.norm[ColFG]        = sbarcolor.bnormfgcolor;
-     dc.sel[ColBorder]     = sbarcolor.bselbordercolor;
-     dc.sel[ColBG]         = sbarcolor.bselbgcolor;
-     dc.sel[ColFG]         = sbarcolor.bselfgcolor;
-     dc.sbar[SBarBorder]   = sbarcolor.bbotbordercolor;
-     dc.sbar[SBarLine]  = sbarcolor.bcpu_line; 
-     dc.sbar[SBarCpuPoint] = sbarcolor.bcpu_point;
+     dc.norm[ColBorder]    = sbar.colors.bnormbordercolor;
+     dc.norm[ColBG]        = sbar.colors.bnormbgcolor;
+     dc.norm[ColFG]        = sbar.colors.bnormfgcolor;
+     dc.sel[ColBorder]     = sbar.colors.bselbordercolor;
+     dc.sel[ColBG]         = sbar.colors.bselbgcolor;
+     dc.sel[ColFG]         = sbar.colors.bselfgcolor;
+     dc.sbar[SBarBorder]   = sbar.colors.bbotbordercolor;
+     dc.sbar[SBarLine]     = sbar.colors.bcpu_line; 
+     dc.sbar[SBarCpuPoint] = sbar.colors.bcpu_point;
    }
  }
  
@@ -2154,9 +2160,6 @@ setup(void) {
   // load sbar
   setup_sbar();
   
-  //struct timeval start_time, end_time;
-  gettimeofday(&start_time, 0);
-
 	updategeom();
 	/* init atoms */
 	wmatom[WMProtocols]            = XInternAtom(dpy, "WM_PROTOCOLS", False);
@@ -2615,16 +2618,12 @@ updatetitle(Client *c) {
 
 void
 updatestatus(void) {
-  if(readFromXroot){
-    if(!gettextprop(root, XA_WM_NAME, stext, sizeof(stext)))
-      strcpy(stext, "Mwm-"VERSION);
-  }else {
-    update_status();
-    drawstatus();
-    draw_freestylebar();
-    if(draw_status_win)
-      drawstw();
-  }
+  update_status();
+  drawstatus();
+  draw_freestylebar();
+  if(draw_status_win)
+    drawstw();
+
   drawbar(selmon);
 }
 

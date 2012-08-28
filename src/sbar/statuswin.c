@@ -76,8 +76,8 @@ void drawstw()
   wprintln("  |    +--cpu");
   wprintln("  |    |    |");
 
-  for(i = 0; i < ncpus; i++){;
-    sprintf(stwbuffer, "  |    |    +--cpu%d:  %d%c",i+1, (int)(cpuloads[i]*100), '%');
+  for(i = 0; i < cpuinfo.ncpus; i++){;
+    sprintf(stwbuffer, "  |    |    +--cpu%d:  %d%c",i+1, (int)(cpuinfo.cpuloads[i]*100), '%');
     wprintln(stwbuffer);
   }
  
@@ -117,11 +117,11 @@ void drawstw()
   wprintln("  |    +--processes  ");
   sprintf(stwbuffer, "  |    %c    |", pipe);
   wprintln(stwbuffer);
-  sprintf(stwbuffer, "  |    %c    +--amount:  %d",pipe , processes.total);
+  sprintf(stwbuffer, "  |    %c    +--amount:  %d",pipe , cpuinfo.processes.total);
   wprintln(stwbuffer);  
-  sprintf(stwbuffer, "  |    %c    +--running:  %d",pipe , processes.running);
+  sprintf(stwbuffer, "  |    %c    +--running:  %d",pipe , cpuinfo.processes.running);
   wprintln(stwbuffer);                                        
-  sprintf(stwbuffer, "  |    %c    +--blocked:  %d",pipe , processes.blocked);
+  sprintf(stwbuffer, "  |    %c    +--blocked:  %d",pipe , cpuinfo.processes.blocked);
   wprintln(stwbuffer);
 
   if(sbar_status_symbols[DrawBattery].active){

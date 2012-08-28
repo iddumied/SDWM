@@ -21,14 +21,6 @@ typedef struct {
   Pixmap full_active; // witout window but active
 } STab;
 
-
-typedef struct {
-  int w, h, ntabs;
-  Bool topbar;
-  Pixmap drawable;
-  STab * tabs;  
-} SBar;
-
 typedef struct {
   int w, h, pos_x, pos_y;
   char * has_win; // with_windows
@@ -53,5 +45,4 @@ typedef struct {
   int (*func) (int, int);
   Bool active;
 } SBarStatusSymbol;
-
 

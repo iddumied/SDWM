@@ -83,7 +83,7 @@ int draw_backlight(int y, int pos)
   char buffer[8];  
 
   // draw backbacklight.per
-  gcv.foreground = sbarcolor.yellow; 
+  gcv.foreground = sbar.colors.yellow; 
   XChangeGC(dpy, dc.gc, GCForeground, &gcv);
 
   // calc symbol
@@ -118,7 +118,7 @@ int draw_termal(int y, int pos)
   
   // calculaing color
   if(thermal > 55)
-    gcv.foreground = sbarcolor.red;
+    gcv.foreground = sbar.colors.red;
   else gcv.foreground = dc.norm[ColFG];
   
   XChangeGC(dpy, dc.gc, GCForeground, &gcv);
@@ -146,7 +146,7 @@ int draw_memory(int y, int pos)
   if(swapusedper > 0){
     char swap_buffer[4];
     
-    gcv.foreground = sbarcolor.red;
+    gcv.foreground = sbar.colors.red;
     XChangeGC(dpy, dc.gc, GCForeground, &gcv);
     
     sprintf(swap_buffer, " %d%c", swapusedper, '%');
@@ -271,7 +271,7 @@ void drawsymbolstatus()
   // drawing sbar symbols. The order is configured in config.h
   for(i = 0; i < DrawLast;i++){
     if(sbar_status_symbols[i].active)
-      pos = sbar_status_symbols[i].func(y, pos) - tbar_distancex;
+      pos = sbar_status_symbols[i].func(y, pos) - sbar_distancex;
   }
 
 }

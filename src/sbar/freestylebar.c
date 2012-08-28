@@ -66,14 +66,13 @@ void setup_freestylebar(){
 			x = x + TEXTW(tags[i]);
 	
     
-  freestylebar.w  = freestylebar_width = cpu_posx - x - TEXTW("");
+  freestylebar.w  = freestylebar_width = sbar.cpu_posx - x - TEXTW("");
   freestylebar.y = dc.y;
   freestylebar.x = x;
 
   // because of bottomborder heigh - 1
   freestylebar.h = bh-1;
 
-  printf("\n\nfree h,w: %d, %d\nx: %d   cpu_posx: %d\n\n",freestylebar.h,freestylebar.w, x, cpu_posx);
     
   freestylebar.drawable = XCreatePixmap(dpy, root, freestylebar.w, freestylebar.h, DefaultDepth(dpy, screen));
   freestylebar.gc = XCreateGC(dpy, root, 0, NULL);

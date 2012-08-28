@@ -6,7 +6,7 @@ static const char xtermfont[]       = "-nsb-lokaltog-medium-r-normal--10-100-75-
 static const unsigned int borderpx  = 1;          /* border pixel of windows */
 static const unsigned int snap      = 32;         /* snap pixel */
 static const Bool showbar           = True;       /* False means no bar */
-static const int nmaster            = 1;  /* default number of clients in the master area */
+static const int nmaster            = 1;          /* default number of clients in the master area */
 
 static const Rule rules[] = {
 	/* class      instance    title       tags mask     isfloating   monitor */
