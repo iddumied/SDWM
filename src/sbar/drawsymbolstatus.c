@@ -255,7 +255,7 @@ void drawsymbolstatus()
   XChangeGC(dpy, dc.gc, GCForeground, &gcv);
   
   // calculaing font values
-  pos = screenWidth - symbol_distance;
+  pos = screenWidth - symbol_distance_x;
   h = dc.font.ascent + dc.font.descent;
   y = dc.y + (dc.h / 2) - (h / 2) + dc.font.ascent;
   

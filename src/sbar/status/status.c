@@ -86,11 +86,4 @@ void setup_status()
 
   // setup cpu
   setup_cpu();
-  
-  statusstyle.cmem_used   = getcolor(memused_col);
-  statusstyle.cmem_buffer = getcolor(membuff_col);
-  statusstyle.cmem_cached = getcolor(memcach_col);
-  statusstyle.rl          = getcolor("#010000");
-  statusstyle.gl          = getcolor("#000100");
-
 }

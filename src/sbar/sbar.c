@@ -62,7 +62,7 @@ void setup_sbar()
 
   // cpu_posx calculation need setup_cpu
   sbar.cpu_posx = screenWidth/2 - cpus_length/2;
-  sbar.cpu_length = (cpus_length - (cpuinfo.ncpus-1)*distance_x) / cpuinfo.ncpus; 
+  sbar.cpu_length = (cpus_length - (cpuinfo.ncpus-1)*cpu_distance_x) / cpuinfo.ncpus; 
 
   setup_stw();
   setup_freestylebar();    

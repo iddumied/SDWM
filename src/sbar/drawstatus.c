@@ -14,10 +14,10 @@ void drawstatus(){
 	XDrawLine(dpy, dc.drawable, dc.gc, 0, dc.h, screenWidth, dc.h );
 	
 	// CPU
-	int i, cpu_curr_pos, statusheigh = (bh-distance_y*2 - 1), cpuload, cpu_timeline_lineheight, x1,y1,x2,y2;
+	int i, cpu_curr_pos, statusheigh = (bh-symbol_distance_y*2 - 1), cpuload, cpu_timeline_lineheight, x1,y1,x2,y2;
 	
 	for(i = 0; i < cpuinfo.ncpus;i++){
-		cpu_curr_pos = (sbar.cpu_posx + sbar.cpu_length*i + distance_x*i);
+		cpu_curr_pos = (sbar.cpu_posx + sbar.cpu_length*i + cpu_distance_x*i);
 		
 		// calculating how long to draw
 		cpuload = ((int)((double)(sbar.cpu_length-3) * cpuinfo.cpuloads[i]));

@@ -36,16 +36,11 @@ static const Layout layouts[] = {
 
 
 static const Bool sbartopbar        = True;         // False means bottom bar
-static const Bool showbattery       = True;
-static const int cpus_length        = 255;           // length of all cpu timelines
+static const int cpus_length        = 255;          // length of all cpu timelines
 static const Bool cpu_shift_left    = True;         // Shift cpu timeline left (else right)
-static const int distance_x         = 5;            // distance betwen cpu-cores if you have more than one
-static const int distance_y         = 2;            // distance between symbols and top and bottom of bar
-static const int symbol_distance    = 6;            // distance between two symbols on the x line
-
-static const char memused_col[]      = "#00aaff";   //"#18B218";
-static const char membuff_col[]      = "#ffffff";   //"#0F3FBA";
-static const char memcach_col[]      = "#005588";   //"#FFFF00";
+static const int cpu_distance_x     = 5;            // distance betwen cpu-cores if you have more than one
+static const int symbol_distance_y  = 2;            // distance between symbols and top and bottom of bar
+static const int symbol_distance_x  = 6;            // distance between two symbols on the x line
 
 static const int status_refresh     = 1;            // refresh zyklus in seconds
 static const Bool show_year         = True;
@@ -69,7 +64,6 @@ static Bool draw_status_win           = True;
 static const double blowstat          = 0.1;        // defines the warning stat of battery
 static const double bverylowstat      = 0.12;      // 1 is full 0 is empty
 static const double bat_suspend       = 0.075;       // percent when go to suspend
-static const int  stwwidth            = 1366;
 
 
 
