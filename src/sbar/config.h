@@ -42,6 +42,7 @@ static const int cpu_distance_x       = 5;            // distance betwen cpu-cor
 static const int symbol_distance_y    = 2;            // distance between symbols and top and bottom of bar
 static const int symbol_distance_x    = 6;            // distance between two symbols on the x line
 static const int timeline_length      = 100;          // length of net transmit and recive and of disk read and write timelines
+static Bool show_net_lo_interface     = True;         // shows the net lo interface in the statuswin
                                       
 static const int status_refresh       = 1;            // refresh zyklus in seconds
 static const Bool show_year           = True;

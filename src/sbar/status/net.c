@@ -157,6 +157,7 @@ void get_interface_stat()
     }
   }
   
+  connected = False;
   for (i = 0; i < net.num_interfaces; i++) {
     if (net.interfaces[i].online) {
       net.connected = True;
@@ -440,6 +441,7 @@ void get_net_statistic()
     save = &net.interfaces[i-2].current;
     
     x = 0;
+    start = False;
     for(j = 0;j < len;j++){
       if (!start) {
         if (line[i] == ':')
