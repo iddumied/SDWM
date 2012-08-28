@@ -1,9 +1,34 @@
+#define DEBUG_NET
+#ifdef DEBUG_NET
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include <locale.h>
+#include <stdarg.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <X11/cursorfont.h>
+#include <X11/keysym.h>
+#include <X11/Xatom.h>
+#include <X11/Xlib.h>
+#include <X11/Xproto.h>
+#include <X11/Xutil.h>
+#define MAX_NET_INTERFACES 30
+static const int status_refresh = 1;
+static const int max_link_quality = 70;
+#endif
 void setup_net();
 void get_interface_stat();
 void get_wireless_sterngth();
 void get_net_statistic();
 void toogle_wlan();
 void update_net();
+
 
 typedef struct {
   int bytes, total, error, drop, fifo, frame, colls, compressed, carrier, multicast;
@@ -38,6 +63,25 @@ typedef struct {
 
 Net net;
 
+#ifdef DEBUG_NET
+int main() {
+  setup_net();
+
+  while(1==1){
+    sleep(1);
+    update_net();
+
+    int i;
+      printf("%5s: %d\n", "eth0", net.eth0.online);
+      printf("%5s: %d\n", "wlan0", net.wlan0.online);
+      printf("%5s: %d\n", "lo", net.lo.online);
+
+  }
+
+
+  return 0;
+}
+#endif
 
 void update_net()
 {
@@ -51,19 +95,23 @@ void update_net()
 void toogle_wlan()
 {
   Bool easy_on;
+  #ifndef DEBUG_NET
   Arg sarg;
+  #endif
   
   get_interface_stat();
   
   easy_on = !net.wlan0.easy_online;
   net.wlan0.easy_online = easy_on;
 
+  #ifndef DEBUG_NET
   if(easy_on)
     sarg.v = (const char*[]){ "/bin/sh", "-c",  "echo 1 > /proc/easy_wifi_kill", NULL };
   else
     sarg.v = (const char*[]){ "/bin/sh", "-c",  "echo 0 > /proc/easy_wifi_kill", NULL }; 
 
   spawn(&sarg);
+  #endif
 }
 
 
@@ -80,7 +128,9 @@ void get_net_statistic()
   fp = fopen("/proc/net/dev", "r");
   if (fp == NULL){
         printf("\nfailed to read /proc/net/dev\n");
+        #ifndef DEBUG_NET
         sbar_status_symbols[DrawNet].active = False;
+        #endif
         return;
   }
 
@@ -249,7 +299,9 @@ void get_wireless_sterngth()
   fp = fopen("/proc/net/wireless", "r");
   if (fp == NULL){
         printf("\nfailed to read /proc/net/wireless\n");
+        #ifndef DEBUG_NET
         sbar_status_symbols[DrawNet].active = False;
+        #endif
         return;
   }
 
@@ -278,7 +330,9 @@ void get_interface_stat()
   fp = fopen("/sys/class/net/wlan0/operstate", "r");
   if (fp == NULL){
         printf("\nfailed to read /sys/class/net/wlan0/operstate\n");
+        #ifndef DEBUG_NET
         sbar_status_symbols[DrawNet].active = False;
+        #endif
         return;
   }
 
@@ -296,7 +350,9 @@ void get_interface_stat()
   fp = fopen("/proc/easy_wifi_kill", "r");
   if (fp == NULL){
         printf("\nfailed to read /proc/easy_wifi_kill\n");
+        #ifndef DEBUG_NET
         sbar_status_symbols[DrawNet].active = False;
+        #endif
         return;
   }
 
@@ -314,7 +370,9 @@ void get_interface_stat()
   fp = fopen("/sys/class/net/eth0/operstate", "r");
   if (fp == NULL){
         printf("\nfailed to read /sys/class/net/eth0/operstate\n");
+        #ifndef DEBUG_NET
         sbar_status_symbols[DrawNet].active = False;
+        #endif
         return;
   }
 
@@ -351,7 +409,9 @@ void setup_net()
   fp = fopen("/proc/net/dev", "r");
   if (fp == NULL){
         printf("\nfailed to read /proc/net/dev\n");
+        #ifndef DEBUG_NET
         sbar_status_symbols[DrawNet].active = False;
+        #endif
         return;
   }
 
