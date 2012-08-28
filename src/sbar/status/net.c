@@ -370,7 +370,8 @@ void get_net_statistic()
     net.num_interfaces++;
     
     x = 0;
-    for(j = 0;j < len;j++){
+    start = False;
+    for(j = 0; j < len; j++){
       if (!start) {
         if (line[j] == ':')
           start = True;
@@ -606,6 +607,7 @@ void get_interface_stat()
     }
   }
   
+  net.connected = False;
   for (i = 0; i < net.num_interfaces; i++) {
     if (net.interfaces[i].online && strcmp(net.interfaces[i].name, "lo")) {
       net.connected = True;
