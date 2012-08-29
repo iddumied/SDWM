@@ -46,15 +46,22 @@ static Bool show_net_lo_interface     = True;         // shows statistic (Timlie
                                       
 static const int status_refresh       = 1;            // refresh zyklus in seconds
 static const Bool show_year           = True;
-                                       
 static const char mainsymbol[]        = "\x18";
-                                      
+static const char sbarfont[]          = "-lokaltog-symbols-medium-r-normal--11-110-75-75-p-90-iso8859-1"; 
                                       
 static const Bool utime_seconds       = False;
 static const int  sbar_distancex      = 12;
                                       
 static const unsigned int gappx       = 6;
 static const int max_link_quality     = 70;           // max wlan quality found out by calling iwconfig
+
+static const int uptime_good          = 60 * 60 * 1;  // uptime seconds wen feelings changing
+static const int uptime_lazy          = 60 * 60 * 2;
+static const int uptime_sad           = 60 * 60 * 4;
+static const int uptime_angry         = 60 * 60 * 6;
+static const int uptime_berserk       = 60 * 60 * 8;
+static const int uptime_evil          = 60 * 60 * 10;
+
 
 #define MAXPARTITIONS 50                              // max number of posible partitions mounted if you mount more it will propably crash
 #define MAX_NET_INTERFACES 30                         // max number of possible net_interfaces if you have more it will propably crash

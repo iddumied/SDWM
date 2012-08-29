@@ -22,7 +22,7 @@ int draw_net(int y, int pos)
   }else if(net_wlan_online()){
     double strength = net_wlan_strength();
     if(strength < 0.25)
-      sprintf(buffer_net,"\x13 %d%c", (int)(strength*100),'%');
+      sprintf(buffer_net,"Ö %d%c", (int)(strength*100),'%');
     else if(strength < 0.5)
       sprintf(buffer_net,"\x14 %d%c", (int)(strength*100),'%');
     else if(strength < 0.75)
@@ -35,8 +35,8 @@ int draw_net(int y, int pos)
   buffer_net_len = strlen(buffer_net);
   pos -= textnw(buffer_net, buffer_net_len);
   
-  if(dc.font.set)
-    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, buffer_net, buffer_net_len);
+  if(sbar.font.set)
+    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, buffer_net, buffer_net_len);
   else
     XDrawString(dpy, dc.drawable, dc.gc, pos, y, buffer_net, buffer_net_len);
   
@@ -69,8 +69,8 @@ int draw_audio(int y, int pos)
   buffer_len = strlen(buffer);
   pos -= textnw(buffer, buffer_len);
   
-  if(dc.font.set)
-    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, buffer, buffer_len);
+  if(sbar.font.set)
+    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, buffer, buffer_len);
   else
     XDrawString(dpy, dc.drawable, dc.gc, pos, y, buffer, buffer_len);
   
@@ -101,8 +101,8 @@ int draw_backlight(int y, int pos)
   buffer_len = strlen(buffer);
   pos -= textnw(buffer, buffer_len);
   
-  if(dc.font.set)
-    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, buffer, buffer_len);
+  if(sbar.font.set)
+    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, buffer, buffer_len);
   else
     XDrawString(dpy, dc.drawable, dc.gc, pos, y, buffer, buffer_len);
   
@@ -129,8 +129,8 @@ int draw_termal(int y, int pos)
   // update pos
   pos -= textnw(buffer, buffer_len);
   
-  if(dc.font.set)
-    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, buffer, buffer_len);
+  if(sbar.font.set)
+    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, buffer, buffer_len);
   else
     XDrawString(dpy, dc.drawable, dc.gc, pos, y, buffer, buffer_len);
   
@@ -154,8 +154,8 @@ int draw_memory(int y, int pos)
     swap_buffer_len = strlen(swap_buffer);
     pos -= textnw(swap_buffer, swap_buffer_len);
     
-    if(dc.font.set)
-      XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, swap_buffer, swap_buffer_len);
+    if(sbar.font.set)
+      XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, swap_buffer, swap_buffer_len);
     else
       XDrawString(dpy, dc.drawable, dc.gc, pos, y, swap_buffer, swap_buffer_len);
   }
@@ -168,8 +168,8 @@ int draw_memory(int y, int pos)
   mem_buffer_len = strlen(mem_buffer);
   pos -= textnw(mem_buffer, mem_buffer_len);
 
-  if(dc.font.set)
-    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, mem_buffer, mem_buffer_len);
+  if(sbar.font.set)
+    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, mem_buffer, mem_buffer_len);
   else
     XDrawString(dpy, dc.drawable, dc.gc, pos, y, mem_buffer, mem_buffer_len);
   
@@ -179,15 +179,15 @@ int draw_memory(int y, int pos)
 int draw_uptime(int y, int pos)
 {
   // update pos
-  pos -= textnw(tbar_uptime.uptime, tbar_uptime.len); 
+  pos -= textnw(uptime.uptime, uptime.len); 
   
   // draw uptime
   gcv.foreground = dc.norm[ColFG];
   XChangeGC(dpy, dc.gc, GCForeground, &gcv);
-  if(dc.font.set)
-    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, tbar_uptime.uptime, tbar_uptime.len);
+  if(sbar.font.set)
+    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, uptime.uptime, uptime.len);
   else
-    XDrawString(dpy, dc.drawable, dc.gc, pos, y,tbar_uptime.uptime, tbar_uptime.len);
+    XDrawString(dpy, dc.drawable, dc.gc, pos, y, uptime.uptime, uptime.len);
   
   return pos;
 }
@@ -234,8 +234,8 @@ int draw_battery(int y, int pos)
   pos -= textnw(buffer, buffer_len);
   
  
-  if(dc.font.set)
-    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, buffer, buffer_len);
+  if(sbar.font.set)
+    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, buffer, buffer_len);
   else
     XDrawString(dpy, dc.drawable, dc.gc, pos, y, buffer, buffer_len);
 
@@ -248,8 +248,8 @@ int draw_time(int y, int pos)
   pos -= textnw(tbar_date.date,tbar_date.len);
 
   // draw date and time
-  if(dc.font.set)
-    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, tbar_date.date,tbar_date.len);
+  if(sbar.font.set)
+    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, tbar_date.date,tbar_date.len);
   else
     XDrawString(dpy, dc.drawable, dc.gc, pos, y, tbar_date.date,tbar_date.len);
   
@@ -265,14 +265,14 @@ void drawsymbolstatus()
   
   // calculaing font values
   pos = screenWidth - symbol_distance_x;
-  h = dc.font.ascent + dc.font.descent;
-  y = dc.y + (dc.h / 2) - (h / 2) + dc.font.ascent;
+  h = sbar.font.ascent + sbar.font.descent;
+  y = dc.y + (dc.h / 2) - (h / 2) + sbar.font.ascent;
   
   /*************** DRAWING ***************/
   
   // draw main symbol
-  if(dc.font.set)
-    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, 3, y+1, mainsymbol, 1);
+  if(sbar.font.set)
+    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, 3, y+1, mainsymbol, 1);
   else
     XDrawString(dpy, dc.drawable, dc.gc, 3, y+1, mainsymbol, 1);
   

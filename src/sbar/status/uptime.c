@@ -4,11 +4,11 @@ void setup_uptime();
 
 
 typedef struct {
-  char uptime[35], since[35];
-  int s,m,h,d, len;
-} TBarUptime;
+  char uptime[35], since[35], symbol;
+  int s,m,h,d, len, total_seconds;
+} Uptime;
 
-static TBarUptime tbar_uptime;
+static Uptime uptime;
 
 void setup_uptime()
 {
@@ -18,10 +18,10 @@ void setup_uptime()
   char buffer[30];
   int sec_total = 0;
 
-  sec_total += tbar_uptime.d*60*60*24;
-  sec_total += tbar_uptime.h*60*60;
-  sec_total += tbar_uptime.m*60;
-  sec_total += tbar_uptime.s;  
+  sec_total += uptime.d*60*60*24;
+  sec_total += uptime.h*60*60;
+  sec_total += uptime.m*60;
+  sec_total += uptime.s;  
   
   t -= (time_t)sec_total;
   struct tm *ts = localtime(&t);
@@ -30,34 +30,50 @@ void setup_uptime()
   strftime(buffer, 80, "%d.%m. %Y - %H:%M:%S", ts);
 
   
-  sprintf(tbar_uptime.since, "%s %s", weekdays[ts->tm_wday], buffer);
+  sprintf(uptime.since, "%s %s", weekdays[ts->tm_wday], buffer);
 }
 
 
 void update_uptime()
 {
   get_uptime();
+
+  if (uptime.total_seconds < uptime_good)
+    uptime.symbol = 'ü';
+  else if (uptime.total_seconds < uptime_lazy)
+    uptime.symbol = 'Ü';
+  else if (uptime.total_seconds < uptime_sad)
+    uptime.symbol = 'û';
+  else if (uptime.total_seconds < uptime_angry)
+    uptime.symbol = 'ú';
+  else if (uptime.total_seconds < uptime_berserk)
+    uptime.symbol = 'ù';
+  else
+    uptime.symbol = 'é';
+  
   
   if(utime_seconds){
-    if(tbar_uptime.d > 0)
-      sprintf(tbar_uptime.uptime, "\x0a %02d:%02d:%02d:%02d", tbar_uptime.d, tbar_uptime.h, tbar_uptime.m, tbar_uptime.s);
-    else if(tbar_uptime.h > 0)
-       sprintf(tbar_uptime.uptime, "\x0a %02d:%02d:%02d", tbar_uptime.h, tbar_uptime.m, tbar_uptime.s);
-    else if(tbar_uptime.m > 0)
-       sprintf(tbar_uptime.uptime, "\x0a %02d:%02d", tbar_uptime.m, tbar_uptime.s);
-    else if(tbar_uptime.s > 0)
-       sprintf(tbar_uptime.uptime, "\x0a %02d", tbar_uptime.s);
+    if(uptime.d > 0)
+      sprintf(uptime.uptime, "ü Ü û ú ù é %02d:%02d:%02d:%02d", uptime.d, uptime.h, uptime.m, uptime.s);
+    else if(uptime.h > 0)
+       sprintf(uptime.uptime, "ü Ü û ú ù é %02d:%02d:%02d", uptime.h, uptime.m, uptime.s);
+    else if(uptime.m > 0)
+       sprintf(uptime.uptime, "ü Ü û ú ù é %02d:%02d", uptime.m, uptime.s);
+    else if(uptime.s > 0)
+       sprintf(uptime.uptime, "ü Ü û ú ù é %02d", uptime.s);
     
   }else{
-    if(tbar_uptime.d > 0)
-      sprintf(tbar_uptime.uptime, "\x0a %02d:%02d:%02d", tbar_uptime.d, tbar_uptime.h, tbar_uptime.m);
-    else if(tbar_uptime.h > 0)
-       sprintf(tbar_uptime.uptime, "\x0a %02d:%02d", tbar_uptime.h, tbar_uptime.m);
-    else if(tbar_uptime.m > 0)
-       sprintf(tbar_uptime.uptime, "\x0a %02d", tbar_uptime.m);
+    if(uptime.d > 0)
+      sprintf(uptime.uptime, "ü Ü û ú ù é %02d:%02d:%02d", uptime.d, uptime.h, uptime.m);
+    else if(uptime.h > 0)
+       sprintf(uptime.uptime, "ü Ü û ú ù é %02d:%02d", uptime.h, uptime.m);
+    else if(uptime.m > 0)
+       sprintf(uptime.uptime, "ü Ü û ú ù é %02d", uptime.m);
   }
 
-  tbar_uptime.len =  strlen(tbar_uptime.uptime);
+  printf("[DEBUG] %x %x %x\n", (int *)uptime.uptime, ((int *)uptime.uptime) + 1, ((int *)uptime.uptime) + 2); 
+
+  uptime.len =  strlen(uptime.uptime);
 }
 
 void get_uptime()
@@ -81,10 +97,11 @@ void get_uptime()
   if((read = getline(&line, &len, fp)) != -1){
     total_seconds = atoi(line);
     
-    tbar_uptime.s = total_seconds%60;
-    tbar_uptime.m = (total_seconds/60)%60;
-    tbar_uptime.h = (total_seconds/60/60)%24;
-    tbar_uptime.d = (total_seconds/60/60/24);
+    uptime.total_seconds = total_seconds;
+    uptime.s = total_seconds%60;
+    uptime.m = (total_seconds/60)%60;
+    uptime.h = (total_seconds/60/60)%24;
+    uptime.d = (total_seconds/60/60/24);
     
   }
 

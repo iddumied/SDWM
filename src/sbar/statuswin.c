@@ -57,7 +57,7 @@ void drawstw()
     
   // statusmesage
   if(sbar_status_symbols[DrawUptime].active){
-    sprintf(stwbuffer,"Chief @ ArchLinux  -  online since:  %s", tbar_uptime.since);
+    sprintf(stwbuffer,"Chief @ ArchLinux  -  online since:  %s", uptime.since);
     wprintln("");
     wprintln(stwbuffer);
     wprintln("  |");
@@ -428,14 +428,14 @@ void setup_stw()
     stw.sbar[SBarCpuPoint] = getcolor(themes[CurTheme].stw.timeln_point_color);
     
     
-    stw.font.ascent  = dc.font.ascent;
-    stw.font.descent = dc.font.descent;
-    stw.font.height  = dc.font.height;
-    stw.font.set     = dc.font.set;
-    stw.font.xfont   = dc.font.xfont;
+    stw.font.ascent  = sbar.font.ascent;
+    stw.font.descent = sbar.font.descent;
+    stw.font.height  = sbar.font.height;
+    stw.font.set     = sbar.font.set;
+    stw.font.xfont   = sbar.font.xfont;
     
     stw.w = screenWidth;
-    stw.y = dc.font.height + 3;
+    stw.y = sbar.font.height + 3;
     stw.x = gappx;
     stw.h = screenHeight-bh;
     

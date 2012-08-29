@@ -45,11 +45,11 @@ void setup_freestylebar(){
   freestylebar.sbar[SBarCpuPoint] = getcolor(themes[CurTheme].normal.timeln_point_color);
     
     
-  freestylebar.font.ascent  = dc.font.ascent;
-  freestylebar.font.descent = dc.font.descent;
-  freestylebar.font.height  = dc.font.height;
-  freestylebar.font.set     = dc.font.set;
-  freestylebar.font.xfont   = dc.font.xfont;
+  freestylebar.font.ascent  = sbar.font.ascent;
+  freestylebar.font.descent = sbar.font.descent;
+  freestylebar.font.height  = sbar.font.height;
+  freestylebar.font.set     = sbar.font.set;
+  freestylebar.font.xfont   = sbar.font.xfont;
 
   int  l = 0, x, tmp, i;
   x = TEXTW(mainsymbol);
@@ -92,8 +92,8 @@ void setup_freestylebar(){
 
 void write_on_freestylebar(const char *cstr, const char *colorstr) {
   int str_len = strlen(cstr);
-  int h = dc.font.ascent + dc.font.descent;
-  int y = dc.y + (dc.h / 2) - (h / 2) + dc.font.ascent;
+  int h = sbar.font.ascent + sbar.font.descent;
+  int y = dc.y + (dc.h / 2) - (h / 2) + sbar.font.ascent;
   
   // cangen lenx to fit to text
   freestylebar.w = textnw(cstr, str_len) + 2;

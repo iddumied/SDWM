@@ -3,12 +3,6 @@
 #include "config.h"
 #include "status/status.c"
 
-
-
-double calc_time_div(struct timeval t_end, struct timeval t_star);
-void setup_sbar();
-void changeTheme();
-  
 static int screenWidth, screenHeight;
 
 typedef struct {
@@ -18,10 +12,22 @@ typedef struct {
   Bool status_symbol_mode[DrawLast];
   Pixmap *cpu_timeline;
   int cpu_posx, cpu_length;             /* length of one cpu */
+	struct {
+		int ascent;
+		int descent;
+		int height;
+		XFontSet set;
+		XFontStruct *xfont;
+	} font;
 } SBar;
 
 SBar sbar;
 
+// functions
+double calc_time_div(struct timeval t_end, struct timeval t_star);
+void setup_sbar();
+void changeTheme();
+sbarinitfont(const char *fontstr);
 #include "statuswin.c"
 #include "freestylebar.c"
 
@@ -43,8 +49,10 @@ double calc_time_div(struct timeval t_end, struct timeval t_star)
 
 void setup_sbar()
 {
+  #ifdef INFO
   struct timeval start_time, end_time;
   gettimeofday(&start_time, 0);
+  #endif
   
   int i, j, status;
 
@@ -120,8 +128,14 @@ void setup_sbar()
   for(i = 0;i < cpuinfo.ncpus+1;i++)
     sbar.cpu_timeline[i] = XCreatePixmap(dpy, root, sbar.cpu_length, bh-1, DefaultDepth(dpy, screen));
 
+  sbarinitfont(font);
+
+  #ifdef INFO
+  char logbuf[256];
   gettimeofday(&end_time, 0);
-  printf("\nsbar Setup needed:  %f Seconds\n", calc_time_div(end_time, start_time));  
+  sprintf(logbuf, "sbar Setup needed:  %f Seconds", calc_time_div(end_time, start_time));  
+  log_str(log_str, LOG_INFO);
+  #endif
 }
 
 void toggletheme(){
@@ -211,4 +225,39 @@ void changeTheme(){
   if(!draw_status_win)
     togglestw();
 
+}
+
+sbarinitfont(const char *fontstr) {
+	char *def, **missing, buffer[200];
+	int n;
+
+	sbar.font.set = XCreateFontSet(dpy, fontstr, &missing, &n, &def);
+	if(missing) {
+		while(n--) {
+			sprintf(buffer, "sdwm: missing fontset: %s", missing[n]);
+      log_str(buffer, LOG_WARNING);
+    }
+		XFreeStringList(missing);
+	}
+	if(sbar.font.set) {
+		XFontStruct **xfonts;
+		char **font_names;
+
+		sbar.font.ascent = sbar.font.descent = 0;
+		XExtentsOfFontSet(sbar.font.set);
+		n = XFontsOfFontSet(sbar.font.set, &xfonts, &font_names);
+		while(n--) {
+			sbar.font.ascent = MAX(sbar.font.ascent, (*xfonts)->ascent);
+			sbar.font.descent = MAX(sbar.font.descent,(*xfonts)->descent);
+			xfonts++;
+		}
+	}
+	else {
+		if(!(sbar.font.xfont = XLoadQueryFont(dpy, fontstr))
+		&& !(sbar.font.xfont = XLoadQueryFont(dpy, "fixed")))
+			die("error, cannot load font: '%s'\n", fontstr);
+		sbar.font.ascent = sbar.font.xfont->ascent;
+		sbar.font.descent = sbar.font.xfont->descent;
+	}
+	sbar.font.height = sbar.font.ascent + sbar.font.descent;
 }
