@@ -1,13 +1,5 @@
 DC stw;
 Pixmap background;
-typedef struct {
-  int *bytes, max;
-} Timeline;
-
-typedef struct {
-  int length;
-  Timeline lor, eth0r, wlan0r,lot, eth0t, wlan0t;
-} NetStatistic;
 
 typedef struct {
   int length;
@@ -15,7 +7,6 @@ typedef struct {
   Timeline read, write;
 } DiskStatistic;
 
-NetStatistic netstat;
 DiskStatistic diskstat[MAXPARTITIONS];
 void setup_stw();
 void drawstw();
@@ -141,145 +132,107 @@ void drawstw()
   if(sbar_status_symbols[DrawNet].active){
     wprintln("  +--net");
     wprintln("       |");
-    wprint("       +--lo");
 
-    calc_timline_max(&netstat.lot, net.lo.between.transmit.bytes_per_sec, netstat.length);
-    calc_timline_max(&netstat.lor, net.lo.between.receive.bytes_per_sec, netstat.length);
-    if(netstat.lor.max == 0 && netstat.lot.max == 0){                                 
-      wprintln(":  inactive");
+    if (!show_net_lo_interface && !strcmp(net.interfaces[net.num_interfaces - 1].name, "lo"))
+      net.num_interfaces--;
+
+    for (i = 0; i < net.num_interfaces - 1; i++) {
+      if (!show_net_lo_interface && !strcmp(net.interfaces[i].name, "lo")) continue;
+
+
+      sprintf(stwbuffer, "       +--%s", net.interfaces[i].name);
+      wprint(stwbuffer);
+     
+      calc_timline_max(&net.interfaces[i].timeline.t, net.interfaces[i].between.transmit.bytes_per_sec, net.timeline_length);
+      calc_timline_max(&net.interfaces[i].timeline.r, net.interfaces[i].between.receive.bytes_per_sec, net.timeline_length);
+      if(net.interfaces[i].timeline.r.max == 0 && net.interfaces[i].timeline.t.max == 0){                                 
+        if (net.interfaces[i].online || net.interfaces[i].easy_online)
+          wprintln(":  inactive");
+        else if (net.interfaces[i].state_unknowen)
+          wprintln(":  unknowen");
+        else 
+          wprintln(":  down");
+      }else{
+        wprintln("");
+        wprintln("       |    |");
+        if(net.interfaces[i].timeline.t.max == 0)    
+          wprintln("       |    +--up:  inactiv");
+        else{  
+          human_readable(net.interfaces[i].between.transmit.bytes_per_sec, False, hread);
+          human_readable(net.interfaces[i].timeline.t.max, False, maxhread);
+          sprintf(stwbuffer, "       |    +--up:  %s  @  %s ", hread, maxhread);
+          wprintln(stwbuffer);
+          wprintln("       |    |    |");
+          wprint("       |    |    +--");
+          wprinttimelineln(net.interfaces[i].between.transmit.bytes_per_sec, net.timeline_length, 1, 
+                              &net.interfaces[i].timeline.t, stw.sbar[SBarLine], 
+                                stw.sbar[SBarCpuPoint],net.interfaces[i].timeline.t.max);
+          wprintln("       |    |");
+        }
+   
+        if(net.interfaces[i].timeline.r.max == 0)    
+          wprintln("       |    +--down:  inactiv");
+        else{  
+          human_readable(net.interfaces[i].between.receive.bytes_per_sec, False, hread);
+          human_readable(net.interfaces[i].timeline.r.max, False, maxhread);
+          sprintf(stwbuffer, "       |    +--down:  %s  @  %s ", hread, maxhread);
+          wprintln(stwbuffer);
+          wprintln("       |         |");
+          wprint("       |         +--");
+          wprinttimelineln(net.interfaces[i].between.receive.bytes_per_sec, net.timeline_length, 1, 
+                            &net.interfaces[i].timeline.r, stw.sbar[SBarLine], 
+                              stw.sbar[SBarCpuPoint],net.interfaces[i].timeline.r.max);
+        }
+        wprintln("       |");
+      }                      
+    }
+
+    // las interface with out pipe slastes
+    sprintf(stwbuffer, "       +--%s", net.interfaces[i].name);
+    wprint(stwbuffer);
+    
+    calc_timline_max(&net.interfaces[i].timeline.t, net.interfaces[i].between.transmit.bytes_per_sec, net.timeline_length);
+    calc_timline_max(&net.interfaces[i].timeline.r, net.interfaces[i].between.receive.bytes_per_sec, net.timeline_length);
+    if(net.interfaces[i].timeline.r.max == 0 && net.interfaces[i].timeline.t.max == 0){                                 
+      if (net.interfaces[i].online || net.interfaces[i].easy_online)
+        wprintln(":  inactive");
+      else if (net.interfaces[i].state_unknowen)
+        wprintln(":  unknowen");
+      else 
+        wprintln(":  down");
     }else{
       wprintln("");
-      wprintln("       |    |");
-      if(netstat.lot.max == 0)    
-        wprintln("       |    +--up:  inactiv");
-      else{  
-        human_readable(net.lo.between.transmit.bytes_per_sec, False, hread);
-        human_readable(netstat.lot.max, False, maxhread);
-        sprintf(stwbuffer, "       |    +--up:  %s  @  %s ", hread, maxhread);
-        wprintln(stwbuffer);
-        wprintln("       |    |    |");
-        wprint("       |    |    +--");
-        wprinttimelineln(net.lo.between.transmit.bytes_per_sec, netstat.length, 1, 
-        &netstat.lot,stw.sbar[SBarLine], 
-        stw.sbar[SBarCpuPoint],netstat.lot.max);
-        wprintln("       |    |");
-      }
-  
-      if(netstat.lor.max == 0)    
-        wprintln("       |    +--down:  inactiv");
-      else{  
-        human_readable(net.lo.between.receive.bytes_per_sec, False, hread);
-        human_readable(netstat.lor.max, False, maxhread);
-        sprintf(stwbuffer, "       |    +--down:  %s  @  %s ", hread, maxhread);
-        wprintln(stwbuffer);
-        wprintln("       |         |");
-        wprint("       |         +--");
-        wprinttimelineln(net.lo.between.receive.bytes_per_sec, netstat.length, 1, 
-        &netstat.lor,stw.sbar[SBarLine], 
-        stw.sbar[SBarCpuPoint],netstat.lor.max);
-      }
-      wprintln("       |");
-    }                      
-  
-    wprint("       +--eth0");
-    calc_timline_max(&netstat.eth0r, net.eth0.between.transmit.bytes_per_sec, netstat.length);
-    calc_timline_max(&netstat.eth0t, net.eth0.between.transmit.bytes_per_sec, netstat.length);
-    if(netstat.eth0r.max == 0 && netstat.eth0t.max == 0){                                 
-      if(net.eth0.online)
-        wprintln(":  inactive");  
-      else
-        wprintln(":  down");
-    }else{ 
-      if(!net.eth0.online)   
-        wprintln(":  down");
-      else
-        wprintln(":  connected");
-  
-      
-      wprintln("       |    |");
-      if(netstat.eth0t.max == 0)   
-        wprintln("       |    +--up:  inactiv");
-      else{
-        human_readable(net.eth0.between.transmit.bytes_per_sec, False, hread);
-        human_readable(netstat.eth0t.max, False, maxhread);
-        sprintf(stwbuffer, "       |    +--up:  %s  @  %s ", hread, maxhread);
-        wprintln(stwbuffer);
-        wprintln("       |    |    |");
-        wprint("       |    |    +--");
-        wprinttimelineln(net.eth0.between.transmit.bytes_per_sec, netstat.length, 1, 
-        &netstat.eth0t,stw.sbar[SBarLine], 
-        stw.sbar[SBarCpuPoint],netstat.eth0t.max);
-        wprintln("       |    |");
-      }
-  
-      if(netstat.eth0r.max == 0)    
-        wprintln("       |    +--down:  inactiv");
-      else{
-        human_readable(net.eth0.between.receive.bytes_per_sec, False, hread);
-        human_readable(netstat.eth0r.max, False, maxhread);
-        sprintf(stwbuffer, "       |    +--down:  %s  @  %s ", hread, maxhread);
-        wprintln(stwbuffer);
-        wprintln("       |         |");
-        wprint("       |         +--");
-        wprinttimelineln(net.eth0.between.receive.bytes_per_sec, netstat.length, 1, 
-        &netstat.eth0r,stw.sbar[SBarLine], 
-        stw.sbar[SBarCpuPoint],netstat.eth0r.max);
-      }
-      wprintln("       |");   
-    }
-    wprint("       +--wlan0");
-    calc_timline_max(&netstat.wlan0t, net.wlan0.between.transmit.bytes_per_sec, netstat.length);
-    calc_timline_max(&netstat.wlan0r, net.wlan0.between.receive.bytes_per_sec, netstat.length);
-    if(netstat.wlan0r.max == 0 && netstat.wlan0t.max == 0){                                 
-      if(net.wlan0.online) 
-        wprintln(":  inactive");
-      else if(net.wlan0.easy_online)      
-        wprintln(":  disconnected");
-      else   
-        wprintln(":  down");
-    }else{ 
-      if(!net.wlan0.easy_online) 
-        wprintln(":  down");
-      else if(!net.wlan0.online)  
-        wprintln(":  disconnected");
-      else  
-        wprintln(":  connected");
-      
       wprintln("            |");
-      if(net.wlan0.online){    
-        sprintf(stwbuffer, "            +--signal:  %d%c",(int)(net.wlan0.strength*100),'%');
-        wprintln(stwbuffer);
-      }
-  
-      if(netstat.wlan0t.max == 0)     
+      if(net.interfaces[i].timeline.t.max == 0)    
         wprintln("            +--up:  inactiv");
-      else{       
-        human_readable(net.wlan0.between.transmit.bytes_per_sec, False, hread);
-        human_readable(netstat.wlan0t.max, False, maxhread);
+      else{  
+        human_readable(net.interfaces[i].between.transmit.bytes_per_sec, False, hread);
+        human_readable(net.interfaces[i].timeline.t.max, False, maxhread);
         sprintf(stwbuffer, "            +--up:  %s  @  %s ", hread, maxhread);
         wprintln(stwbuffer);
         wprintln("            |    |");
         wprint("            |    +--");
-        wprinttimelineln(net.wlan0.between.transmit.bytes_per_sec, netstat.length, 1, 
-        &netstat.wlan0t,stw.sbar[SBarLine], 
-        stw.sbar[SBarCpuPoint],netstat.wlan0t.max);
+        wprinttimelineln(net.interfaces[i].between.transmit.bytes_per_sec, net.timeline_length, 1, 
+                            &net.interfaces[i].timeline.t, stw.sbar[SBarLine], 
+                              stw.sbar[SBarCpuPoint],net.interfaces[i].timeline.t.max);
         wprintln("            |");
       }
-  
-      if(netstat.wlan0r.max == 0)        
+   
+      if(net.interfaces[i].timeline.r.max == 0)    
         wprintln("            +--down:  inactiv");
       else{  
-        human_readable(net.wlan0.between.receive.bytes_per_sec, False, hread);
-        human_readable(netstat.wlan0r.max, False, maxhread);
+        human_readable(net.interfaces[i].between.receive.bytes_per_sec, False, hread);
+        human_readable(net.interfaces[i].timeline.r.max, False, maxhread);
         sprintf(stwbuffer, "            +--down:  %s  @  %s ", hread, maxhread);
         wprintln(stwbuffer);
         wprintln("                 |");
         wprint("                 +--");
-        wprinttimelineln(net.wlan0.between.receive.bytes_per_sec, netstat.length, 1, 
-        &netstat.wlan0r,stw.sbar[SBarLine], 
-        stw.sbar[SBarCpuPoint],netstat.wlan0r.max);
-      }                                         
-    } 
+        wprinttimelineln(net.interfaces[i].between.receive.bytes_per_sec, net.timeline_length, 1, 
+                          &net.interfaces[i].timeline.r, stw.sbar[SBarLine], 
+                            stw.sbar[SBarCpuPoint],net.interfaces[i].timeline.r.max);
+      }
+    }                      
+
   }else{
     wprintln("  |");
     wprintln("  +--net: error");
@@ -511,37 +464,26 @@ void setup_stw()
     stwwrite.font.xfont   = stw.font.xfont;
     
    
-    netstat.length = 100;
+    net.timeline_length = timeline_length;
     
     
-    netstat.lor.bytes    = (int*)malloc(sizeof(int)*netstat.length);
-    netstat.eth0r.bytes  = (int*)malloc(sizeof(int)*netstat.length);
-    netstat.wlan0r.bytes = (int*)malloc(sizeof(int)*netstat.length);    
-    netstat.lot.bytes    = (int*)malloc(sizeof(int)*netstat.length);
-    netstat.eth0t.bytes  = (int*)malloc(sizeof(int)*netstat.length);
-    netstat.wlan0t.bytes = (int*)malloc(sizeof(int)*netstat.length);
-
-   
-    for(i = 0; i < netstat.length;i++){
-      netstat.lor.bytes[i]    = 0;
-      netstat.eth0r.bytes[i]  = 0;
-      netstat.wlan0r.bytes[i] = 0;
-      netstat.lot.bytes[i]    = 0;
-      netstat.eth0t.bytes[i]  = 0;
-      netstat.wlan0t.bytes[i] = 0;
+    for (j = 0; j < MAX_NET_INTERFACES; j++) {
+      net.interfaces[j].timeline.r.bytes = (int*)malloc(sizeof(int)*timeline_length);    
+      net.interfaces[j].timeline.t.bytes = (int*)malloc(sizeof(int)*timeline_length);
+     
+      for(i = 0; i < net.timeline_length; i++){
+        net.interfaces[j].timeline.r.bytes[i] = 0;
+        net.interfaces[j].timeline.t.bytes[i] = 0;
+      }
+      
+      net.interfaces[j].timeline.r.max = 0;
+      net.interfaces[j].timeline.t.max = 0;
     }
-    
-    netstat.lor.max      = 0;
-    netstat.eth0r.max    = 0;
-    netstat.wlan0r.max   = 0;
-    netstat.lot.max      = 0;
-    netstat.eth0t.max    = 0;
-    netstat.wlan0t.max   = 0;
 
     for(i = 0; i < MAXPARTITIONS;i++){
       diskstat[i].length      = 100;
-      diskstat[i].read.bytes  = (int*)malloc(sizeof(int)*netstat.length);
-      diskstat[i].write.bytes = (int*)malloc(sizeof(int)*netstat.length);
+      diskstat[i].read.bytes  = (int*)malloc(sizeof(int)*timeline_length);
+      diskstat[i].write.bytes = (int*)malloc(sizeof(int)*timeline_length);
 
       for(j = 0;j < diskstat[i].length;j++){
         diskstat[i].read.bytes[i]  = 0;

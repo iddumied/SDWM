@@ -1,3 +1,5 @@
+#ifndef STATUS_UTILS
+#define STATUS_UTILS
 #include <errno.h>
 #include <locale.h>
 #include <stdarg.h>
@@ -147,3 +149,4 @@ int get_line(int fp, char *buffer, int *len) {
   buffer[*len] = '\x00';
   return error;
 }
+#endif // end of STATUS_UTILS

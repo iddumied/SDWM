@@ -190,6 +190,9 @@ int draw_audio(int y, int pos);
 int draw_net(int y, int pos);
 void dmenucmd();
 void termcmd();
+void suspend();
+void shutdown();
+void reboot();
 
 
 // dwm functions
@@ -711,48 +714,59 @@ Monitor *m = selmon;
 
 void black_floading()
 {
- srand(time(NULL));
- int *pointx;
- int *pointy;
- int *ary;
- int i, j, p1, p2, ra1, ra2;
- GC gc = XCreateGC(dpy, DefaultRootWindow(dpy), 0, NULL);
- XGCValues gcv;
+  srand(time(NULL));
+  int *pointx;
+  int *pointy;
+  int *ary;
+  int i, j, p1, p2, ra1, ra2;
+  GC gc = XCreateGC(dpy, DefaultRootWindow(dpy), 0, NULL);
+  XGCValues gcv;
+  gcv.foreground = sbar.colors.red;
+  XChangeGC(dpy, gc, GCForeground, &gcv);
+
+  pointx = (int*)malloc(sizeof(int)*screenWidth);
+  pointy = (int*)malloc(sizeof(int)*screenWidth);
+  ary = (int*)malloc(sizeof(int)*screenWidth);
+ 
+  for(i = 0; i < screenWidth;i++){
+     pointx[i] = 0;
+     pointy[i] = bh;
+     ary[i] = i;
+  }
+ 
+  for (i = 0; i < screenWidth; i++) {
+    XDrawPoint(dpy, root, gc, i, bh-1);
+    usleep(500);
+    XFlush(dpy);
+  }
+
   gcv.foreground = sbar.colors.black;
   XChangeGC(dpy, gc, GCForeground, &gcv);
 
- pointx = (int*)malloc(sizeof(int)*screenWidth);
- pointy = (int*)malloc(sizeof(int)*screenWidth);
- ary = (int*)malloc(sizeof(int)*screenWidth);
-
- for(i = 0; i < screenWidth;i++){
-   pointx[i] = 0;
-   pointy[i] = 0;
-   ary[i] = i;
- }
-
- for(i = 0; i < screenWidth*2;i++){
-
-   if(i < screenWidth){  
-     p1 = (int)(rand()%(screenWidth-i));
-     ra1 = ary[p1];
-
-     for(j = p1; j < (screenWidth-i-1);j++)
-       ary[j] = ary[j+1];
-     
-     pointx[i] = ra1;
-   }
-
-   int x = (i+1 < screenWidth) ? (i+1) : (screenWidth);
-
-   for(j = 0; j < x;j++){
-     XDrawPoint(dpy, root, gc, pointx[j], pointy[j]);
-     
-     pointy[j]++;
-   }
-   
- }
+  for(i = 0; i < screenWidth*2;i++){
+ 
+    if(i < screenWidth){  
+      p1 = (int)(rand()%(screenWidth-i));
+      ra1 = ary[p1];
+ 
+      for(j = p1; j < (screenWidth-i-1);j++)
+        ary[j] = ary[j+1];
+      
+      pointx[i] = ra1;
+    }
+ 
+    int x = (i+1 < screenWidth) ? (i+1) : (screenWidth);
+ 
+    for(j = 0; j < x;j++){
+      XDrawPoint(dpy, root, gc, pointx[j], pointy[j]);
+      
+      pointy[j]++;
+    }
+    
+  }
+  usleep(1000);
 }
+
 void black_floadquit()
 {
   Client *c;
@@ -764,6 +778,51 @@ void black_floadquit()
   black_floading();
   quit(NULL);
 }
+
+void suspend()
+{
+  popen("sudo pm-suspend", "w");
+
+  int i;
+  GC gc = XCreateGC(dpy, DefaultRootWindow(dpy), 0, NULL);
+  XGCValues gcv;
+  gcv.foreground = sbar.colors.red;
+  XChangeGC(dpy, gc, GCForeground, &gcv);
+ 
+  for (i = 0; i < screenWidth; i++) {
+    XDrawPoint(dpy, root, gc, i, bh-1);
+    usleep(1500);
+    XFlush(dpy);
+  }
+  sleep(3);
+}
+
+void shutdown()
+{
+  Client *c;
+
+  // destroying all Clients
+	for(c = selmon->stack; c; c = c->snext)
+    XDestroyWindow(dpy,c->win);
+
+  black_floading();
+  popen("sudo shutdown -h now", "w");
+}
+
+void reboot()
+{
+  Client *c;
+
+  // destroying all Clients
+	for(c = selmon->stack; c; c = c->snext)
+    XDestroyWindow(dpy,c->win);
+
+  black_floading();
+  popen("sudo reboot", "w");
+}
+
+
+
 
 // DWM FUNCTIONS
 

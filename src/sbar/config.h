@@ -35,35 +35,38 @@ static const Layout layouts[] = {
 
 
 
-static const Bool sbartopbar        = True;         // False means bottom bar
-static const int cpus_length        = 255;          // length of all cpu timelines
-static const Bool cpu_shift_left    = True;         // Shift cpu timeline left (else right)
-static const int cpu_distance_x     = 5;            // distance betwen cpu-cores if you have more than one
-static const int symbol_distance_y  = 2;            // distance between symbols and top and bottom of bar
-static const int symbol_distance_x  = 6;            // distance between two symbols on the x line
+static const Bool sbartopbar          = True;         // False means bottom bar
+static const int cpus_length          = 255;          // length of all cpu timelines
+static const Bool cpu_shift_left      = True;         // Shift cpu timeline left (else right)
+static const int cpu_distance_x       = 5;            // distance betwen cpu-cores if you have more than one
+static const int symbol_distance_y    = 2;            // distance between symbols and top and bottom of bar
+static const int symbol_distance_x    = 6;            // distance between two symbols on the x line
+static const int timeline_length      = 100;          // length of net transmit and recive and of disk read and write timelines
+static Bool show_net_lo_interface     = True;         // shows statistic (Timlie) for the lo interface in the Statuswindow
+                                      
+static const int status_refresh       = 1;            // refresh zyklus in seconds
+static const Bool show_year           = True;
+                                       
+static const char mainsymbol[]        = "\x18";
+                                      
+                                      
+static const Bool utime_seconds       = False;
+static const int  sbar_distancex      = 12;
+                                      
+static const unsigned int gappx       = 6;
+static const int max_link_quality     = 70;           // max wlan quality found out by calling iwconfig
 
-static const int status_refresh     = 1;            // refresh zyklus in seconds
-static const Bool show_year         = True;
-
-static const char mainsymbol[]      = "\x18";
-
-
-static const Bool utime_seconds     = False;
-static const int  sbar_distancex    = 12;
-
-static const unsigned int gappx     = 6;
-static const int max_link_quality   = 70;           // max wlan quality found out by calling iwconfig
-
-#define MAXPARTITIONS 20                            // max number of posible partitions mounted if you mount more it will crash
+#define MAXPARTITIONS 50                              // max number of posible partitions mounted if you mount more it will propably crash
+#define MAX_NET_INTERFACES 30                         // max number of possible net_interfaces if you have more it will propably crash
 
 
 /******* SECTION INVORMATIONS *******/
 
 // statuswin
 static Bool draw_status_win           = True;
-static const double blowstat          = 0.1;        // defines the warning stat of battery
-static const double bverylowstat      = 0.12;      // 1 is full 0 is empty
-static const double bat_suspend       = 0.075;       // percent when go to suspend
+static const double blowstat          = 0.1;          // defines the warning stat of battery
+static const double bverylowstat      = 0.12;         // 1 is full 0 is empty
+static const double bat_suspend       = 0.075;        // percent when go to suspend
 
 
 
