@@ -17,9 +17,9 @@ void togglestw();
 void togglestw(){
   draw_status_win = !draw_status_win;
 
-	Monitor *m;
+  Monitor *m;
 
-	for(m = mons; m; m = m->next){
+  for(m = mons; m; m = m->next){
     if(draw_status_win) XMapWindow(dpy,m->statuswin);
     else XUnmapWindow(dpy,m->statuswin);
   }

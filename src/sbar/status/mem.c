@@ -37,7 +37,7 @@ void get_memory()
           }
         }
         break;
-	
+  
       case 1: // MemFree:
         for(i = 8;i < len;i++){
           if(line[i] != ' '){
@@ -46,7 +46,7 @@ void get_memory()
           }
         }
         break;
-	
+  
       case 2: // Buffers:
         for(i = 8;i < len;i++){
           if(line[i] != ' '){
@@ -55,7 +55,7 @@ void get_memory()
           }
         }
         break;
-	
+  
       case 3: // Cached:
         for(i = 7;i < len;i++){
           if(line[i] != ' '){
@@ -64,7 +64,7 @@ void get_memory()
           }
         }
         break;
-	
+  
       case 13: // SwapTotal:
         for(i = 10;i < len;i++){
           if(line[i] != ' '){
@@ -73,7 +73,7 @@ void get_memory()
           }
         }
         break;
-	
+  
       case 14: // SwapFree:
         for(i = 9;i < len;i++){
           if(line[i] != ' '){
@@ -82,7 +82,7 @@ void get_memory()
           }
         }
         break;
-	
+  
       case 15: // Finish
         if (line) free(line);
         fclose(fp);

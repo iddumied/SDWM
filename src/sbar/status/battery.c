@@ -178,7 +178,7 @@ void check_stat()
         }else if(battery.mode == CHARGING){
           battery.remain.h = (battery.capacity - battery.current) / battery.rate;
           battery.remain.m = (int)(((double)(battery.capacity - battery.current) / 
-			                        (double)battery.rate - battery.remain.h) * 60);
+                              (double)battery.rate - battery.remain.h) * 60);
           battery.stat = (double)battery.current / (double)battery.capacity;
         }else{ //charged
           battery.stat = 1.0;
@@ -241,7 +241,7 @@ void check_stat()
   }else if(battery.mode == CHARGING){
     battery.remain.h = (battery.capacity - battery.current) / battery.rate;
     battery.remain.m = (int)(((double)(battery.capacity - battery.current) / 
-			  (double)battery.rate - battery.remain.h) * 60);
+        (double)battery.rate - battery.remain.h) * 60);
     battery.stat = (double)battery.current / (double)battery.capacity;
   }else{ //charged
     battery.stat = 1.0;

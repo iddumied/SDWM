@@ -18,7 +18,7 @@ void draw_freestylebar(){
   int des_x = (freestylebar_curr_x < 0) ? freestylebar.x : freestylebar_curr_x + freestylebar.x;
 
   // copping freestylebar on bar
-	  XCopyArea(dpy, freestylebar.drawable, dc.drawable, freestylebar.gc, 
+    XCopyArea(dpy, freestylebar.drawable, dc.drawable, freestylebar.gc, 
                 src_x, 0,                                    // src x, y
                   width, freestylebar.h,                     // width, height
                     des_x, freestylebar.y);                  // des x, y
@@ -28,7 +28,7 @@ void draw_freestylebar(){
     freestylebar_curr_x = (-1) * freestylebar.w;
 
 //  // copping freestylebar on bar
-//	XCopyArea(dpy, freestylebar.drawable, dc.drawable, freestylebar.gc, 0,0, freestylebar.w, freestylebar.h, freestylebar.x, freestylebar.y);
+//  XCopyArea(dpy, freestylebar.drawable, dc.drawable, freestylebar.gc, 0,0, freestylebar.w, freestylebar.h, freestylebar.x, freestylebar.y);
 }
 
 
@@ -51,8 +51,8 @@ void setup_freestylebar(){
   freestylebar.font.set     = dc.font.set;
   freestylebar.font.xfont   = dc.font.xfont;
 
-	int	l = 0, x, tmp, i;
-	x = TEXTW(mainsymbol);
+  int  l = 0, x, tmp, i;
+  x = TEXTW(mainsymbol);
 
   for(i = 0;i < LENGTH(layouts);i++){
     tmp = TEXTW(layouts[i].symbol);
@@ -62,9 +62,9 @@ void setup_freestylebar(){
   x += l+TEXTW("")/2 ;
 
 
-	for(i = 0;i < LENGTH(tags);i++)
-			x = x + TEXTW(tags[i]);
-	
+  for(i = 0;i < LENGTH(tags);i++)
+      x = x + TEXTW(tags[i]);
+  
     
   freestylebar.w  = freestylebar_width = sbar.cpu_posx - x - TEXTW("");
   freestylebar.y = dc.y;

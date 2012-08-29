@@ -22,10 +22,10 @@ enum { DrawTime, DrawBattery, DrawUptime, DrawMemory, DrawTermal, DrawBacklight,
 static const char *tags[] = { "main", "term", "dev", "img", "misc", "more" };
 
 static const Layout layouts[] = {
-	/* symbol     arrange function */
-	{ "\x04",      ntile },    /* first entry is default */
-	{ "\x03",      NULL },     /* no layout function means floating behavior */
-	{ "\x01",      monocle },
+  /* symbol     arrange function */
+  { "\x04",      ntile },    /* first entry is default */
+  { "\x03",      NULL },     /* no layout function means floating behavior */
+  { "\x01",      monocle },
   { "\x05",      nbstack },
   { "\x08",      nbstackhoriz },
   { "\x09",      spiral },

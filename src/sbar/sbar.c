@@ -13,7 +13,7 @@ static int screenWidth, screenHeight;
 
 typedef struct {
   SBarColor colors;
-  Bool topbar;    			                /* False means bottom bar */
+  Bool topbar;                          /* False means bottom bar */
   Bool sbarloaded;
   Bool status_symbol_mode[DrawLast];
   Pixmap *cpu_timeline;
@@ -142,7 +142,7 @@ void changeTheme(){
   Client *c;
 
   // destroying all Clients
-	for(c = selmon->stack; c; c = c->snext)
+  for(c = selmon->stack; c; c = c->snext)
     XDestroyWindow(dpy,c->win);
 
   // unmap status win if mapped
@@ -156,7 +156,7 @@ void changeTheme(){
   fclose(fp);
 
 
-	XSync(dpy, False);
+  XSync(dpy, False);
   XFlush(dpy);
   sleep(1);
   // coping new Image to stws bg
