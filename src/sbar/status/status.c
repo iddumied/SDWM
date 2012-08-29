@@ -42,28 +42,71 @@ void update_status()
     log_str(buffer, LOG_DEBUG);
     #endif
     
-    if(sbar_status_symbols[DrawMemory].active)
+    if(sbar_status_symbols[DrawMemory].active) {
       get_memory();
+      
+      #ifdef DEBUG
+      log_str("Sucessfully Updated Memory", LOG_DEBUG);
+      #endif
+    }
     
-    if(sbar_status_symbols[DrawBattery].active)
+    if(sbar_status_symbols[DrawBattery].active) {
       check_battery();
 
+      #ifdef DEBUG
+      log_str("Sucessfully Updated Battery", LOG_DEBUG);
+      #endif
+    }
+
     cpu_usage();
+
+    #ifdef DEBUG
+    log_str("Sucessfully Updated CPU", LOG_DEBUG);
+    #endif
+
     update_date();
 
-    if(sbar_status_symbols[DrawUptime].active)
+    #ifdef DEBUG
+    log_str("Sucessfully Updated Date", LOG_DEBUG);
+    #endif
+
+    if(sbar_status_symbols[DrawUptime].active) {
       update_uptime();
 
-    if(sbar_status_symbols[DrawTermal].active)
+      #ifdef DEBUG
+      log_str("Sucessfully Updated Uptime", LOG_DEBUG);
+      #endif
+    }
+
+    if(sbar_status_symbols[DrawTermal].active) {
       get_thermal();
 
-    if(sbar_status_symbols[DrawBacklight].active)
+      #ifdef DEBUG
+      log_str("Sucessfully Updated Termal", LOG_DEBUG);
+      #endif
+    }
+
+    if(sbar_status_symbols[DrawBacklight].active) {
       update_backlight();
 
-    if(sbar_status_symbols[DrawNet].active)
+      #ifdef DEBUG
+      log_str("Sucessfully Updated Backlight", LOG_DEBUG);
+      #endif
+    }
+
+    if(sbar_status_symbols[DrawNet].active) {
       update_net();
 
+      #ifdef DEBUG
+      log_str("Sucessfully Updated Net", LOG_DEBUG);
+      #endif
+    }
+
     update_disk();
+
+    #ifdef DEBUG
+    log_str("Sucessfully Updated Disk", LOG_DEBUG);
+    #endif
 
 }
 

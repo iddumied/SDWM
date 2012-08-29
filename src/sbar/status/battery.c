@@ -25,9 +25,27 @@ static Battery battery;
 
 void check_battery()
 {
+  #ifdef DEBUG
+  log_str("Update Battery", LOG_DEBUG);
+  #endif
+  
   check_adapter();
+  
+  #ifdef DEBUG
+  log_str("Sucessfully Update Battery Adapter", LOG_DEBUG);
+  #endif
+  
   get_capacity();
+  
+  #ifdef DEBUG
+  log_str("Sucessfully Update Battery Capacity", LOG_DEBUG);
+  #endif
+  
   check_stat();
+
+  #ifdef DEBUG
+  log_str("Sucessfully Update Battery Stat", LOG_DEBUG);
+  #endif
 }
 
 void check_adapter()
@@ -57,11 +75,12 @@ void check_adapter()
     
     if(line) free(line);
     fclose(fp);
-    return;
 
     #ifdef DEBUG
     log_str("[BCS] Sucesfully readed /sys/class/power_supply/ADP1/online", LOG_DEBUG);
     #endif
+
+    return;
   }
   
   // open /proc/stat
@@ -101,6 +120,11 @@ void check_adapter()
 
 void get_capacity()
 {
+  #ifdef DEBUG
+  log_str("Update Battery Capacity: [UBC]", LOG_DEBUG);
+  #endif
+
+
   // initializing
   FILE * fp;
   char * line = NULL;
@@ -112,12 +136,21 @@ void get_capacity()
   if (fp == NULL){
       log_str("failed to read /sys/class/power_supply/BAT1/charge_full", LOG_WARNING);
   }else{
+    
+    #ifdef DEBUG
+    log_str("[UBC] Sucessfully opend /sys/class/power_supply/BAT1/charge_full", LOG_DEBUG);
+    #endif
 
     if((read = getline(&line, &len, fp)) != -1)
       battery.capacity = atoi(line);
     
     if(line) free(line);
     fclose(fp);
+
+    #ifdef DEBUG
+    log_str("[UBC] Sucessfully readed /sys/class/power_supply/BAT1/charge_full", LOG_DEBUG);
+    #endif
+    
     return;
   }
 
@@ -131,7 +164,10 @@ void get_capacity()
       sbar_status_symbols[DrawBattery].active = False;
       return;
   }
-
+    
+  #ifdef DEBUG
+  log_str("[UBC] Sucessfully opend /proc/acpi/battery/BAT1/info", LOG_DEBUG);
+  #endif
   
   // reading line by line
   while ((read = getline(&line, &len, fp)) != -1) {
@@ -148,10 +184,18 @@ void get_capacity()
   }
   if (line) free(line);
   fclose(fp);
+    
+  #ifdef DEBUG
+  log_str("[UBC] Sucessfully readed /proc/acpi/battery/BAT1/info", LOG_DEBUG);
+  #endif
 }
 
 void check_stat()
 {
+
+  #ifdef DEBUG
+  log_str("Update Battery Stat: [UBS]", LOG_DEBUG);
+  #endif
 
   // initializing
   FILE * fp;
@@ -166,11 +210,20 @@ void check_stat()
   if (fp == NULL){
     log_str("failed to open /sys/class/power_supply/BAT1/status", LOG_WARNING);
   }else{
+
+    #ifdef DEBUG
+    log_str("[UBS] Sucessfully opend /sys/class/power_supply/BAT1/status", LOG_DEBUG);
+    #endif
+
     if((read = getline(&line, &len, fp)) != -1){
       if(line[0] == 'D') battery.mode = DISCHARGING;
       else if(line[0] == 'C') battery.mode = CHARGING;
       else battery.mode = CHARGED;
     }
+
+    #ifdef DEBUG
+    log_str("[UBS] Sucessfully readed /sys/class/power_supply/BAT1/status", LOG_DEBUG);
+    #endif
 
     fclose(fp);
     
@@ -179,8 +232,16 @@ void check_stat()
       log_str("failed to open /sys/class/power_supply/BAT1/charge_now", LOG_WARNING);
     }else{
 
+      #ifdef DEBUG
+      log_str("[UBS] Sucessfully opend /sys/class/power_supply/BAT1/charge_now", LOG_DEBUG);
+      #endif
+
       if((read = getline(&line, &len, fp)) != -1)
         battery.current = atoi(line);
+
+      #ifdef DEBUG
+      log_str("[UBS] Sucessfully readed /sys/class/power_supply/BAT1/charge_now", LOG_DEBUG);
+      #endif
 
       fclose(fp);
 
@@ -189,8 +250,22 @@ void check_stat()
         log_str("failed to open /sys/class/power_supply/BAT1/current_now", LOG_WARNING);
       }else{
 
+        #ifdef DEBUG
+        log_str("[UBS] Sucessfully opend /sys/class/power_supply/BAT1/current_now", LOG_DEBUG);
+        #endif
+
         if((read = getline(&line, &len, fp)) != -1)
           battery.rate = atoi(line);
+
+        // avoid divide with zero
+        if (battery.rate == 0) battery.mode = CHARGED;
+
+        #ifdef DEBUG
+        log_str("[UBS] Sucessfully readed /sys/class/power_supply/BAT1/current_now", LOG_DEBUG);
+        char logbuf[256];
+        sprintf(logbuf, "Battery current %d, rate %d, capacity %d remain hours %d", battery.current, battery.rate, battery.capacity, battery.remain.h);
+        log_str(logbuf, LOG_DEBUG);
+        #endif
 
         if(battery.mode == DISCHARGING){
           battery.remain.h = battery.current / battery.rate;
@@ -207,9 +282,21 @@ void check_stat()
           battery.remain.h = 0;
           battery.remain.m = 0;
         }
+        #ifdef DEBUG
+        log_str("[UBS] Sucessfully updated changes from /sys/class/power_supply/BAT1/current_now", LOG_DEBUG);
+        #endif
       
         if(line) free(line);
+
+        #ifdef DEBUG
+        log_str("[UBS] Sucessfully freed resauces from /sys/class/power_supply/BAT1/current_now", LOG_DEBUG);
+        #endif
+
         fclose(fp);
+
+        #ifdef DEBUG
+        log_str("[UBS] Sucessfully closed /sys/class/power_supply/BAT1/current_now", LOG_DEBUG);
+        #endif
         return;
       }
     }
@@ -224,6 +311,10 @@ void check_stat()
     sbar_status_symbols[DrawBattery].active = False;
     return;
   }
+
+  #ifdef DEBUG
+  log_str("[UBS] Sucessfully opend /proc/acpi/battery/BAT1/state", LOG_DEBUG);
+  #endif
 
   // reading line by line
   while ((read = getline(&line, &len, fp)) != -1) {
@@ -273,5 +364,9 @@ void check_stat()
   
   if (line) free(line);
   fclose(fp);
+
+  #ifdef DEBUG
+  log_str("[UBS] Sucessfully readed /proc/acpi/battery/BAT1/state", LOG_DEBUG);
+  #endif
 }
 
