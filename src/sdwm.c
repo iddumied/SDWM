@@ -1,3 +1,5 @@
+#define DEBUG
+
 /* See LICENSE file for copyright and license details.
  *
  * stylish dynamic window manager is designed like any other X client as well. It is
@@ -843,7 +845,7 @@ void log_str(const char *str, unsigned int importance)
   time(&rawtime);
   timeinfo = localtime(&rawtime);
 
-  strftime(curtime, 80, "[%d/%d/%Y::%H:%M:%S] ", timeinfo);
+  strftime(curtime, 80, "[%d/%b/%Y::%H:%M:%S] ", timeinfo);
 
   int fd = open("/var/log/sdwm", O_APPEND|O_WRONLY);
   if (fd == -1) {
@@ -2874,7 +2876,6 @@ zoom(const Arg *arg) {
 
 int
 main(int argc, char *argv[]) {
-  log_str("SDWM startup", LOG_INFO);
 	if(argc == 2 && !strcmp("-v", argv[1]))
 		die("sdwm-"VERSION", © 2006-2011 sdwm engineers, see LICENSE for details\n");
 	else if(argc != 1)

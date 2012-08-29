@@ -198,9 +198,17 @@ int draw_battery(int y, int pos)
   char buffer[8];
 
   // calculating battery color;
-  gcv.foreground = ((int)(battery.stat * 255)) * statusstyle.gl + 
-          (255 - ((int)(battery.stat * 255))) * statusstyle.rl;
+  gcv.foreground = ((int)(battery.stat * 255)) * sbar.colors.greenlow + 
+          (255 - ((int)(battery.stat * 255))) * sbar.colors.redlow;
   XChangeGC(dpy, dc.gc, GCForeground, &gcv);
+
+  #ifdef DEBUG
+  char log[256];
+  sprintf(log, "Draw Battery Color: %d", gcv.foreground);
+  log_str(log, LOG_DEBUG);
+  sprintf(log, "battery.stat %f", battery.stat);
+  log_str(log, LOG_DEBUG);
+  #endif
   
   // calculating battery stat
   if(battery.mode == CHARGING){
@@ -271,8 +279,14 @@ void drawsymbolstatus()
 
   // drawing sbar symbols. The order is configured in config.h
   for(i = 0; i < DrawLast;i++){
-    if(sbar_status_symbols[i].active)
+    if(sbar_status_symbols[i].active) {
       pos = sbar_status_symbols[i].func(y, pos) - sbar_distancex;
+    } 
+    #ifdef DEBUG
+      char buffer[256];
+      sprintf(buffer, "drawsymbolstatus %d %s", i, sbar_status_symbols[i].active ? "yes" : "no");
+      log_str(buffer, LOG_DEBUG);
+    #endif
   }
 
 }

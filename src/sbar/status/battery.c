@@ -32,6 +32,10 @@ void check_battery()
 
 void check_adapter()
 {
+  #ifdef DEBUG
+  log_str("Battery Check Status: [BCS]", LOG_DEBUG);
+  #endif
+
   // initializing
   FILE * fp;
   char * line = NULL;
@@ -44,14 +48,21 @@ void check_adapter()
       log_str("failed to read /sys/class/power_supply/ADP1/online", LOG_WARNING);
   }else{
     
+    #ifdef DEBUG
+    log_str("[BCS] Sucessfuly opend /sys/class/power_supply/ADP1/online", LOG_DEBUG);
+    #endif
+    
     if((read = getline(&line, &len, fp)) != -1)
       battery.adapter = line[0] == '1' ? True : False;
     
     if(line) free(line);
     fclose(fp);
     return;
+
+    #ifdef DEBUG
+    log_str("[BCS] Sucesfully readed /sys/class/power_supply/ADP1/online", LOG_DEBUG);
+    #endif
   }
-  // try  /proc file
   
   // open /proc/stat
   fp = fopen("/proc/acpi/ac_adapter/ADP1/state", "r");
@@ -60,6 +71,9 @@ void check_adapter()
       sbar_status_symbols[DrawBattery].active = False;
       return;
   }
+  #ifdef DEBUG
+  log_str("[BCS] Sucesfully opend /proc/acpi/ac_adapter/ADP1/state", LOG_DEBUG);
+  #endif
   
   // reading line by line
   while ((read = getline(&line, &len, fp)) != -1) {
@@ -73,8 +87,16 @@ void check_adapter()
     break;
   }
 
+  #ifdef DEBUG
+  log_str("[BCS] Sucesfully readed /proc/acpi/ac_adapter/ADP1/state", LOG_DEBUG);
+  #endif
+
   if (line) free(line);
   fclose(fp);
+
+  #ifdef DEBUG
+  log_str("Sucessfully finished [BCS]", LOG_DEBUG);
+  #endif
 }
 
 void get_capacity()
