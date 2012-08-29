@@ -194,9 +194,16 @@ void custom_suspend();
 void custom_shutdown();
 void custom_reboot();
 void log_str(const char *str, unsigned int importance);
-#define LOG_INFO    0
-#define LOG_WARNING 1
-#define LOG_ERROR   2
+#define LOG_DEBUG   0
+#define LOG_INFO    1
+#define LOG_WARNING 2
+#define LOG_ERROR   3
+#ifdef DEBUG
+#ifndef INFO
+#define INFO
+#endif
+#endif
+
 
 
 // dwm functions
@@ -826,17 +833,43 @@ void custom_reboot()
   popen("sudo reboot", "w");
   sleep(5);
 }
-#include <fcntl.h>
+
 void log_str(const char *str, unsigned int importance)
 {
-  int fd = open("/var/log/sdwm", O_APPEND|O_WRONLY);
-  if (importance == LOG_INFO)
-    write(fd, "[II] ", 5);
-  else if (importance == LOG_WARNING)
-    write(fd, "[WW] ", 5);
-  else
-    write(fd, "[EE] ", 5);
+  time_t rawtime;
+  struct tm * timeinfo;
+  char curtime[80];
 
+  time(&rawtime);
+  timeinfo = localtime(&rawtime);
+
+  strftime(curtime, 80, "[%d/%d/%Y::%H:%M:%S] ", timeinfo);
+
+  int fd = open("/var/log/sdwm", O_APPEND|O_WRONLY);
+  if (fd == -1) {
+    printf("[ERROR] couldn't open logfile /var/log/sdwm\n");
+    if (importance == LOG_DEBUG)
+      printf("[DD]%s %s", curtime, str);
+    else if (importance == LOG_INFO)
+      printf("[II]%s %s", curtime, str);
+    else if (importance == LOG_WARNING)
+      printf("[WW]%s %s", curtime, str);
+    else
+      printf("[EE]%s %s", curtime, str);
+
+    return;
+  }
+
+  if (importance == LOG_DEBUG)
+    write(fd, "[DD]", 4);
+  else if (importance == LOG_INFO)
+    write(fd, "[II]", 4);
+  else if (importance == LOG_WARNING)
+    write(fd, "[WW]", 4);
+  else
+    write(fd, "[EE]", 4);
+
+  write(fd, curtime, strlen(curtime));
   write(fd, str, strlen(str));
   write(fd, "\n", 1);
   close(fd);
@@ -1268,6 +1301,7 @@ die(const char *errstr, ...) {
 	va_list ap;
 
 	va_start(ap, errstr);
+  log_str(errstr, LOG_ERROR);
 	vfprintf(stderr, errstr, ap);
 	va_end(ap);
 	exit(EXIT_FAILURE);
@@ -1635,13 +1669,15 @@ grabkeys(void) {
 
 void
 initfont(const char *fontstr) {
-	char *def, **missing;
+	char *def, **missing, buffer[200];
 	int n;
 
 	dc.font.set = XCreateFontSet(dpy, fontstr, &missing, &n, &def);
 	if(missing) {
-		while(n--)
-			fprintf(stderr, "sdwm: missing fontset: %s\n", missing[n]);
+		while(n--) {
+			sprintf(buffer, "sdwm: missing fontset: %s", missing[n]);
+      log_str(buffer, LOG_WARNING);
+    }
 		XFreeStringList(missing);
 	}
 	if(dc.font.set) {

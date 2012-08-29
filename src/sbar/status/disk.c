@@ -95,7 +95,9 @@ void merge_mount_path()
 
       fp = fopen(buf, "r");
       if (fp == NULL){
-        printf("\nfailed to read %s\n",buf);
+        char buffer[300];
+        sprintf(buffer, "failed to read %s",buf);
+        log_str(buffer, LOG_WARNING);
         return;
       }
   
@@ -151,7 +153,7 @@ void update_mounts()
   // open /proc/stat
   fp = fopen("/proc/mounts", "r");
   if (fp == NULL){
-      printf("\nfailed to read /proc/mounts\n");
+      log_str("failed to read /proc/mounts", LOG_WARNING);
       return;
   }
   
@@ -200,7 +202,7 @@ void update_stats()
   // open /proc/stat
   fp = fopen("/proc/diskstats", "r");
   if (fp == NULL){
-      printf("\nfailed to read /proc/diskstats\n");
+      log_str("failed to read /proc/diskstats", LOG_WARNING);
       return;
   }
   

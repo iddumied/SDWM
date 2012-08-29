@@ -44,7 +44,7 @@ void setup_cpu()
   // open /proc/stat
   fp = fopen("/proc/stat", "r");
   if (fp == NULL){
-      printf("\nfailed to read /proc/stat\n");
+      log_str("failed to read /proc/stat", LOG_WARNING);
       return;
   }
   
@@ -81,7 +81,7 @@ void setup_cpu_name() {
  
   fp = popen("cat /proc/cpuinfo |grep \"model name\"", "r");
   if (fp == NULL){
-      printf("\nfailed to read /proc/cpuinfo\n");
+      log_str("failed to read /proc/cpuinfo", LOG_WARNING);
       return;
   }
   
@@ -124,7 +124,7 @@ int get_ncpus()
 
     fp = fopen("/proc/stat", "r");
     if (fp == NULL){
-         printf("\nfailed to read /proc/stat\n");
+         log_str("failed to read /proc/stat", LOG_WARNING);
          return;
     }
 
@@ -151,7 +151,7 @@ void cpu_usage()
 
     fp = fopen("/proc/stat", "r");
     if (fp == NULL){
-      printf("\nfailed to read /proc/stat\n");
+      log_str("failed to read /proc/stat", LOG_WARNING);
       return;
     }
 

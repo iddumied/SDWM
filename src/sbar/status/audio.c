@@ -30,7 +30,7 @@ void set_audio(const Arg* arg)
 
   fp = popen(cmd, "r");
   if (fp == NULL){
-        printf("\nfailed to read output of amixer\n");
+        log_str("failed to read output of amixer", LOG_WARNING);
         return;
   }
 
@@ -77,7 +77,7 @@ void toggle_mute()
     fp = popen("amixer set Master unmute", "r");
   
   if (fp == NULL){
-        printf("\nfailed to read output of amixer\n");
+        log_str("failed to read output of amixer", LOG_WARNING);
         return;
   }
 
@@ -118,7 +118,7 @@ void setup_audio()
 
   fp = popen("amixer | grep Master -A 4", "r");
   if (fp == NULL){
-        printf("\nfailed to read output of amixer\n");
+        log_str("failed to read output of amixer", LOG_WARNING);
         return;
   }
 

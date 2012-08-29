@@ -19,7 +19,7 @@ void get_memory()
   // open /proc/stat
   fp = fopen("/proc/meminfo", "r");
   if (fp == NULL){
-      printf("\nfailed to read /proc/meminfo\n");
+      log_str("failed to read /proc/meminfo", LOG_WARNING);
       sbar_status_symbols[DrawMemory].active = False;
       return;
   }

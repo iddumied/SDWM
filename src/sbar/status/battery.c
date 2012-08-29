@@ -41,7 +41,7 @@ void check_adapter()
 
   fp = fopen("/sys/class/power_supply/ADP1/online", "r");
   if (fp == NULL){
-      printf("\nfailed to read /sys/class/power_supply/ADP1/online\n");
+      log_str("failed to read /sys/class/power_supply/ADP1/online", LOG_WARNING);
   }else{
     
     if((read = getline(&line, &len, fp)) != -1)
@@ -56,7 +56,7 @@ void check_adapter()
   // open /proc/stat
   fp = fopen("/proc/acpi/ac_adapter/ADP1/state", "r");
   if (fp == NULL){
-      printf("\nfailed to read /proc/acpi/ac_adapter/ADP1/state\n");
+      log_str("failed to read /proc/acpi/ac_adapter/ADP1/state", LOG_WARNING);
       sbar_status_symbols[DrawBattery].active = False;
       return;
   }
@@ -88,7 +88,7 @@ void get_capacity()
   
   fp = fopen("/sys/class/power_supply/BAT1/charge_full", "r");
   if (fp == NULL){
-      printf("\nfailed to read /sys/class/power_supply/BAT1/charge_full\n");
+      log_str("failed to read /sys/class/power_supply/BAT1/charge_full", LOG_WARNING);
   }else{
 
     if((read = getline(&line, &len, fp)) != -1)
@@ -105,7 +105,7 @@ void get_capacity()
   // open /proc/stat
   fp = fopen("/proc/acpi/battery/BAT1/info", "r");
   if (fp == NULL){
-      printf("\nfailed to read /proc/acpi/battery/BAT1/info\n");
+      log_str("failed to read /proc/acpi/battery/BAT1/info", LOG_WARNING);
       sbar_status_symbols[DrawBattery].active = False;
       return;
   }
@@ -142,7 +142,7 @@ void check_stat()
 
   fp = fopen("/sys/class/power_supply/BAT1/status", "r");
   if (fp == NULL){
-    printf("\nfailed to open /sys/class/power_supply/BAT1/status");
+    log_str("failed to open /sys/class/power_supply/BAT1/status", LOG_WARNING);
   }else{
     if((read = getline(&line, &len, fp)) != -1){
       if(line[0] == 'D') battery.mode = DISCHARGING;
@@ -154,7 +154,7 @@ void check_stat()
     
     fp = fopen("/sys/class/power_supply/BAT1/charge_now", "r");
     if (fp == NULL){
-      printf("\nfailed to open /sys/class/power_supply/BAT1/charge_now");
+      log_str("failed to open /sys/class/power_supply/BAT1/charge_now", LOG_WARNING);
     }else{
 
       if((read = getline(&line, &len, fp)) != -1)
@@ -164,7 +164,7 @@ void check_stat()
 
       fp = fopen("/sys/class/power_supply/BAT1/current_now", "r");
       if (fp == NULL){
-        printf("\nfailed to open /sys/class/power_supply/BAT1/current_now");
+        log_str("failed to open /sys/class/power_supply/BAT1/current_now", LOG_WARNING);
       }else{
 
         if((read = getline(&line, &len, fp)) != -1)
@@ -198,7 +198,7 @@ void check_stat()
   // open /proc/stat
   fp = fopen("/proc/acpi/battery/BAT1/state", "r");
   if (fp == NULL){
-    printf("\nfailed to open/proc/acpi/battery/BAT1/state");
+    log_str("failed to open/proc/acpi/battery/BAT1/state", LOG_WARNING);
     sbar_status_symbols[DrawBattery].active = False;
     return;
   }

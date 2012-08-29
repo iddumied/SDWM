@@ -99,26 +99,6 @@ int main() {
 
   }
 
-#ifdef DEBUG_NET
-int main() {
-  setup_net();
-
-  while(1==1){
-    sleep(1);
-    update_net();
-
-    int i;
-      printf("%5s: %d\n", "eth0", net.eth0.online);
-      printf("%5s: %d\n", "wlan0", net.wlan0.online);
-      printf("%5s: %d\n", "lo", net.lo.online);
-
-  }
-
-
-  return 0;
-}
-#endif
-
   return 0;
 }
 #endif
@@ -167,7 +147,7 @@ void check_wireless_maxlink()
       sprintf(cmd, "iwconfig %s | grep \"Link Quality\"", net.interfaces[i].name);
       fp = popen(cmd, "r");
       if (fp == NULL){
-            printf("\n2: failed to read iwconfig output\n");
+            log_str("0: failed to read iwconfig output", LOG_WARNING);
             #ifndef DEBUG_NET
             sbar_status_symbols[DrawNet].active = False;
             #endif
@@ -232,7 +212,7 @@ void new_interface(Interface *interface, char *line, int len)
 
   fp = popen(cmd, "r");
   if (fp == NULL){
-        printf("\n1: failed to read iwconfig output\n");
+        log_str("1: failed to read iwconfig output", LOG_WARNING);
         #ifndef DEBUG_NET
         sbar_status_symbols[DrawNet].active = False;
         #endif
@@ -252,7 +232,7 @@ void new_interface(Interface *interface, char *line, int len)
     sprintf(cmd, "iwconfig %s | grep \"Link Quality\"", interface->name);
     fp = popen(cmd, "r");
     if (fp == NULL){
-          printf("\n2: failed to read iwconfig output\n");
+          log_str("2: failed to read iwconfig output", LOG_WARNING);
           #ifndef DEBUG_NET
           sbar_status_symbols[DrawNet].active = False;
           #endif
@@ -369,7 +349,7 @@ void get_net_statistic()
 
   fp = open("/proc/net/dev", O_RDONLY);
   if (fp == -1){
-        printf("\nfailed to read /proc/net/dev\n");
+        log_str("failed to read /proc/net/dev", LOG_WARNING);
         #ifndef DEBUG_NET
         sbar_status_symbols[DrawNet].active = False;
         #endif
@@ -534,7 +514,7 @@ void calculate_wlan_strength()
 
   fp = open("/proc/net/wireless", O_RDONLY);
   if (fp == -1){
-        printf("\nfailed to read /proc/net/wireless\n");
+        log_str("failed to read /proc/net/wireless", LOG_WARNING);
         #ifndef DEBUG_NET
         sbar_status_symbols[DrawNet].active = False;
         #endif
@@ -583,8 +563,10 @@ void get_interface_stat()
 
     fp = open(cmd, O_RDONLY);
     if (fp == -1){
-          printf("\nfailed to read %s\n", cmd);
-          return;
+      char buffer[256];
+      sprintf(buffer, "failed to read %s", cmd);
+      log_str(buffer, LOG_WARNING);
+      return;
     }
  
     if (read(fp, buffer, 2) != -1) {
@@ -604,7 +586,7 @@ void get_interface_stat()
   
   fp = open("/proc/easy_wifi_kill", O_RDONLY);
   if (fp == -1){
-        printf("\nfailed to read /proc/easy_wifi_kill\n");
+        log_str("failed to read /proc/easy_wifi_kill", LOG_WARNING);
         #ifndef DEBUG_NET
         sbar_status_symbols[DrawNet].active = False;
         #endif
