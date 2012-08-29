@@ -1,4 +1,4 @@
-Instlall a font
+Install a font
 ==============
 
 - Edit font with gbdfed
