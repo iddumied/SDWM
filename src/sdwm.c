@@ -190,6 +190,9 @@ int draw_audio(int y, int pos);
 int draw_net(int y, int pos);
 void dmenucmd();
 void termcmd();
+void suspend();
+void shutdown();
+void reboot();
 
 
 // dwm functions
@@ -763,6 +766,7 @@ void black_floading()
   }
   usleep(1000);
 }
+
 void black_floadquit()
 {
   Client *c;
@@ -774,6 +778,51 @@ void black_floadquit()
   black_floading();
   quit(NULL);
 }
+
+void suspend()
+{
+  popen("sudo pm-suspend", "w");
+
+  int i;
+  GC gc = XCreateGC(dpy, DefaultRootWindow(dpy), 0, NULL);
+  XGCValues gcv;
+  gcv.foreground = sbar.colors.red;
+  XChangeGC(dpy, gc, GCForeground, &gcv);
+ 
+  for (i = 0; i < screenWidth; i++) {
+    XDrawPoint(dpy, root, gc, i, bh-1);
+    usleep(1500);
+    XFlush(dpy);
+  }
+  sleep(3);
+}
+
+void shutdown()
+{
+  Client *c;
+
+  // destroying all Clients
+	for(c = selmon->stack; c; c = c->snext)
+    XDestroyWindow(dpy,c->win);
+
+  black_floading();
+  popen("sudo shutdown -h now", "w");
+}
+
+void reboot()
+{
+  Client *c;
+
+  // destroying all Clients
+	for(c = selmon->stack; c; c = c->snext)
+    XDestroyWindow(dpy,c->win);
+
+  black_floading();
+  popen("sudo reboot", "w");
+}
+
+
+
 
 // DWM FUNCTIONS
 
