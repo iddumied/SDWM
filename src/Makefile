@@ -50,11 +50,16 @@ install: all
 	@mkdir -p ${DESTDIR}${MANPREFIX}/man1
 	@sed "s/VERSION/${VERSION}/g" < sdwm.1 > ${DESTDIR}${MANPREFIX}/man1/sdwm.1
 	@chmod 644 ${DESTDIR}${MANPREFIX}/man1/sdwm.1
+	@mkdir -p ${DESTDIR}${LOGPREFIX}
+	@touch ${DESTDIR}${LOGPREFIX}/sdwm
+	@chmod 777 ${DESTDIR}${LOGPREFIX}/sdwm
 
 uninstall:
 	@echo removing executable file from ${DESTDIR}${PREFIX}/bin
 	@rm -f ${DESTDIR}${PREFIX}/bin/sdwm
 	@echo removing manual page from ${DESTDIR}${MANPREFIX}/man1
 	@rm -f ${DESTDIR}${MANPREFIX}/man1/sdwm.1
+	@echo removing log file from ${DESTDIR}${LOGPREFIX}
+	@rm -f ${DESTDIR}${LOGPREFIX}/sdwm
 
 .PHONY: all options clean dist install uninstall
