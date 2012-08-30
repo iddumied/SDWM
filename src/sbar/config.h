@@ -68,18 +68,19 @@ static const char audio_mute[]             = "\x15";
 static const char audio_low[]              = "\x16";
 static const char audio_middle[]           = "\x17";
 static const char audio_high[]             = "\x18";
-static const char uptime_sym_evil[]        = "\x19";
-static const char uptime_sym_berserk[]     = "\x1a";
-static const char uptime_sym_angry[]       = "\x1b";
-static const char uptime_sym_sad[]         = "\x1c";
-static const char uptime_sym_lazy[]        = "\x1d";
-static const char uptime_sym_good[]        = "\x1e";
-static const char backlight_very_low[]     = "\x1f";
-static const char backlight_low[]          = "\x20";
-static const char backlight_middle[]       = "\x21";
-static const char backlight_high[]         = "\x22";
-static const char termal_symbol[]          = "\x23";
-static const char memory_symbol[]          = "\x24";
+static const char audio_very_high[]        = "\x19";
+static const char uptime_sym_evil[]        = "\x1a";
+static const char uptime_sym_berserk[]     = "\x1b";
+static const char uptime_sym_angry[]       = "\x1c";
+static const char uptime_sym_sad[]         = "\x1d";
+static const char uptime_sym_lazy[]        = "\x1e";
+static const char uptime_sym_good[]        = "\x1f";
+static const char backlight_very_low[]     = "\x20";
+static const char backlight_low[]          = "\x21";
+static const char backlight_middle[]       = "\x22";
+static const char backlight_high[]         = "\x23";
+static const char termal_symbol[]          = "\x24";
+static const char memory_symbol[]          = "\x25";
 
 
                                       

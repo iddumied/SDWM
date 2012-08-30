@@ -57,31 +57,38 @@ int draw_net(int y, int pos)
 int draw_audio(int y, int pos)
 {
   int buffer_len;
-  char buffer[8];  
+  char buffer[8], *symbol;  
 
   // draw audio
   gcv.foreground = dc.norm[ColFG];
   XChangeGC(dpy, dc.gc, GCForeground, &gcv);
 
+  sprintf(buffer," %d%%", audio.percent);
+    
   // calc symbol
   if(audio.mute)
-    sprintf(buffer,"\x0f %d%c", audio.percent,'%');
+    symbol = audio_mute;
   else if(audio.percent < 25)
-    sprintf(buffer,"\x10 %d%c", audio.percent,'%');
+    symbol = audio_low;
   else if(audio.percent < 50)
-    sprintf(buffer,"\x11 %d%c", audio.percent,'%');
+    symbol = audio_middle;
   else if(audio.percent < 75)
-    sprintf(buffer,"\x12 %d%c", audio.percent,'%');
+    symbol = audio_high;
   else
-    sprintf(buffer,"É %d%c", audio.percent,'%');
+    symbol = audio_very_high;
   
   
     
   buffer_len = strlen(buffer);
-  pos -= textnw(buffer, buffer_len);
+  pos -= textnw(buffer, buffer_len) - sbartextnw(symbol, 1);
   
   if(sbar.font.set)
-    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, buffer, buffer_len);
+    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, symbol, 1);
+  else
+    XDrawString(dpy, dc.drawable, dc.gc, pos, y, symbol, 1);
+
+  if(dc.font.set)
+    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, buffer, buffer_len);
   else
     XDrawString(dpy, dc.drawable, dc.gc, pos, y, buffer, buffer_len);
   
