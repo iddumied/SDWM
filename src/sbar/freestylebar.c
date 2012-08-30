@@ -33,6 +33,7 @@ void draw_freestylebar(){
 
 
 void setup_freestylebar(){
+
   // initializing freestylebar
   freestylebar.norm[ColBorder]    = getcolor(themes[CurTheme].normal.normbordercolor);
   freestylebar.norm[ColBG]        = getcolor(themes[CurTheme].normal.normbgcolor);
@@ -44,12 +45,15 @@ void setup_freestylebar(){
   freestylebar.sbar[SBarLine]  = getcolor(themes[CurTheme].normal.timeln_line_color);
   freestylebar.sbar[SBarCpuPoint] = getcolor(themes[CurTheme].normal.timeln_point_color);
     
-    
   freestylebar.font.ascent  = dc.font.ascent;
   freestylebar.font.descent = dc.font.descent;
   freestylebar.font.height  = dc.font.height;
   freestylebar.font.set     = dc.font.set;
   freestylebar.font.xfont   = dc.font.xfont;
+
+  #ifdef INFO
+  log_str("Setup freestylebar appearance and font", LOG_INFO);
+  #endif
 
   int  l = 0, x, tmp, i;
   x = SBARTEXTW(mainsymbol);

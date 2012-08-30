@@ -56,6 +56,11 @@ void setup_sbar()
   
   int i, j, status;
 
+  sbarinitfont(sbarfont);
+
+  #ifdef INFO
+  log_str("successful init sbar font", LOG_INFO);
+  #endif
 
   screenWidth  = DisplayWidth(dpy, DefaultScreen(dpy));
   screenHeight = DisplayHeight(dpy, DefaultScreen(dpy));
@@ -73,8 +78,16 @@ void setup_sbar()
   sbar.cpu_length = (cpus_length - (cpuinfo.ncpus-1)*cpu_distance_x) / cpuinfo.ncpus; 
 
   setup_stw();
+
+  #ifdef INFO
+  log_str("Setup statuswin", LOG_INFO);
+  #endif
+
   setup_freestylebar();    
 
+  #ifdef INFO
+  log_str("Setup freestylebar", LOG_INFO);
+  #endif
 
   sbar.colors.red            = getcolor("#FF0000");
   sbar.colors.green          = getcolor("#00FF00");
@@ -122,13 +135,20 @@ void setup_sbar()
   sbar.colors.bbbotbordercolor  = getcolor(themes[CurTheme].verylow.botbordercolor);
   sbar.colors.bbcpu_line        = getcolor(themes[CurTheme].verylow.timeln_line_color);
   sbar.colors.bbcpu_point       = getcolor(themes[CurTheme].verylow.timeln_point_color);
+
+  #ifdef INFO
+  log_str("Setup Sbar apperance", LOG_INFO);
+  #endif
     
   sbar.cpu_timeline = (Pixmap*)malloc(sizeof(Pixmap)*cpuinfo.ncpus+1);
       
   for(i = 0;i < cpuinfo.ncpus+1;i++)
     sbar.cpu_timeline[i] = XCreatePixmap(dpy, root, sbar.cpu_length, bh-1, DefaultDepth(dpy, screen));
 
-  sbarinitfont(sbarfont);
+  #ifdef INFO
+  log_str("Setup cpu timelins", LOG_INFO);
+  #endif
+
 
   #ifdef INFO
   char logbuf[256];
