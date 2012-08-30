@@ -1,0 +1,41 @@
+post_install() {
+  if [ -e /etc/X11/xorg.conf ]; then
+   cp /etc/X11/xorg.conf /etc/X11/xorg.conf.pacsave.sdwm
+   echo "xorg.conf saved as xorg.conf.pacsave"
+ 
+   if [[ -z $(grep -e "/usr/share/fonts/sdwm/" /etc/X11/xorg.conf) ]]; then 
+ 
+     if [[ -z $(grep -e 'Section "Files"' /etc/X11/xorg.conf) ]]; then
+       echo 'Section "Files"' >> /etc/X11/xorg.conf
+       echo "    /usr/share/fonts/sdwm/" >> /etc/X11/xorg.conf
+       echo "EndSection" >> /etc/X11/xorg.conf
+       fc-cache -fv
+     else
+       sed -i '/Section "Files"/{
+         a \
+    FontPath        "/usr/share/fonts/sdwm/"
+       }' /etc/X11/xorg.conf 
+       fc-cache -fv
+     fi
+   fi
+
+  elif [ -d /etc/X11 ]; then
+    echo "Section \"Files\"" > /etc/X11/xorg.conf
+    echo "    /usr/share/fonts/sdwm/" >> /etc/X11/xorg.conf
+    echo "EndSection" >> /etc/X11/xorg.conf
+    fc-cache -fv
+  else
+    echo "/etc/X11 does not exist! Did you installed xserver?"
+  fi
+}
+
+post_remove() {
+  if [ -e /etc/X11/xorg.conf ]; then
+   cp /etc/X11/xorg.conf /etc/X11/xorg.conf.pacsave.sdwm
+   echo "xorg.conf saved as xorg.conf.pacsave"
+ 
+   if [[ -z $(grep -e "/usr/share/fonts/sdwm/" /etc/X11/xorg.conf) ]]; then 
+     sed -i '/usr\/share\/fonts\/sdwm/d' /etc/X11/xorg.conf
+   fi
+  fi
+}
