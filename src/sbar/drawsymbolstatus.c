@@ -4,39 +4,50 @@ static XGCValues gcv;
 int draw_net(int y, int pos)
 {
   int buffer_net_len;
-  char buffer_net[13], buffer_speed[11];
+  char *symbol, buffer_net[13], buffer_speed[11];
   
   // draw net
   gcv.foreground = dc.norm[ColFG];
   XChangeGC(dpy, dc.gc, GCForeground, &gcv);
 
   // calc symbol
-  if(!net.connected)
+  if(!net.connected) {
+    symbol = net_sym_offline;
     if(!(interface_by_name("wlan0")->easy_online))
-      sprintf(buffer_net,"%c down", net_sym_offline);
-    else
-      sprintf(buffer_net,"%c of", net_sym_offline);
-  else if(net_lan_online()){
+      sprintf(buffer_net," down");
+    else 
+      sprintf(buffer_net," of");
+  } else if(net_lan_online()){
+    symbol = net_sym_lan_online;
     human_readable(net_all_bytes_per_sec(), False, buffer_speed);
-    sprintf(buffer_net,"%c  %s", net_sym_lan_online, buffer_speed);
+    sprintf(buffer_net,"  %s", buffer_speed);
   }else if(net_wlan_online()){
     double strength = net_wlan_strength();
+    sprintf(buffer_net," %d%%", (int)(strength*100));
+    
     if(strength < 0.25)
-      sprintf(buffer_net,"%c %d%%", net_sym_wlan_very_low, (int)(strength*100));
+      symbol = net_sym_wlan_very_low;
     else if(strength < 0.5)
-      sprintf(buffer_net,"%c %d%%", net_sym_wlan_low, (int)(strength*100));
+      symbol = net_sym_wlan_low;
     else if(strength < 0.75)
-      sprintf(buffer_net,"%c %d%%", net_sym_wlan_middle, (int)(strength*100));
+      symbol = net_sym_wlan_middle;
     else
-      sprintf(buffer_net,"%c %d%%", net_sym_wlan_high, (int)(strength*100));
-  }else
+      symbol = net_sym_wlan_high;
+  }else {
     sprintf(buffer_net,"Error");
+    symbol = net_sym_offline;
+  }
     
   buffer_net_len = strlen(buffer_net);
-  pos -= textnw(buffer_net, buffer_net_len);
+  pos -= textnw(buffer_net, buffer_net_len) - sbartextnw(symbol, 1);
   
-  if(sbar.font.set)
-    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, buffer_net, buffer_net_len);
+  if (sbar.font.set)
+    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, symbol, 1);
+  else
+    XDrawString(dpy, dc.drawable, dc.gc, pos, y, symbol, 1);
+
+  if (dc.font.set)
+    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, buffer_net, buffer_net_len);
   else
     XDrawString(dpy, dc.drawable, dc.gc, pos, y, buffer_net, buffer_net_len);
   
@@ -258,6 +269,11 @@ int draw_time(int y, int pos)
 
 void drawsymbolstatus()
 {
+  
+  if(!sbar.font.set) 
+    log_str("SBar Font not initialized!!!", LOG_ERROR);
+
+
   /*************** INITIALIZE ***************/
   int i, y, h, pos;
   gcv.foreground = dc.norm[ColFG];
