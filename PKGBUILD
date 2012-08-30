@@ -11,6 +11,8 @@ arch=('i686' 'x86_64')
 license=('MIT')
 options=(zipman)
 depends=('libx11' 'libxinerama')
+optdepends=('gbdfed' 'bdftopcf' 'xlsfonts')
+install=sdwm.install
 srcdir="$PWD"/src
 
 build() {

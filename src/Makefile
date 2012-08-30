@@ -53,6 +53,9 @@ install: all
 	@mkdir -p ${DESTDIR}${LOGPREFIX}
 	@touch ${DESTDIR}${LOGPREFIX}/sdwm
 	@chmod 777 ${DESTDIR}${LOGPREFIX}/sdwm
+	@mkdir -p ${DESTDIR}${PREFIX}/share/fonts/sdwm
+	@cp -f fonts/* ${DESTDIR}${PREFIX}/share/fonts/sdwm/
+	@chmod 777 ${DESTDIR}${PREFIX}/share/fonts/sdwm/*
 
 uninstall:
 	@echo removing executable file from ${DESTDIR}${PREFIX}/bin

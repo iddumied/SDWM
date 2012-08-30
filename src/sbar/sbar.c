@@ -128,7 +128,7 @@ void setup_sbar()
   for(i = 0;i < cpuinfo.ncpus+1;i++)
     sbar.cpu_timeline[i] = XCreatePixmap(dpy, root, sbar.cpu_length, bh-1, DefaultDepth(dpy, screen));
 
-  sbarinitfont(font);
+  sbarinitfont(sbarfont);
 
   #ifdef INFO
   char logbuf[256];

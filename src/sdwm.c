@@ -56,6 +56,7 @@
 #define HEIGHT(X)               ((X)->h + 2 * (X)->bw)
 #define TAGMASK                 ((1 << LENGTH(tags)) - 1)
 #define TEXTW(X)                (textnw(X, strlen(X)) + dc.font.height)
+#define SBARTEXTW(X)            (sbartextnw(X, strlen(X)) + sbar.font.height)
 
 /* enums */
 enum { CurNormal, CurResize, CurMove, CurLast };              /* cursor */
@@ -195,6 +196,7 @@ void termcmd();
 void custom_suspend();
 void custom_shutdown();
 void custom_reboot();
+int sbartextnw(const char *text, unsigned int len);
 void log_str(const char *str, unsigned int importance);
 #define LOG_DEBUG   0
 #define LOG_INFO    1
@@ -1034,7 +1036,7 @@ buttonpress(XEvent *e) {
   if(ev->window == selmon->barwin || ev->window == selmon->statuswin) {
       
     i = 0;
-    x = TEXTW(mainsymbol);
+    x = SBARTEXTW(mainsymbol);
       
     do { 
        // calculates on witch tab mous was pressed
@@ -2437,6 +2439,17 @@ textnw(const char *text, unsigned int len) {
 		return r.width;
 	}
 	return XTextWidth(dc.font.xfont, text, len);
+}
+
+int
+sbartextnw(const char *text, unsigned int len) {
+	XRectangle r;
+
+	if(sbar.font.set) {
+		XmbTextExtents(sbar.font.set, text, len, NULL, &r);
+		return r.width;
+	}
+	return XTextWidth(sbar.font.xfont, text, len);
 }
 
 void

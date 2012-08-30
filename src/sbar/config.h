@@ -23,14 +23,14 @@ static const char *tags[] = { "main", "term", "dev", "img", "misc", "more" };
 
 static const Layout layouts[] = {
   /* symbol     arrange function */
-  { "\x04",      ntile },    /* first entry is default */
+  { "\x02",      ntile },    /* first entry is default */
   { "\x03",      NULL },     /* no layout function means floating behavior */
-  { "\x01",      monocle },
+  { "\x04",      monocle },
   { "\x05",      nbstack },
-  { "\x08",      nbstackhoriz },
-  { "\x09",      spiral },
-  { "\x1b",      dwindle },
-  { "\x07",      gaplessgrid },
+  { "\x06",      nbstackhoriz },
+  { "\x07",      spiral },
+  { "\x07",      dwindle },
+  { "\x08",      gaplessgrid },
 };
 
 
@@ -46,8 +46,42 @@ static Bool show_net_lo_interface     = True;         // shows statistic (Timlie
                                       
 static const int status_refresh       = 1;            // refresh zyklus in seconds
 static const Bool show_year           = True;
-static const char mainsymbol[]        = "\x18";
-static const char sbarfont[]          = "-lokaltog-symbols-medium-r-normal--11-110-75-75-p-90-iso8859-1"; 
+
+/**
+ * Font and symbols for the sbar
+ * edit font with gbdfed and change symbol chars
+ */
+static const char sbarfont[]               = "-lokaltog-symbols-medium-r-normal--11-110-75-75-p-90-iso8859-1"; // font with the sbar status Symbols 
+static const char mainsymbol[]             = "\x01"; 
+static const char battery_very_low[]       = "\x0a";
+static const char battery_low[]            = "\x0b";
+static const char battery_half_full[]      = "\x0c";
+static const char battery_full[]           = "\x0d";
+static const char battery_power_on[]       = "\x0e";
+static const char net_sym_offline[]        = "\x0f";
+static const char net_sym_lan_online[]     = "\x10";
+static const char net_sym_wlan_very_low[]  = "\x11";
+static const char net_sym_wlan_low[]       = "\x12";
+static const char net_sym_wlan_middle[]    = "\x13";
+static const char net_sym_wlan_high[]      = "\x14";
+static const char audio_mute[]             = "\x15";
+static const char audio_low[]              = "\x16";
+static const char audio_middle[]           = "\x17";
+static const char audio_high[]             = "\x18";
+static const char uptime_sym_evil[]        = "\x19";
+static const char uptime_sym_berserk[]     = "\x1a";
+static const char uptime_sym_angry[]       = "\x1b";
+static const char uptime_sym_sad[]         = "\x1c";
+static const char uptime_sym_lazy[]        = "\x1d";
+static const char uptime_sym_good[]        = "\x1e";
+static const char backlight_very_low[]     = "\x1f";
+static const char backlight_low[]          = "\x20";
+static const char backlight_middle[]       = "\x21";
+static const char backlight_high[]         = "\x22";
+static const char termal_symbol[]          = "\x23";
+static const char memory_symbol[]          = "\x24";
+
+
                                       
 static const Bool utime_seconds       = False;
 static const int  sbar_distancex      = 12;

@@ -9,15 +9,14 @@ post_install() {
        echo 'Section "Files"' >> /etc/X11/xorg.conf
        echo "    /usr/share/fonts/sdwm/" >> /etc/X11/xorg.conf
        echo "EndSection" >> /etc/X11/xorg.conf
-       fc-cache -fv
      else
        sed -i '/Section "Files"/{
          a \
     FontPath        "/usr/share/fonts/sdwm/"
        }' /etc/X11/xorg.conf 
-       fc-cache -fv
      fi
    fi
+   fc-cache -fv
 
   elif [ -d /etc/X11 ]; then
     echo "Section \"Files\"" > /etc/X11/xorg.conf
@@ -27,6 +26,10 @@ post_install() {
   else
     echo "/etc/X11 does not exist! Did you installed xserver?"
   fi
+}
+
+post_upgrade() {
+  post_install
 }
 
 post_remove() {
