@@ -37,7 +37,7 @@ typedef struct {
 } ConfBar;
 
 typedef struct {
-  Bool battery, textbar, border, redroot;
+  Bool battery, redroot;
   unsigned long bordercolor;
 } SBarConf;
 

@@ -4,7 +4,7 @@ void setup_uptime();
 
 
 typedef struct {
-  char uptime[35], since[35], symbol;
+  char uptime[35], since[35], *symbol;
   int s,m,h,d, len, total_seconds;
 } Uptime;
 
@@ -39,39 +39,37 @@ void update_uptime()
   get_uptime();
 
   if (uptime.total_seconds < uptime_good)
-    uptime.symbol = 'ü';
+    uptime.symbol = uptime_sym_good;
   else if (uptime.total_seconds < uptime_lazy)
-    uptime.symbol = 'Ü';
+    uptime.symbol = uptime_sym_lazy;
   else if (uptime.total_seconds < uptime_sad)
-    uptime.symbol = 'û';
+    uptime.symbol = uptime_sym_sad;
   else if (uptime.total_seconds < uptime_angry)
-    uptime.symbol = 'ú';
+    uptime.symbol = uptime_sym_angry;
   else if (uptime.total_seconds < uptime_berserk)
-    uptime.symbol = 'ù';
+    uptime.symbol = uptime_sym_berserk;
   else
-    uptime.symbol = 'é';
+    uptime.symbol = uptime_sym_evil;
   
   
   if(utime_seconds){
     if(uptime.d > 0)
-      sprintf(uptime.uptime, "ü Ü û ú ù é %02d:%02d:%02d:%02d", uptime.d, uptime.h, uptime.m, uptime.s);
+      sprintf(uptime.uptime, " %02d:%02d:%02d:%02d", uptime.d, uptime.h, uptime.m, uptime.s);
     else if(uptime.h > 0)
-       sprintf(uptime.uptime, "ü Ü û ú ù é %02d:%02d:%02d", uptime.h, uptime.m, uptime.s);
+      sprintf(uptime.uptime, " %02d:%02d:%02d", uptime.h, uptime.m, uptime.s);
     else if(uptime.m > 0)
-       sprintf(uptime.uptime, "ü Ü û ú ù é %02d:%02d", uptime.m, uptime.s);
+      sprintf(uptime.uptime, " %02d:%02d", uptime.m, uptime.s);
     else if(uptime.s > 0)
-       sprintf(uptime.uptime, "ü Ü û ú ù é %02d", uptime.s);
+      sprintf(uptime.uptime, " %02d", uptime.s);
     
   }else{
     if(uptime.d > 0)
-      sprintf(uptime.uptime, "ü Ü û ú ù é %02d:%02d:%02d", uptime.d, uptime.h, uptime.m);
+      sprintf(uptime.uptime, " %02d:%02d:%02d", uptime.d, uptime.h, uptime.m);
     else if(uptime.h > 0)
-       sprintf(uptime.uptime, "ü Ü û ú ù é %02d:%02d", uptime.h, uptime.m);
+      sprintf(uptime.uptime, " %02d:%02d", uptime.h, uptime.m);
     else if(uptime.m > 0)
-       sprintf(uptime.uptime, "ü Ü û ú ù é %02d", uptime.m);
+      sprintf(uptime.uptime, " %02d", uptime.m);
   }
-
-  printf("[DEBUG] %x %x %x\n", (int *)uptime.uptime, ((int *)uptime.uptime) + 1, ((int *)uptime.uptime) + 2); 
 
   uptime.len =  strlen(uptime.uptime);
 }

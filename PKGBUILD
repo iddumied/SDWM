@@ -10,8 +10,8 @@ pkgdesc="A stylish dynamic window manager for X"
 arch=('i686' 'x86_64')
 license=('MIT')
 options=(zipman)
-depends=('libx11' 'libxinerama')
-optdepends=('gbdfed' 'bdftopcf' 'xlsfonts')
+depends=('libx11' 'libxinerama' 'bdftopcf')
+optdepends=('gbdfed' 'xlsfonts')
 install=sdwm.install
 srcdir="$PWD"/src
 

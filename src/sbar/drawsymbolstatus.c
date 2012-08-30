@@ -4,7 +4,7 @@ static XGCValues gcv;
 int draw_net(int y, int pos)
 {
   int buffer_net_len;
-  char *symbol, buffer_net[13], buffer_speed[11];
+  char *symbol, buffer_net[12], buffer_speed[10];
   
   // draw net
   gcv.foreground = dc.norm[ColFG];
@@ -20,7 +20,7 @@ int draw_net(int y, int pos)
   } else if(net_lan_online()){
     symbol = net_sym_lan_online;
     human_readable(net_all_bytes_per_sec(), False, buffer_speed);
-    sprintf(buffer_net,"  %s", buffer_speed);
+    sprintf(buffer_net, "  %s", buffer_speed);
   }else if(net_wlan_online()){
     double strength = net_wlan_strength();
     sprintf(buffer_net," %d%%", (int)(strength*100));
@@ -39,7 +39,7 @@ int draw_net(int y, int pos)
   }
     
   buffer_net_len = strlen(buffer_net);
-  pos -= textnw(buffer_net, buffer_net_len) - sbartextnw(symbol, 1);
+  pos -= (textnw(buffer_net, buffer_net_len) + sbartextnw(symbol, 1));
   
   if (sbar.font.set)
     XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, symbol, 1);
@@ -57,7 +57,7 @@ int draw_net(int y, int pos)
 int draw_audio(int y, int pos)
 {
   int buffer_len;
-  char buffer[8], *symbol;  
+  char buffer[7], *symbol;  
 
   // draw audio
   gcv.foreground = dc.norm[ColFG];
@@ -80,7 +80,7 @@ int draw_audio(int y, int pos)
   
     
   buffer_len = strlen(buffer);
-  pos -= textnw(buffer, buffer_len) - sbartextnw(symbol, 1);
+  pos -= (textnw(buffer, buffer_len) + sbartextnw(symbol, 1));
   
   if(sbar.font.set)
     XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, symbol, 1);
@@ -99,28 +99,35 @@ int draw_audio(int y, int pos)
 int draw_backlight(int y, int pos)
 {
   int buffer_len;
-  char buffer[8];  
+  char buffer[7], *symbol;  
 
   // draw backbacklight.per
   gcv.foreground = sbar.colors.yellow; 
   XChangeGC(dpy, dc.gc, GCForeground, &gcv);
 
+  sprintf(buffer," %d%%", (int)(backlight.per*100));
+
   // calc symbol
   if(backlight.per < 0.25)
-    sprintf(buffer,"\x02 %d%c", (int)(backlight.per*100),'%');
+    symbol = backlight_very_low;
   else if(backlight.per < 0.5)
-    sprintf(buffer,"\x1d %d%c", (int)(backlight.per*100),'%');
+    symbol = backlight_low;
   else if(backlight.per < 0.75)
-    sprintf(buffer,"\x1e %d%c", (int)(backlight.per*100),'%');
+    symbol = backlight_middle;
   else
-    sprintf(buffer,"\x1f %d%c", (int)(backlight.per*100),'%');
+    symbol = backlight_high;
   
     
   buffer_len = strlen(buffer);
-  pos -= textnw(buffer, buffer_len);
+  pos -= (textnw(buffer, buffer_len) + sbartextnw(symbol, 1));
   
   if(sbar.font.set)
-    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, buffer, buffer_len);
+    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, symbol, 1);
+  else
+    XDrawString(dpy, dc.drawable, dc.gc, pos, y, symbol, 1);
+
+  if(dc.font.set)
+    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, buffer, buffer_len);
   else
     XDrawString(dpy, dc.drawable, dc.gc, pos, y, buffer, buffer_len);
   
@@ -129,11 +136,11 @@ int draw_backlight(int y, int pos)
 
 int draw_termal(int y, int pos)
 {
-  char buffer[8];
+  char buffer[7];
   int buffer_len;
 
   // draw thermal
-  sprintf(buffer,"\x1c %d°C", thermal);
+  sprintf(buffer," %d°C", thermal);
   
   // calculaing color
   if(thermal > 55)
@@ -145,10 +152,15 @@ int draw_termal(int y, int pos)
   buffer_len = strlen(buffer);
 
   // update pos
-  pos -= textnw(buffer, buffer_len);
+  pos -= (textnw(buffer, buffer_len) + sbartextnw(termal_symbol, 1));
   
   if(sbar.font.set)
-    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, buffer, buffer_len);
+    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, termal_symbol, 1);
+  else
+    XDrawString(dpy, dc.drawable, dc.gc, pos, y, termal_symbol, 1);
+  
+  if(dc.font.set)
+    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, buffer, buffer_len);
   else
     XDrawString(dpy, dc.drawable, dc.gc, pos, y, buffer, buffer_len);
   
@@ -158,7 +170,7 @@ int draw_termal(int y, int pos)
 int draw_memory(int y, int pos)
 {
   int swap_buffer_len, mem_buffer_len, swapusedper;
-  char mem_buffer[5];
+  char mem_buffer[4];
 
   // draw swap if used
   swapusedper = (int)(memory.pswapused*100);
@@ -168,12 +180,12 @@ int draw_memory(int y, int pos)
     gcv.foreground = sbar.colors.red;
     XChangeGC(dpy, dc.gc, GCForeground, &gcv);
     
-    sprintf(swap_buffer, " %d%c", swapusedper, '%');
+    sprintf(swap_buffer, " %d%%", swapusedper);
     swap_buffer_len = strlen(swap_buffer);
     pos -= textnw(swap_buffer, swap_buffer_len);
     
-    if(sbar.font.set)
-      XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, swap_buffer, swap_buffer_len);
+    if(dc.font.set)
+      XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, swap_buffer, swap_buffer_len);
     else
       XDrawString(dpy, dc.drawable, dc.gc, pos, y, swap_buffer, swap_buffer_len);
   }
@@ -182,12 +194,17 @@ int draw_memory(int y, int pos)
   gcv.foreground = dc.norm[ColFG];
   XChangeGC(dpy, dc.gc, GCForeground, &gcv);
   
-  sprintf(mem_buffer, "\x1a %d%c", (int)(memory.pused*100),'%');
+  sprintf(mem_buffer, " %d%%", (int)(memory.pused*100));
   mem_buffer_len = strlen(mem_buffer);
-  pos -= textnw(mem_buffer, mem_buffer_len);
+  pos -= (textnw(mem_buffer, mem_buffer_len) + sbartextnw(memory_symbol, 1));
 
   if(sbar.font.set)
-    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, mem_buffer, mem_buffer_len);
+    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, memory_symbol, 1);
+  else
+    XDrawString(dpy, dc.drawable, dc.gc, pos, y, memory_symbol, 1);
+  
+  if(dc.font.set)
+    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, mem_buffer, mem_buffer_len);
   else
     XDrawString(dpy, dc.drawable, dc.gc, pos, y, mem_buffer, mem_buffer_len);
   
@@ -197,13 +214,19 @@ int draw_memory(int y, int pos)
 int draw_uptime(int y, int pos)
 {
   // update pos
-  pos -= textnw(uptime.uptime, uptime.len); 
+  pos -= (textnw(uptime.uptime, uptime.len) + sbartextnw(uptime.symbol, 1)); 
   
   // draw uptime
   gcv.foreground = dc.norm[ColFG];
   XChangeGC(dpy, dc.gc, GCForeground, &gcv);
+
   if(sbar.font.set)
-    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, uptime.uptime, uptime.len);
+    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, uptime.symbol, 1);
+  else
+    XDrawString(dpy, dc.drawable, dc.gc, pos, y, uptime.symbol, 1);
+  
+  if(dc.font.set)
+    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, uptime.uptime, uptime.len);
   else
     XDrawString(dpy, dc.drawable, dc.gc, pos, y, uptime.uptime, uptime.len);
   
@@ -213,7 +236,7 @@ int draw_uptime(int y, int pos)
 int draw_battery(int y, int pos)
 {
   int buffer_len;
-  char buffer[8];
+  char buffer[7], *symbol;
 
   // calculating battery color;
   gcv.foreground = ((int)(battery.stat * 255)) * sbar.colors.greenlow + 
@@ -230,30 +253,38 @@ int draw_battery(int y, int pos)
   
   // calculating battery stat
   if(battery.mode == CHARGING){
-     sprintf(buffer, "%c %02d:%02d", (char)23, battery.remain.h, battery.remain.m);
+     sprintf(buffer, " %02d:%02d", battery.remain.h, battery.remain.m);
+     symbol = battery_power_on;
    
   }else if(battery.mode == CHARGED){
-    sprintf(buffer, "%c Full", (char)23);
+    sprintf(buffer, " Full");
+     symbol = battery_power_on;
    
   }else{
+    sprintf(buffer, " %02d:%02d", battery.remain.h, battery.remain.m);
+
     if(battery.stat < 0.25)
-      sprintf(buffer, "%c %02d:%02d", (char)11, battery.remain.h, battery.remain.m);
+      symbol = battery_very_low;
     else if(battery.stat < 0.5)
-      sprintf(buffer, "%c %02d:%02d", (char)12, battery.remain.h, battery.remain.m);
+      symbol = battery_low;
     else if(battery.stat < 0.75)
-      sprintf(buffer, "%c %02d:%02d", (char)13, battery.remain.h, battery.remain.m);
+      symbol = battery_half_full;
     else
-      sprintf(buffer, "%c %02d:%02d", (char)14, battery.remain.h, battery.remain.m);
+      symbol = battery_full;
 
   }
 
   // update pos
   buffer_len = strlen(buffer);
-  pos -= textnw(buffer, buffer_len);
+  pos -= (textnw(buffer, buffer_len) + sbartextnw(symbol, 1));
   
- 
   if(sbar.font.set)
-    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, buffer, buffer_len);
+    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, symbol, 1);
+  else
+    XDrawString(dpy, dc.drawable, dc.gc, pos, y, symbol, 1);
+ 
+  if(dc.font.set)
+    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, buffer, buffer_len);
   else
     XDrawString(dpy, dc.drawable, dc.gc, pos, y, buffer, buffer_len);
 
@@ -263,13 +294,13 @@ int draw_battery(int y, int pos)
 int draw_time(int y, int pos)
 {
   // update pos  
-  pos -= textnw(tbar_date.date,tbar_date.len);
+  pos -= textnw(sbar_date.date, sbar_date.len);
 
   // draw date and time
-  if(sbar.font.set)
-    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, tbar_date.date,tbar_date.len);
+  if(dc.font.set)
+    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, sbar_date.date, sbar_date.len);
   else
-    XDrawString(dpy, dc.drawable, dc.gc, pos, y, tbar_date.date,tbar_date.len);
+    XDrawString(dpy, dc.drawable, dc.gc, pos, y, sbar_date.date, sbar_date.len);
   
   return pos;
 }
