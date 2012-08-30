@@ -39,17 +39,19 @@ int draw_net(int y, int pos)
   }
     
   buffer_net_len = strlen(buffer_net);
-  pos -= (textnw(buffer_net, buffer_net_len) + sbartextnw(symbol, 1));
-  
-  if (sbar.font.set)
-    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, symbol, 1);
-  else
-    XDrawString(dpy, dc.drawable, dc.gc, pos, y, symbol, 1);
+  pos -= textnw(buffer_net, buffer_net_len);
 
   if (dc.font.set)
     XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, buffer_net, buffer_net_len);
   else
     XDrawString(dpy, dc.drawable, dc.gc, pos, y, buffer_net, buffer_net_len);
+
+  pos -= sbartextnw(symbol, 1);
+
+  if (sbar.font.set)
+    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, symbol, 1);
+  else
+    XDrawString(dpy, dc.drawable, dc.gc, pos, y, symbol, 1);
   
   return pos;
 }
@@ -80,18 +82,20 @@ int draw_audio(int y, int pos)
   
     
   buffer_len = strlen(buffer);
-  pos -= (textnw(buffer, buffer_len) + sbartextnw(symbol, 1));
+  pos -= textnw(buffer, buffer_len);
+  
+  if(dc.font.set)
+    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, buffer, buffer_len);
+  else
+    XDrawString(dpy, dc.drawable, dc.gc, pos, y, buffer, buffer_len);
+
+  pos -= sbartextnw(symbol, 1);
   
   if(sbar.font.set)
     XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, symbol, 1);
   else
     XDrawString(dpy, dc.drawable, dc.gc, pos, y, symbol, 1);
 
-  if(dc.font.set)
-    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, buffer, buffer_len);
-  else
-    XDrawString(dpy, dc.drawable, dc.gc, pos, y, buffer, buffer_len);
-  
  
   return pos;
 }
@@ -119,18 +123,20 @@ int draw_backlight(int y, int pos)
   
     
   buffer_len = strlen(buffer);
-  pos -= (textnw(buffer, buffer_len) + sbartextnw(symbol, 1));
+  pos -= textnw(buffer, buffer_len);
+  
+  if(dc.font.set)
+    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, buffer, buffer_len);
+  else
+    XDrawString(dpy, dc.drawable, dc.gc, pos, y, buffer, buffer_len);
+
+  pos -= sbartextnw(symbol, 1);
   
   if(sbar.font.set)
     XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, symbol, 1);
   else
     XDrawString(dpy, dc.drawable, dc.gc, pos, y, symbol, 1);
 
-  if(dc.font.set)
-    XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, buffer, buffer_len);
-  else
-    XDrawString(dpy, dc.drawable, dc.gc, pos, y, buffer, buffer_len);
-  
   return pos;
 }
 
@@ -152,17 +158,19 @@ int draw_termal(int y, int pos)
   buffer_len = strlen(buffer);
 
   // update pos
-  pos -= (textnw(buffer, buffer_len) + sbartextnw(termal_symbol, 1));
-  
-  if(sbar.font.set)
-    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, termal_symbol, 1);
-  else
-    XDrawString(dpy, dc.drawable, dc.gc, pos, y, termal_symbol, 1);
+  pos -= textnw(buffer, buffer_len);
   
   if(dc.font.set)
     XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, buffer, buffer_len);
   else
     XDrawString(dpy, dc.drawable, dc.gc, pos, y, buffer, buffer_len);
+
+  pos -= sbartextnw(termal_symbol, 1);
+  
+  if(sbar.font.set)
+    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, termal_symbol, 1);
+  else
+    XDrawString(dpy, dc.drawable, dc.gc, pos, y, termal_symbol, 1);
   
   return pos; 
 }
@@ -196,17 +204,19 @@ int draw_memory(int y, int pos)
   
   sprintf(mem_buffer, " %d%%", (int)(memory.pused*100));
   mem_buffer_len = strlen(mem_buffer);
-  pos -= (textnw(mem_buffer, mem_buffer_len) + sbartextnw(memory_symbol, 1));
+  pos -= textnw(mem_buffer, mem_buffer_len);
 
-  if(sbar.font.set)
-    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, memory_symbol, 1);
-  else
-    XDrawString(dpy, dc.drawable, dc.gc, pos, y, memory_symbol, 1);
-  
   if(dc.font.set)
     XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, mem_buffer, mem_buffer_len);
   else
     XDrawString(dpy, dc.drawable, dc.gc, pos, y, mem_buffer, mem_buffer_len);
+
+  pos -= sbartextnw(memory_symbol, 1);
+  
+  if(sbar.font.set)
+    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, memory_symbol, 1);
+  else
+    XDrawString(dpy, dc.drawable, dc.gc, pos, y, memory_symbol, 1);
   
   return pos;
 }
@@ -214,21 +224,23 @@ int draw_memory(int y, int pos)
 int draw_uptime(int y, int pos)
 {
   // update pos
-  pos -= (textnw(uptime.uptime, uptime.len) + sbartextnw(uptime.symbol, 1)); 
+  pos -= textnw(uptime.uptime, uptime.len); 
   
   // draw uptime
   gcv.foreground = dc.norm[ColFG];
   XChangeGC(dpy, dc.gc, GCForeground, &gcv);
 
-  if(sbar.font.set)
-    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, uptime.symbol, 1);
-  else
-    XDrawString(dpy, dc.drawable, dc.gc, pos, y, uptime.symbol, 1);
-  
   if(dc.font.set)
     XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, uptime.uptime, uptime.len);
   else
     XDrawString(dpy, dc.drawable, dc.gc, pos, y, uptime.uptime, uptime.len);
+
+  pos -= sbartextnw(uptime.symbol, 1); 
+  
+  if(sbar.font.set)
+    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, uptime.symbol, 1);
+  else
+    XDrawString(dpy, dc.drawable, dc.gc, pos, y, uptime.symbol, 1);
   
   return pos;
 }
@@ -276,18 +288,20 @@ int draw_battery(int y, int pos)
 
   // update pos
   buffer_len = strlen(buffer);
-  pos -= (textnw(buffer, buffer_len) + sbartextnw(symbol, 1));
+  pos -= textnw(buffer, buffer_len);
   
-  if(sbar.font.set)
-    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, symbol, 1);
-  else
-    XDrawString(dpy, dc.drawable, dc.gc, pos, y, symbol, 1);
- 
   if(dc.font.set)
     XmbDrawString(dpy, dc.drawable, dc.font.set, dc.gc, pos, y, buffer, buffer_len);
   else
     XDrawString(dpy, dc.drawable, dc.gc, pos, y, buffer, buffer_len);
 
+  pos -= sbartextnw(symbol, 1);
+
+  if(sbar.font.set)
+    XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, pos, y, symbol, 1);
+  else
+    XDrawString(dpy, dc.drawable, dc.gc, pos, y, symbol, 1);
+ 
   return pos; 
 }
 
@@ -329,7 +343,7 @@ void drawsymbolstatus()
     XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, 3, y+1, mainsymbol, 1);
   else
     XDrawString(dpy, dc.drawable, dc.gc, 3, y+1, mainsymbol, 1);
-  
+
 
   // drawing sbar symbols. The order is configured in config.h
   for(i = 0; i < DrawLast;i++){
@@ -342,5 +356,4 @@ void drawsymbolstatus()
       log_str(buffer, LOG_DEBUG);
     #endif
   }
-
 }

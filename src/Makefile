@@ -55,9 +55,12 @@ install: all
 	@chmod 777 ${DESTDIR}${LOGPREFIX}/sdwm
 	@bdftopcf fonts/cureextra.bdf > fonts/cureextra.pcf
 	@bdftopcf fonts/lokaltog-symbols.bdf > fonts/lokaltog-symbols.pcf
+	@bdftopcf fonts/lokaltog-10.bdf > fonts/lokaltog-10.pcf
 	@mkdir -p ${DESTDIR}${PREFIX}/share/fonts/sdwm
 	@cp -f fonts/cureextra.pcf ${DESTDIR}${PREFIX}/share/fonts/sdwm/cureextra.pcf
 	@cp -f fonts/lokaltog-symbols.pcf ${DESTDIR}${PREFIX}/share/fonts/sdwm/lokaltog-symbols.pcf
+	@cp -f fonts/lokaltog-10.pcf ${DESTDIR}${PREFIX}/share/fonts/sdwm/lokaltog-10.pcf
+	@cp -f fonts/fonts.dir ${DESTDIR}${PREFIX}/share/fonts/sdwm/fonts.dir
 	@chmod 777 ${DESTDIR}${PREFIX}/share/fonts/sdwm/*
 
 uninstall:

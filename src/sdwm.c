@@ -197,6 +197,7 @@ void custom_suspend();
 void custom_shutdown();
 void custom_reboot();
 int sbartextnw(const char *text, unsigned int len);
+void sbardrawtext(const char *text, unsigned long col[ColLast], Bool invert);
 void log_str(const char *str, unsigned int importance);
 #define LOG_DEBUG   0
 #define LOG_INFO    1
@@ -1390,7 +1391,7 @@ drawbar(Monitor *m) {
       urg |= c->tags;
   }
    
-  dc.x = TEXTW(mainsymbol);
+  dc.x = SBARTEXTW(mainsymbol);
   for(i = 0; i < LENGTH(tags); i++) {
     dc.w = TEXTW(tags[i]);
     col = m->tagset[m->seltags] & 1 << i ? dc.sel : dc.norm;
@@ -1399,8 +1400,10 @@ drawbar(Monitor *m) {
       occ & 1 << i, urg & 1 << i, col);
     dc.x += dc.w;
   }
-  dc.w = blw = TEXTW(m->ltsymbol);
-  drawtext(m->ltsymbol, dc.norm, False);
+
+  // draw layout symbol
+  dc.w = blw = SBARTEXTW(m->ltsymbol);
+  sbardrawtext(m->ltsymbol, dc.norm, False);
   dc.x += dc.w;
   x = dc.x;
   if(m != selmon)  
@@ -1428,6 +1431,33 @@ drawsquare(Bool filled, Bool empty, Bool invert, unsigned long col[ColLast]) {
 		XFillRectangle(dpy, dc.drawable, dc.gc, dc.x+1, dc.y+1, x+1, x+1);
 	else if(empty)
 		XDrawRectangle(dpy, dc.drawable, dc.gc, dc.x+1, dc.y+1, x, x);
+}
+
+void
+sbardrawtext(const char *text, unsigned long col[ColLast], Bool invert) {
+	char buf[256];
+	int i, x, y, h, len, olen;
+
+	XSetForeground(dpy, dc.gc, col[invert ? ColFG : ColBG]);
+	XFillRectangle(dpy, dc.drawable, dc.gc, dc.x, dc.y, dc.w, dc.h);
+	if(!text)
+		return;
+	olen = strlen(text);
+	h = sbar.font.ascent + sbar.font.descent;
+	y = dc.y + (dc.h / 2) - (h / 2) + sbar.font.ascent;
+	x = dc.x + (h / 2);
+	/* shorten text if necessary */
+	for(len = MIN(olen, sizeof buf); len && sbartextnw(text, len) > dc.w - h; len--);
+	if(!len)
+		return;
+	memcpy(buf, text, len);
+	if(len < olen)
+		for(i = len; i && i > len - 3; buf[--i] = '.');
+	XSetForeground(dpy, dc.gc, col[invert ? ColBG : ColFG]);
+	if(sbar.font.set)
+		XmbDrawString(dpy, dc.drawable, sbar.font.set, dc.gc, x, y, buf, len);
+	else
+		XDrawString(dpy, dc.drawable, dc.gc, x, y, buf, len);
 }
 
 void
