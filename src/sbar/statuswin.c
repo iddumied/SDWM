@@ -47,7 +47,7 @@ void drawstw()
   
 
   // values
-  char stwbuffer[100], hread[12], maxhread[12];
+  char stwbuffer[100], hread[12], maxhread[12], *tmp_ptr;
   int i;
   
   XGCValues gcv;
@@ -237,8 +237,13 @@ void drawstw()
     wprintln("  |");
     wprintln("  +--net: error");
   }  
-  char ebuf[5][20];
-  int countdisks, mj, mi = 0;
+
+  /***********************************************
+   *             Partition Part                  *
+   ***********************************************/
+
+  char ebuf[5][20], buff2[100] tmp_ptr2;
+  int countdisks, mj, mi = 0, len;
   stwwrite.xs = stwwrite.xc  = screenWidth-266;//1100;
   stwwrite.ys = stwwrite.yc = (stw.font.height + gappx);
   stwwrite.xe = stwwrite.w = stw.w - gappx;
@@ -258,6 +263,21 @@ void drawstw()
     
   
     if(disks[i].mountpoint != NULL){
+      tmp_ptr = stwbuffer;
+      tmp_ptr2 = buff2;
+      tmp_ptr = let_str_fitt_to(tmp_ptr, disk[i].path, 40, strlen(disk[i].path));
+      tmp_ptr2 = fill_with_spaces_after(tmp_ptr2, tmp_ptr, 40, strlen(tmp_ptr));
+      wprint(tmp_ptr2);
+      wprint(" @ ");
+      tmp_ptr = stwbuffer;
+      tmp_ptr2 = buff2;
+      tmp_ptr = let_str_fitt_to(tmp_ptr, disk[i].mountpoint, 40, strlen(disk[i].path));
+      tmp_ptr2 = fill_with_spaces_after(tmp_ptr2, tmp_ptr, 40, strlen(tmp_ptr));
+      wprintln(tmp_ptr2);
+      
+
+/*
+
       mi++;
       sprintf(stwbuffer,"  +--%s  @  %s", disks[i].path, disks[i].mountpoint);  
       wprintln(stwbuffer);
@@ -277,7 +297,7 @@ void drawstw()
       wprintln(stwbuffer);
 
 
-      /****** RAED *****/
+      ****** RAED *****
 
       // calculation inforamtions and make it readable
       diskstat[i].readges += disks[i].between.read;
@@ -334,7 +354,7 @@ void drawstw()
       }
 
 
-      /****** WRITE *****/
+      ****** WRITE *****
 
       // calculation inforamtions and make it readable
       diskstat[i].writeges += disks[i].between.write;
@@ -388,6 +408,7 @@ void drawstw()
       }
 
       if(mi < mounted_volumes) wprintln("  |");
+    */
     }else if(diskstat[i].read.max > 0 || diskstat[i].write.max > 0){
       diskstat[i].read.max  = 0;
       diskstat[i].write.max = 0;

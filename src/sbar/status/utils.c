@@ -12,8 +12,53 @@ int xtoi(const char* xs, int szlen);
 void human_readable(unsigned long long bytes, Bool bits, char* result);
 void human_readable_disk(unsigned long long bytes, char* result);
 void readadable_seconds(unsigned long long sec, char* result);
+char *let_str_fitt_to(char *dst, char *src, int dst_len, int src_len);
+char *fill_with_spaces_bevor(char *dst, char *src, int dst_len, int src_len);
+char *fill_with_spaces_after(char *dst, char *src, int dst_len, int src_len) {
 
 
+char *let_str_fitt_to(char *dst, char *src, int dst_len, int src_len) {
+  if (src_len <= dst_len) return src;
+  if (dst_len <= 3) return NULL;
+
+  int i;
+  for (i = 0; i < dst_len; i++) {
+    if (i < dst_len - 3)
+      dst[i] = src[i];
+    else
+      dst[i] = '.';
+  }
+  dst[i] = (char) 0;
+  return dst;
+}
+
+char *fill_with_spaces_bevor(char *dst, char *src, int dst_len, int src_len) {
+  if (dst_len <= src_len) return src;
+
+  int i, distance = dst_len - src_len;
+  for ( i = 0; i < dst_len; i++) {
+    if (i < distance)
+      dst[i] = ' ';
+    else
+      dst[i] = src[i - distance];
+  }
+  dst[i] = (char) 0;
+  return dst;
+}
+
+char *fill_with_spaces_after(char *dst, char *src, int dst_len, int src_len) {
+  if (dst_len <= src_len) return src;
+
+  int i;
+  for ( i = 0; i < dst_len; i++) {
+    if (i < src_len)
+      dst[i] = src[i];
+    else
+      dst[i] = ' ';
+  }
+  dst[i] = (char) 0;
+  return dst;
+}
 
 
 void readadable_seconds(unsigned long long sec, char* result)
