@@ -20,5 +20,6 @@ Install a font
 -------------
 if you just want other symbols insted of an new font:
 - edit lokaltog-symbols.bdf with gbdfed
+- edit src/sbar/config.h
 - run makepkg -f
 - after that run makepkg -i
