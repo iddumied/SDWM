@@ -14,8 +14,13 @@ void human_readable_disk(unsigned long long bytes, char* result);
 void readadable_seconds(unsigned long long sec, char* result);
 char *let_str_fitt_to(char *dst, char *src, int dst_len, int src_len);
 char *fill_with_spaces_bevor(char *dst, char *src, int dst_len, int src_len);
-char *fill_with_spaces_after(char *dst, char *src, int dst_len, int src_len) {
+char *fill_with_spaces_after(char *dst, char *src, int dst_len, int src_len);
+void add_char_to_str(char *str, char chr, int len);
 
+void add_char_to_str(char *str, char chr, int len) {
+  str[len] = chr;
+  str[len + 1] = (char) 0;
+}
 
 char *let_str_fitt_to(char *dst, char *src, int dst_len, int src_len) {
   if (src_len <= dst_len) return src;
@@ -36,7 +41,7 @@ char *fill_with_spaces_bevor(char *dst, char *src, int dst_len, int src_len) {
   if (dst_len <= src_len) return src;
 
   int i, distance = dst_len - src_len;
-  for ( i = 0; i < dst_len; i++) {
+  for (i = 0; i < dst_len; i++) {
     if (i < distance)
       dst[i] = ' ';
     else
@@ -50,7 +55,7 @@ char *fill_with_spaces_after(char *dst, char *src, int dst_len, int src_len) {
   if (dst_len <= src_len) return src;
 
   int i;
-  for ( i = 0; i < dst_len; i++) {
+  for (i = 0; i < dst_len; i++) {
     if (i < src_len)
       dst[i] = src[i];
     else

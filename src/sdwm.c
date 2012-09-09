@@ -1,4 +1,5 @@
 //#define DEBUG
+#define INFO
 
 /* See LICENSE file for copyright and license details.
  *

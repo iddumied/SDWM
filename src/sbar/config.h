@@ -106,6 +106,8 @@ static const int uptime_evil          = 60 * 60 * 10;
 
 // statuswin
 static Bool draw_status_win           = True;
+static const int status_win_width     = 200;
+
 static const double blowstat          = 0.1;          // defines the warning stat of battery
 static const double bverylowstat      = 0.12;         // 1 is full 0 is empty
 static const double bat_suspend       = 0.075;        // percent when go to suspend

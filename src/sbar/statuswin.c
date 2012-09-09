@@ -7,7 +7,14 @@ typedef struct {
   Timeline read, write;
 } DiskStatistic;
 
+typedef struct {
+  char line_seperator[512];
+  int max_char_len, max_chrs_per_line, max_chrs_per_halfln;
+} DiskStatusWinUtils;
+
+
 DiskStatistic diskstat[MAXPARTITIONS];
+DiskStatusWinUtils diskstat_utils;
 void setup_stw();
 void drawstw();
 void calc_timline_max(Timeline *timeline, int bytes, int length);
@@ -47,7 +54,7 @@ void drawstw()
   
 
   // values
-  char stwbuffer[100], hread[12], maxhread[12], *tmp_ptr;
+  char stwbuffer[100], hread[12], maxhread[12];
   int i;
   
   XGCValues gcv;
@@ -242,9 +249,9 @@ void drawstw()
    *             Partition Part                  *
    ***********************************************/
 
-  char ebuf[5][20], buff2[100] tmp_ptr2;
+  char ebuf[5][20], ebuf2[5][20], buff2[100], *tmp_ptr, *tmp_ptr2;
   int countdisks, mj, mi = 0, len;
-  stwwrite.xs = stwwrite.xc  = screenWidth-266;//1100;
+  stwwrite.xs = stwwrite.xc  = screenWidth - gappx - status_win_width;// Statuswin pos and size to config.h
   stwwrite.ys = stwwrite.yc = (stw.font.height + gappx);
   stwwrite.xe = stwwrite.w = stw.w - gappx;
   stwwrite.ye = stwwrite.h = stw.h;
@@ -257,23 +264,80 @@ void drawstw()
   wprintln("");
   sprintf(stwbuffer,"Volumes mounted:  %d  of  %d  Disks",mounted_volumes,countdisks);
   wprintln(stwbuffer);
-  wprintln("  |");
+  wprintln(diskstat_utils.line_seperator); 
   for(i = 0; i < MAXPARTITIONS; i++){
     if(!disks[i].active) break;
     
   
     if(disks[i].mountpoint != NULL){
-      tmp_ptr = stwbuffer;
-      tmp_ptr2 = buff2;
-      tmp_ptr = let_str_fitt_to(tmp_ptr, disk[i].path, 40, strlen(disk[i].path));
-      tmp_ptr2 = fill_with_spaces_after(tmp_ptr2, tmp_ptr, 40, strlen(tmp_ptr));
-      wprint(tmp_ptr2);
-      wprint(" @ ");
-      tmp_ptr = stwbuffer;
-      tmp_ptr2 = buff2;
-      tmp_ptr = let_str_fitt_to(tmp_ptr, disk[i].mountpoint, 40, strlen(disk[i].path));
-      tmp_ptr2 = fill_with_spaces_after(tmp_ptr2, tmp_ptr, 40, strlen(tmp_ptr));
-      wprintln(tmp_ptr2);
+
+      // path + mountpoint
+      tmp_ptr = let_str_fitt_to(stwbuffer, disks[i].path, diskstat_utils.max_chrs_per_halfln, strlen(disks[i].path));
+      wprint(tmp_ptr);
+      stwwrite.xc = screenWidth - gappx - status_win_width / 2; // set cursor to half
+      tmp_ptr = let_str_fitt_to(stwbuffer, disks[i].mountpoint, diskstat_utils.max_chrs_per_halfln, strlen(disks[i].path));
+      wprintln(tmp_ptr);
+
+      // usage
+      //wprintcol(disks[i].pused, status_win_width / 2 - gappx, 0.65, 2);
+      //stwwrite.xc += gappx;
+      human_readable_disk(disks[i].avil, &ebuf[0]);
+      human_readable_disk(disks[i].total, &ebuf[1]);
+      sprintf(stwbuffer,"free:  %s / %s", ebuf[0], ebuf[1]);
+      wprint(stwbuffer);
+      stwwrite.xc = screenWidth - gappx - status_win_width / 2; // set cursor to half
+      wprintcolln(disks[i].pused, status_win_width / 2 - gappx, 0.65, 2);
+
+      // read write
+
+      // calculation inforamtions and make it readable
+      diskstat[i].readges += disks[i].between.read;
+      calc_timline_max(&diskstat[i].read, disks[i].between.read, diskstat[i].length);
+      human_readable_disk(disks[i].now.read, &ebuf[0]);
+      human_readable(disks[i].between.read, False, &ebuf[1]);
+      human_readable(diskstat[i].read.max, False, &ebuf[2]);
+      human_readable_disk(diskstat[i].readges, &ebuf[3]);
+
+      diskstat[i].writeges += disks[i].between.write;
+      calc_timline_max(&diskstat[i].write, disks[i].between.write, diskstat[i].length);
+      human_readable_disk(disks[i].now.write, &ebuf2[0]);
+      human_readable(disks[i].between.write, False, &ebuf2[1]);
+      human_readable(diskstat[i].write.max, False, &ebuf2[2]);
+      human_readable_disk(diskstat[i].writeges, &ebuf2[3]);
+
+      sprintf(stwbuffer, "readed: %s / %s", ebuf[3], ebuf[0]);
+      wprint(stwbuffer);
+      stwwrite.xc = screenWidth - gappx - status_win_width / 2; // set cursor to half
+      sprintf(stwbuffer, "written: %s / %s", ebuf2[3], ebuf2[0]);
+      wprintln(stwbuffer);
+
+      if(diskstat[i].read.max > 0 || diskstat[i].write.max > 0){
+        sprintf(stwbuffer, "read: %s @ %s", ebuf[1], ebuf[2]);
+        wprint(stwbuffer);
+        stwwrite.xc = screenWidth - gappx - status_win_width / 2; // set cursor to half
+        sprintf(stwbuffer, "write: %s @ %s", ebuf2[1], ebuf2[2]);
+        wprintln(stwbuffer);
+        stwwrite.yc += 6;
+
+
+        // printing timeline if max > 0
+        wprinttimeline(disks[i].between.read, diskstat[i].length, 1, &diskstat[i].read, 
+                      stw.sbar[SBarLine], stw.sbar[SBarCpuPoint], diskstat[i].read.max);
+      
+
+        stwwrite.xc = screenWidth - gappx - status_win_width / 2; // set cursor to half
+
+        wprinttimelineln(disks[i].between.write, diskstat[i].length, 1, &diskstat[i].write, 
+                      stw.sbar[SBarLine], stw.sbar[SBarCpuPoint], diskstat[i].write.max);
+      
+
+      }
+
+
+      // line seperator
+      wprintln(diskstat_utils.line_seperator); 
+
+
       
 
 /*
@@ -502,7 +566,7 @@ void setup_stw()
     }
 
     for(i = 0; i < MAXPARTITIONS;i++){
-      diskstat[i].length      = 100;
+      diskstat[i].length      = status_win_width / 2 - gappx;
       diskstat[i].read.bytes  = (int*)malloc(sizeof(int)*timeline_length);
       diskstat[i].write.bytes = (int*)malloc(sizeof(int)*timeline_length);
 
@@ -515,4 +579,42 @@ void setup_stw()
       diskstat[i].writeges  = 0;
       diskstat[i].readges   = 0;
     }
+
+    diskstat_utils.line_seperator[0] = '-';
+    diskstat_utils.line_seperator[1] = (char) 0;
+    
+    for (i = 1; textnw(diskstat_utils.line_seperator, i) < status_win_width; i++)
+      add_char_to_str(diskstat_utils.line_seperator, '-', i);
+
+    diskstat_utils.line_seperator[i - 1] = (char) 0;
+    diskstat_utils.max_char_len = 0;
+    int char_len = 0;
+
+    #ifdef INFO
+    char logbuffer[256];
+    int max_char;
+    #endif
+
+    for (i = 0; i < 256; i++) {
+      char_len = textnw(&i, 1);
+      #ifdef INFO
+      sprintf(logbuffer, "Char-Width: %c (0x%02X): %d", i, i, char_len);
+      log_str(logbuffer, LOG_INFO);
+      if (diskstat_utils.max_char_len < char_len)
+        max_char = i;
+      #endif
+
+      if (diskstat_utils.max_char_len < char_len)
+        diskstat_utils.max_char_len = char_len;
+    }
+
+    diskstat_utils.max_chrs_per_line = status_win_width / diskstat_utils.max_char_len;
+    diskstat_utils.max_chrs_per_halfln = (status_win_width / 2) / diskstat_utils.max_char_len;
+   
+
+    #ifdef INFO
+    sprintf(logbuffer, "Max Char-Width: %c (0x%02X): %d", max_char, max_char, textnw(&max_char, 1));
+    log_str(logbuffer, LOG_INFO);
+    #endif
+
 }
