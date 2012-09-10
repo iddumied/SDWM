@@ -199,6 +199,10 @@ void custom_shutdown();
 void custom_reboot();
 int sbartextnw(const char *text, unsigned int len);
 void sbardrawtext(const char *text, unsigned long col[ColLast], Bool invert);
+void setup_vim();
+void vimcmd();
+void stw_disk_set_width(const char *input);
+void run_vim_command(const char *input);
 void log_str(const char *str, unsigned int importance);
 #define LOG_DEBUG   0
 #define LOG_INFO    1
@@ -880,6 +884,150 @@ void log_str(const char *str, unsigned int importance)
   write(fd, "\n", 1);
   close(fd);
 }
+
+/**
+ * Vim Commands functions
+ */
+
+void setup_vim() {
+
+  int i, commands_len = 64;
+  for (i = 0; i < LENGTH(vim_commands); i++)
+    commands_len += strlen(vim_commands[i].command) + 1;
+
+  char *commands = (char *) malloc(sizeof(char) * commands_len);
+  sprintf(commands, "%s", "xsetroot -name \"VIMCMD: $(echo '");
+
+  for (i = 0; i < LENGTH(vim_commands); i++) {
+    strcat(commands, "\n");
+    strcat(commands, vim_commands[i].command);
+  }
+  strcat(commands, "'");
+
+  int cmd_len = (sizeof(char) * (commands_len + strlen(font) + strlen(themes[CurTheme].verylow.normbgcolor) * 4 + 64));
+  vim_command_utils.cmd_bat_verylow = (char *) malloc(cmd_len);
+  vim_command_utils.cmd_bat_low = (char *) malloc(cmd_len);
+  vim_command_utils.cmd = (char *) malloc(cmd_len);
+
+  sprintf(vim_command_utils.cmd_bat_verylow, "%s | dmenu -fn '%s' -nb '%s' -nf '%s' -sb '%s' -sf '%s')\"", commands,
+          font, themes[CurTheme].verylow.normbgcolor,
+          themes[CurTheme].verylow.normfgcolor, 
+          themes[CurTheme].verylow.selbgcolor, 
+          themes[CurTheme].verylow.selfgcolor);
+
+  sprintf(vim_command_utils.cmd_bat_low, "%s | dmenu -fn '%s' -nb '%s' -nf '%s' -sb '%s' -sf '%s')\"", commands,
+          font, themes[CurTheme].low.normbgcolor,
+          themes[CurTheme].low.normfgcolor, 
+          themes[CurTheme].low.selbgcolor, 
+          themes[CurTheme].low.selfgcolor);
+
+  sprintf(vim_command_utils.cmd, "%s | dmenu -fn '%s' -nb '%s' -nf '%s' -sb '%s' -sf '%s')\"", commands,
+          font, themes[CurTheme].normal.normbgcolor,
+          themes[CurTheme].normal.normfgcolor, 
+          themes[CurTheme].normal.selbgcolor, 
+          themes[CurTheme].normal.selfgcolor);
+
+}
+
+void vimcmd() {
+  if(sbar_status_symbols[DrawBattery].active && battery.stat <= bverylowstat && !battery.adapter){
+    popen(vim_command_utils.cmd_bat_verylow, "w");
+
+  }else if(sbar_status_symbols[DrawBattery].active && battery.stat <= blowstat && !battery.adapter){
+    popen(vim_command_utils.cmd_bat_low, "w");
+
+  }else{
+    popen(vim_command_utils.cmd, "w");
+
+  }
+}
+
+void run_vim_command(const char *input) {
+
+  int i;
+  for (i = 0; i < LENGTH(vim_commands); i++) {
+    if (!strncmp(input, vim_commands[i].command, strlen(vim_commands[i].command))) {
+      vim_commands[i].func(input);
+      return;
+    }
+  }
+
+}
+
+/**
+ * vim command functions 
+ */
+
+void stw_disk_set_width(const char *input) {
+  
+  sscanf(input, ":stw disk set width %d", &status_win_width);
+
+
+  int i, j;
+
+  if (status_win_width < diskstat_utils.min_status_win_width) {
+    char logbuff[64];
+    sprintf(logbuff, "status_win_width (%d) to smal => set to %d", status_win_width, diskstat_utils.min_status_win_width);
+    log_str(logbuff, LOG_WARNING);
+
+    status_win_width = diskstat_utils.min_status_win_width;
+  } else {
+
+    // init prefixes
+    sprintf(diskstat_utils.read_prefix, "%s", "read: ");
+    sprintf(diskstat_utils.write_prefix,"%s", "write: ");
+
+    int write_prefix_len = textnw(diskstat_utils.write_prefix, strlen(diskstat_utils.write_prefix));
+    int read_prefix_len  = textnw(diskstat_utils.read_prefix, strlen(diskstat_utils.read_prefix));
+    int max_prefix = (write_prefix_len > read_prefix_len) ? write_prefix_len : read_prefix_len;
+
+    if ((max_prefix + diskstat_utils.min_status_win_width) > status_win_width) {
+      sprintf(diskstat_utils.read_prefix, "%s", "r: ");
+      sprintf(diskstat_utils.write_prefix,"%s", "w: ");
+
+      write_prefix_len = textnw(diskstat_utils.write_prefix, strlen(diskstat_utils.write_prefix));
+      read_prefix_len  = textnw(diskstat_utils.read_prefix, strlen(diskstat_utils.read_prefix));
+      max_prefix = (write_prefix_len > read_prefix_len) ? write_prefix_len : read_prefix_len;
+
+      if ((max_prefix + diskstat_utils.min_status_win_width) > status_win_width) {
+        diskstat_utils.read_prefix[0]  = (char) 0;
+        diskstat_utils.write_prefix[0] = (char) 0;
+      }
+    }
+
+  //write_prefix[32], readed_prefix[32], written_prefix[32], free_prefix[32];
+  }
+
+  // init diskstat (Distk Timelines and stuff)
+  for(i = 0; i < MAXPARTITIONS;i++){
+    diskstat[i].length      = status_win_width / 2 - gappx;
+
+    for(j = 0;j < diskstat[i].length;j++){
+      diskstat[i].read.bytes[i]  = 0;
+      diskstat[i].write.bytes[i] = 0;
+    }
+    diskstat[i].read.max  = 0;
+    diskstat[i].write.max = 0;
+    diskstat[i].writeges  = 0;
+    diskstat[i].readges   = 0;
+  }
+
+
+
+  diskstat_utils.line_seperator[0] = '-';
+  diskstat_utils.line_seperator[1] = (char) 0;
+  int line_seperator_len = textnw(diskstat_utils.line_seperator, 1);
+  
+  for (i = 1; i < status_win_width / line_seperator_len; i++)
+    add_char_to_str(diskstat_utils.line_seperator, '-', i);
+
+  diskstat_utils.line_seperator[i - 1] = (char) 0;
+
+  diskstat_utils.max_chrs_per_line = status_win_width / diskstat_utils.max_char_len;
+  diskstat_utils.max_chrs_per_halfln = (status_win_width / 2) / diskstat_utils.max_char_len;
+
+}
+
 
 
 // DWM FUNCTIONS
@@ -2778,13 +2926,23 @@ updatetitle(Client *c) {
 
 void
 updatestatus(void) {
-  update_status();
-  drawstatus();
-  draw_freestylebar();
-  if(draw_status_win)
-    drawstw();
 
-  drawbar(selmon);
+	gettextprop(root, XA_WM_NAME, vim_command_utils.last_input, sizeof(vim_command_utils.last_input));
+
+  if (!strncmp(vim_command_utils.last_input, "VIMCMD: ", 8)) {
+    run_vim_command(vim_command_utils.last_input + 8);
+    
+  } else {
+
+    update_status();
+    drawstatus();
+    draw_freestylebar();
+    if(draw_status_win)
+      drawstw();
+ 
+    drawbar(selmon);
+  }
+
 }
 
 void

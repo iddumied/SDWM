@@ -1,5 +1,3 @@
-#include <pthread.h>
-
 #include "utils.c"
 #include "cpu.c"
 #include "battery.c"

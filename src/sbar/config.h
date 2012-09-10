@@ -115,6 +115,7 @@ static const double bat_suspend       = 0.075;        // percent when go to susp
 
 
 
+
 /********* SECTION COLORS **********/
 
 // normal color
@@ -129,3 +130,8 @@ static const char cpu_line_color[]    = "#21536a";  // color of cpu timeline lin
 static const char cpu_point_color[]   = "#00aaff";  // color of cpu timeline point
 
 #include "themes.c"
+
+/********* SECTION VIM LIKE COMMANDS **********/
+
+#include "sdwm_vim.c"
+

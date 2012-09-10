@@ -149,6 +149,7 @@ void setup_sbar()
   log_str("Setup cpu timelins", LOG_INFO);
   #endif
 
+  setup_vim();
 
   #ifdef INFO
   char logbuf[256];
