@@ -960,7 +960,12 @@ void run_vim_command(const char *input) {
 
 void stw_disk_set_width(const char *input) {
   
-  sscanf(input, ":stw disk set width %d", &status_win_width);
+  if (!strcmp(input, ":stw disk set width max")) 
+    status_win_width = diskstat_utils.max_status_win_width;
+  else if (!strcmp(input, ":stw disk set width min")) 
+    status_win_width = diskstat_utils.min_status_win_width;
+  else
+    sscanf(input, ":stw disk set width %d", &status_win_width);
 
 
   int i, j;
