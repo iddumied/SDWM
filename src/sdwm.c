@@ -971,32 +971,32 @@ void stw_disk_set_width(const char *input) {
     log_str(logbuff, LOG_WARNING);
 
     status_win_width = diskstat_utils.min_status_win_width;
-  } else {
+  } 
 
-    // init prefixes
-    sprintf(diskstat_utils.read_prefix, "%s", "read: ");
-    sprintf(diskstat_utils.write_prefix,"%s", "write: ");
+  // init prefixes
+  sprintf(diskstat_utils.read_prefix, "%s", "read: ");
+  sprintf(diskstat_utils.write_prefix,"%s", "write: ");
 
-    int write_prefix_len = textnw(diskstat_utils.write_prefix, strlen(diskstat_utils.write_prefix));
-    int read_prefix_len  = textnw(diskstat_utils.read_prefix, strlen(diskstat_utils.read_prefix));
-    int max_prefix = (write_prefix_len > read_prefix_len) ? write_prefix_len : read_prefix_len;
+  int write_prefix_len = textnw(diskstat_utils.write_prefix, strlen(diskstat_utils.write_prefix));
+  int read_prefix_len  = textnw(diskstat_utils.read_prefix, strlen(diskstat_utils.read_prefix));
+  int max_prefix = (write_prefix_len > read_prefix_len) ? write_prefix_len : read_prefix_len;
+
+  if ((max_prefix + diskstat_utils.min_status_win_width) > status_win_width) {
+    sprintf(diskstat_utils.read_prefix, "%s", "r: ");
+    sprintf(diskstat_utils.write_prefix,"%s", "w: ");
+
+    write_prefix_len = textnw(diskstat_utils.write_prefix, strlen(diskstat_utils.write_prefix));
+    read_prefix_len  = textnw(diskstat_utils.read_prefix, strlen(diskstat_utils.read_prefix));
+    max_prefix = (write_prefix_len > read_prefix_len) ? write_prefix_len : read_prefix_len;
 
     if ((max_prefix + diskstat_utils.min_status_win_width) > status_win_width) {
-      sprintf(diskstat_utils.read_prefix, "%s", "r: ");
-      sprintf(diskstat_utils.write_prefix,"%s", "w: ");
-
-      write_prefix_len = textnw(diskstat_utils.write_prefix, strlen(diskstat_utils.write_prefix));
-      read_prefix_len  = textnw(diskstat_utils.read_prefix, strlen(diskstat_utils.read_prefix));
-      max_prefix = (write_prefix_len > read_prefix_len) ? write_prefix_len : read_prefix_len;
-
-      if ((max_prefix + diskstat_utils.min_status_win_width) > status_win_width) {
-        diskstat_utils.read_prefix[0]  = (char) 0;
-        diskstat_utils.write_prefix[0] = (char) 0;
-      }
+      diskstat_utils.read_prefix[0]  = (char) 0;
+      diskstat_utils.write_prefix[0] = (char) 0;
     }
+  }
 
   //write_prefix[32], readed_prefix[32], written_prefix[32], free_prefix[32];
-  }
+  
 
   // init diskstat (Distk Timelines and stuff)
   for(i = 0; i < MAXPARTITIONS;i++){
