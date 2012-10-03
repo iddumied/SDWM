@@ -8,9 +8,13 @@ typedef struct {
 } DiskStatistic;
 
 typedef struct {
-  char line_seperator[512], read_prefix[32], write_prefix[32], readed_prefix[32], written_prefix[32], free_prefix[32];
+  char line_seperator[512], read_prefix[32], 
+       write_prefix[32], readed_prefix[32], 
+       written_prefix[32], free_prefix[32];
   Bool free_percent;
-  int max_char_len, max_chrs_per_line, max_chrs_per_halfln, min_status_win_width;
+  int max_char_len, max_chrs_per_line, 
+      max_chrs_per_halfln, min_status_win_width, 
+      readed_width, free_width, max_status_win_width;
 } DiskStatusWinUtils;
 
 
@@ -285,7 +289,7 @@ void drawstw()
       //stwwrite.xc += gappx;
       human_readable_disk(disks[i].avil, &ebuf[0]);
       human_readable_disk(disks[i].total, &ebuf[1]);
-      sprintf(stwbuffer,"%s / %s", ebuf[0], ebuf[1]);
+      sprintf(stwbuffer,"%s%s / %s", diskstat_utils.free_prefix, ebuf[0], ebuf[1]);
       wprint(stwbuffer);
       stwwrite.xc = screenWidth - gappx - status_win_width / 2; // set cursor to half
       wprintcolln(disks[i].pused, status_win_width / 2 - gappx, 0.65, 2);
@@ -307,10 +311,10 @@ void drawstw()
       human_readable(diskstat[i].write.max, False, &ebuf2[2]);
       human_readable_disk(diskstat[i].writeges, &ebuf2[3]);
 
-      sprintf(stwbuffer, "r: %s / %s", ebuf[3], ebuf[0]);
+      sprintf(stwbuffer, "%s%s / %s", diskstat_utils.readed_prefix, ebuf[3], ebuf[0]);
       wprint(stwbuffer);
       stwwrite.xc = screenWidth - gappx - status_win_width / 2; // set cursor to half
-      sprintf(stwbuffer, "w: %s / %s", ebuf2[3], ebuf2[0]);
+      sprintf(stwbuffer, "%s%s / %s", diskstat_utils.written_prefix, ebuf2[3], ebuf2[0]);
       wprintln(stwbuffer);
 
       if(diskstat[i].read.max > 0 || diskstat[i].write.max > 0){
@@ -578,8 +582,9 @@ void setup_stw_disks() {
 
     // calculate minimum status_win_width
     const char *num[] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
-    const char *byte[] = { "B/s","KB/s","MB/s" };
-    char max_numi, max_bytei;
+    const char *byte_per_sec[] = { "B/s","KB/s","MB/s" };
+    const char *byte[] = { "B","KB","MB","GB","TB" };
+    char max_numi, max_byte_per_seci, max_bytei;
 
 
     for (i = 0, max_numi = 0; i < 10; i++) {
@@ -587,13 +592,20 @@ void setup_stw_disks() {
         max_numi = textnw(num[i], 1);
     }
 
-    for (i = 0, max_bytei = 0; i < 3; i++) {
+    for (i = 0, max_byte_per_seci = 0; i < 3; i++) {
+      if (max_byte_per_seci < textnw(byte_per_sec[i], strlen(byte_per_sec[i])))
+        max_byte_per_seci = textnw(byte_per_sec[i], strlen(byte_per_sec[i]));
+    }
+
+    for (i = 0, max_bytei = 0; i < 5; i++) {
       if (max_bytei < textnw(byte[i], strlen(byte[i])))
         max_bytei = textnw(byte[i], strlen(byte[i]));
     }
 
-    // maximum if minimal printable text is "000 MB/s @ 000 MB/s"
-    diskstat_utils.min_status_win_width = (textnw("  @  ", 5) + 6 * max_numi + 2 * max_bytei) * 2 + gappx;
+    // maximum minimal printable text is "000 MB/s @ 000 MB/s"
+    diskstat_utils.min_status_win_width = (textnw("  @  ", 5) + 6 * max_numi + 2 * max_byte_per_seci) * 2 + gappx;
+    diskstat_utils.readed_width         = (textnw("  /  ", 5) + 6 * max_numi + 2 * max_bytei) * 2 + gappx;
+    diskstat_utils.free_width           = (textnw("  /  ", 5) + 6 * max_numi + 2 * max_bytei) + gappx / 2;
 
     if (status_win_width < diskstat_utils.min_status_win_width) {
       char logbuff[64];
@@ -607,17 +619,26 @@ void setup_stw_disks() {
     sprintf(diskstat_utils.read_prefix, "%s", "read: ");
     sprintf(diskstat_utils.write_prefix,"%s", "write: ");
 
-    int write_prefix_len = textnw(diskstat_utils.write_prefix, strlen(diskstat_utils.write_prefix));
-    int read_prefix_len  = textnw(diskstat_utils.read_prefix, strlen(diskstat_utils.read_prefix));
-    int max_prefix = (write_prefix_len > read_prefix_len) ? write_prefix_len : read_prefix_len;
+    int max_prefix = textnw(diskstat_utils.write_prefix, strlen(diskstat_utils.write_prefix))
+                      + textnw(diskstat_utils.read_prefix, strlen(diskstat_utils.read_prefix));
+
+    diskstat_utils.max_status_win_width = max_prefix + diskstat_utils.min_status_win_width;
+
+    if (status_win_width > diskstat_utils.max_status_win_width) {
+      char logbuff[64];
+      sprintf(logbuff, "status_win_width (%d) to big => set to %d", status_win_width, diskstat_utils.min_status_win_width);
+      log_str(logbuff, LOG_WARNING);
+
+      status_win_width = diskstat_utils.max_status_win_width;
+    } 
+
 
     if ((max_prefix + diskstat_utils.min_status_win_width) > status_win_width) {
       sprintf(diskstat_utils.read_prefix, "%s", "r: ");
       sprintf(diskstat_utils.write_prefix,"%s", "w: ");
 
-      write_prefix_len = textnw(diskstat_utils.write_prefix, strlen(diskstat_utils.write_prefix));
-      read_prefix_len  = textnw(diskstat_utils.read_prefix, strlen(diskstat_utils.read_prefix));
-      max_prefix = (write_prefix_len > read_prefix_len) ? write_prefix_len : read_prefix_len;
+      max_prefix = textnw(diskstat_utils.write_prefix, strlen(diskstat_utils.write_prefix))
+                    + textnw(diskstat_utils.read_prefix, strlen(diskstat_utils.read_prefix));
 
       if ((max_prefix + diskstat_utils.min_status_win_width) > status_win_width) {
         diskstat_utils.read_prefix[0]  = (char) 0;
@@ -625,8 +646,31 @@ void setup_stw_disks() {
       }
     }
 
-    //write_prefix[32], readed_prefix[32], written_prefix[32], free_prefix[32];
-    
+    sprintf(diskstat_utils.readed_prefix, "%s", "readed: ");
+    sprintf(diskstat_utils.written_prefix,"%s", "written: ");
+
+    int max2_prefix = textnw(diskstat_utils.written_prefix, strlen(diskstat_utils.written_prefix))
+                       + textnw(diskstat_utils.readed_prefix, strlen(diskstat_utils.readed_prefix));
+
+    if ((max2_prefix + diskstat_utils.readed_width) > status_win_width) {
+      sprintf(diskstat_utils.readed_prefix, "%s", "r: ");
+      sprintf(diskstat_utils.written_prefix,"%s", "w: ");
+    }
+
+    sprintf(diskstat_utils.free_prefix, "%s", "free: ");
+    int free_prefix_len = textnw(diskstat_utils.free_prefix, strlen(diskstat_utils.free_prefix));
+
+    if ((free_prefix_len + diskstat_utils.free_width) * 2 > status_win_width) {
+      diskstat_utils.free_prefix[0]  = (char) 0;
+    }
+
+
+    #ifdef INFO
+      char logbuf[250];
+      sprintf(logbuf, "Status window size is between [%d, %d]", diskstat_utils.min_status_win_width,
+                diskstat_utils.max_status_win_width);
+      log_str(logbuf, LOG_INFO);
+    #endif
 
     // init diskstat (Distk Timelines and stuff)
     for(i = 0; i < MAXPARTITIONS;i++){
@@ -660,28 +704,32 @@ void setup_stw_disks() {
 
     // Calculate Max Char-Width
     
-    #ifdef INFO
-    char logbuffer[256];
-    int max_char;
+    #ifdef DEBUG
+      char logbuffer[256];
+      int max_char;
     #endif
 
     for (i = 0; i < 256; i++) {
       char_len = textnw(&i, 1);
 
-      #ifdef INFO
-      sprintf(logbuffer, "Char-Width: %c (0x%02X): %d", i, i, char_len);
-      log_str(logbuffer, LOG_INFO);
-      if (diskstat_utils.max_char_len < char_len)
-        max_char = i;
+      #ifdef DEBUG
+        // range of printable characters
+        if (i >= 0x21 && i <= 0x7E)
+          sprintf(logbuffer, "Char-Width: %c (0x%02X): %d", i, i, char_len);
+        else
+          sprintf(logbuffer, "Char-Width:   (0x%02X): %d", i, char_len);
+        log_str(logbuffer, LOG_INFO);
+        if (diskstat_utils.max_char_len < char_len)
+          max_char = i;
       #endif
 
       if (diskstat_utils.max_char_len < char_len)
         diskstat_utils.max_char_len = char_len;
     }
 
-    #ifdef INFO
-    sprintf(logbuffer, "Max Char-Width: %c (0x%02X): %d", max_char, max_char, textnw(&max_char, 1));
-    log_str(logbuffer, LOG_INFO);
+    #ifdef DEBUG
+      sprintf(logbuffer, "Max Char-Width: %c (0x%02X): %d", max_char, max_char, textnw(&max_char, 1));
+      log_str(logbuffer, LOG_INFO);
     #endif
 
     diskstat_utils.max_chrs_per_line = status_win_width / diskstat_utils.max_char_len;

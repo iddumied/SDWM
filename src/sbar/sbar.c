@@ -152,10 +152,14 @@ void setup_sbar()
   setup_vim();
 
   #ifdef INFO
+  log_str("Setup vim commands", LOG_INFO);
+  #endif
+
+  #ifdef INFO
   char logbuf[256];
   gettimeofday(&end_time, 0);
   sprintf(logbuf, "sbar Setup needed:  %f Seconds", calc_time_div(end_time, start_time));  
-  log_str(log_str, LOG_INFO);
+  log_str(logbuf, LOG_INFO);
   #endif
 }
 

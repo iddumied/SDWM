@@ -977,17 +977,23 @@ void stw_disk_set_width(const char *input) {
   sprintf(diskstat_utils.read_prefix, "%s", "read: ");
   sprintf(diskstat_utils.write_prefix,"%s", "write: ");
 
-  int write_prefix_len = textnw(diskstat_utils.write_prefix, strlen(diskstat_utils.write_prefix));
-  int read_prefix_len  = textnw(diskstat_utils.read_prefix, strlen(diskstat_utils.read_prefix));
-  int max_prefix = (write_prefix_len > read_prefix_len) ? write_prefix_len : read_prefix_len;
+  int max_prefix = textnw(diskstat_utils.write_prefix, strlen(diskstat_utils.write_prefix))
+                    + textnw(diskstat_utils.read_prefix, strlen(diskstat_utils.read_prefix));
+
+  if (status_win_width > diskstat_utils.max_status_win_width) {
+    char logbuff[64];
+    sprintf(logbuff, "status_win_width (%d) to big => set to %d", status_win_width, diskstat_utils.min_status_win_width);
+    log_str(logbuff, LOG_WARNING);
+
+    status_win_width = diskstat_utils.max_status_win_width;
+  } 
 
   if ((max_prefix + diskstat_utils.min_status_win_width) > status_win_width) {
     sprintf(diskstat_utils.read_prefix, "%s", "r: ");
     sprintf(diskstat_utils.write_prefix,"%s", "w: ");
 
-    write_prefix_len = textnw(diskstat_utils.write_prefix, strlen(diskstat_utils.write_prefix));
-    read_prefix_len  = textnw(diskstat_utils.read_prefix, strlen(diskstat_utils.read_prefix));
-    max_prefix = (write_prefix_len > read_prefix_len) ? write_prefix_len : read_prefix_len;
+    max_prefix = textnw(diskstat_utils.write_prefix, strlen(diskstat_utils.write_prefix))
+                  + textnw(diskstat_utils.read_prefix, strlen(diskstat_utils.read_prefix));
 
     if ((max_prefix + diskstat_utils.min_status_win_width) > status_win_width) {
       diskstat_utils.read_prefix[0]  = (char) 0;
@@ -995,8 +1001,23 @@ void stw_disk_set_width(const char *input) {
     }
   }
 
-  //write_prefix[32], readed_prefix[32], written_prefix[32], free_prefix[32];
-  
+  sprintf(diskstat_utils.readed_prefix, "%s", "readed: ");
+  sprintf(diskstat_utils.written_prefix,"%s", "written: ");
+
+  int max2_prefix = textnw(diskstat_utils.written_prefix, strlen(diskstat_utils.written_prefix))
+                     + textnw(diskstat_utils.readed_prefix, strlen(diskstat_utils.readed_prefix));
+
+  if ((max2_prefix + diskstat_utils.readed_width) > status_win_width) {
+    sprintf(diskstat_utils.readed_prefix, "%s", "r: ");
+    sprintf(diskstat_utils.written_prefix,"%s", "w: ");
+  }
+
+  sprintf(diskstat_utils.free_prefix, "%s", "free: ");
+  int free_prefix_len = textnw(diskstat_utils.free_prefix, strlen(diskstat_utils.free_prefix));
+
+  if ((free_prefix_len + diskstat_utils.free_width) * 2 > status_win_width) {
+    diskstat_utils.free_prefix[0]  = (char) 0;
+  }
 
   // init diskstat (Distk Timelines and stuff)
   for(i = 0; i < MAXPARTITIONS;i++){
