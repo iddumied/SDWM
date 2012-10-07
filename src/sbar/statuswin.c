@@ -25,6 +25,9 @@ void setup_stw_disks();
 void drawstw();
 void calc_timline_max(Timeline *timeline, int bytes, int length);
 void togglestw();
+void draw_stw_main_info();
+void draw_stw_disk_block();
+void draw_stw_disk_tree_left();
 
 
 void togglestw(){
@@ -51,13 +54,7 @@ void calc_timline_max(Timeline *timeline, int bytes, int length)
   if(bytes > timeline->max) timeline->max = bytes;
 }
 
-void drawstw()
-{
-  // clear
-  XCopyArea(dpy, background, stw.drawable, stw.gc, 0, 0, stw.w, stw.h, 0, 0 );
-  stwwrite.xc = stwwrite.xs;
-  stwwrite.yc = stwwrite.ys;
-  
+void draw_stw_main_info() {
 
   // values
   char stwbuffer[100], hread[12], maxhread[12];
@@ -251,16 +248,181 @@ void drawstw()
     wprintln("  +--net: error");
   }  
 
-  /***********************************************
-   *             Partition Part                  *
-   ***********************************************/
+}
 
-  char ebuf[5][20], ebuf2[5][20], buff2[100], *tmp_ptr, *tmp_ptr2;
-  int countdisks, mj, mi = 0, len;
-  stwwrite.xs = stwwrite.xc  = screenWidth - gappx - status_win_width;// Statuswin pos and size to config.h
-  stwwrite.ys = stwwrite.yc = (stw.font.height + gappx);
-  stwwrite.xe = stwwrite.w = stw.w - gappx;
-  stwwrite.ye = stwwrite.h = stw.h;
+void draw_stw_disk_tree_left() {
+
+  char stwbuffer[100], ebuf[5][20], ebuf2[5][20], buff2[100], *tmp_ptr, *tmp_ptr2;
+  int i, countdisks, mj, mi = 0, len;
+  
+  for(i = 0;i < MAXPARTITIONS;i++)
+    if(!disks[i].active) break;
+  
+  countdisks = i;
+  
+  wprintln("");
+  sprintf(stwbuffer,"Volumes mounted:  %d  of  %d  Disks",mounted_volumes,countdisks);
+  wprintln(stwbuffer);
+  wprintln(diskstat_utils.line_seperator); 
+  for(i = 0; i < MAXPARTITIONS; i++){
+    if(!disks[i].active) break;
+    
+  
+    if(disks[i].mountpoint != NULL){
+
+      mi++;
+      sprintf(stwbuffer,"  +--%s  @  %s", disks[i].path, disks[i].mountpoint);  
+      wprintln(stwbuffer);
+      if(mi < mounted_volumes) wprintln("  |    |");
+      else wprintln("       |");
+
+      if(mi < mounted_volumes) wprint("  |    +--usage:  ");
+      else wprint("       +--usage:  ");
+      wprintcolln(disks[i].pused, 100, 0.65, 2 );
+      if(mi < mounted_volumes) wprintln("  |         |");
+      else wprintln("            |");
+
+      human_readable_disk(disks[i].avil, &ebuf[0]);
+      human_readable_disk(disks[i].total, &ebuf[1]);
+      if(mi < mounted_volumes) {
+        sprintf(stwbuffer,"  |         +--free:  %s / %s  -  %d%c", 
+                 ebuf[0], ebuf[1], (int)(disks[i].pavil*100),'%');
+      } else { 
+        sprintf(stwbuffer,"            +--free:  %s / %s  -  %d%c", 
+                 ebuf[0], ebuf[1], (int)(disks[i].pavil*100),'%');
+      }
+      wprintln(stwbuffer);
+
+
+      /****** RAED *****/
+
+      // calculation inforamtions and make it readable
+      diskstat[i].readges += disks[i].between.read;
+      calc_timline_max(&diskstat[i].read, disks[i].between.read, diskstat[i].length);
+      human_readable_disk(disks[i].now.read, &ebuf[0]);
+      human_readable(disks[i].between.read, False, &ebuf[1]);
+      human_readable(diskstat[i].read.max, False, &ebuf[2]);
+      human_readable_disk(diskstat[i].readges, &ebuf[3]);
+
+      if(mi < mounted_volumes){
+        if(diskstat[i].read.max > 0){
+          sprintf(stwbuffer,"  |         +--read:  %s @ %s", ebuf[1], ebuf[2]);
+          wprintln(stwbuffer);
+
+          wprintln("  |         |    |");
+          wprint("  |         |    +--");
+
+          // printing timeline if max > 0
+          wprinttimeline(disks[i].between.read, diskstat[i].length, 1, &diskstat[i].read, 
+                        stw.sbar[SBarLine], stw.sbar[SBarCpuPoint], diskstat[i].read.max);
+        
+          sprintf(stwbuffer,"   %s",ebuf[3]);
+          wprintln(stwbuffer);
+          wprintln("  |         |");
+
+        }else{
+          diskstat[i].readges = 0; // clearing history
+          sprintf(stwbuffer,"  |         +--readed: %s",ebuf[0]);
+          wprintln(stwbuffer);
+        }
+
+      }else{
+        if(diskstat[i].read.max > 0){
+          sprintf(stwbuffer,"            +--read:  %s @ %s", ebuf[1], ebuf[2]);
+          wprintln(stwbuffer);
+    
+          wprintln("            |    |");
+          wprint("            |    +--");
+
+          // printing timeline if max > 0
+          wprinttimeline(disks[i].between.read, diskstat[i].length, 1, &diskstat[i].read, 
+                        stw.sbar[SBarLine], stw.sbar[SBarCpuPoint], diskstat[i].read.max);
+          
+          sprintf(stwbuffer,"   %s",ebuf[3]);
+          wprintln(stwbuffer);
+          wprintln("            |");
+
+        }else{
+          diskstat[i].readges = 0; // clearing history
+          sprintf(stwbuffer,"            +--readed %s",ebuf[0]);
+          wprintln(stwbuffer);
+        }
+
+      }
+
+
+      /****** WRITE *****/
+
+      // calculation inforamtions and make it readable
+      diskstat[i].writeges += disks[i].between.write;
+      calc_timline_max(&diskstat[i].write, disks[i].between.write, diskstat[i].length);
+      human_readable_disk(disks[i].now.write, &ebuf[0]);
+      human_readable(disks[i].between.write, False, &ebuf[1]);
+      human_readable(diskstat[i].write.max, False, &ebuf[2]);
+      human_readable_disk(diskstat[i].writeges, &ebuf[3]);
+
+      if(mi < mounted_volumes){
+        if(diskstat[i].write.max > 0){
+          sprintf(stwbuffer,"  |         +--write:  %s @ %s", ebuf[1], ebuf[2]);
+          wprintln(stwbuffer);
+
+          wprintln("  |              |");
+          wprint("  |              +--");
+
+          // printing timeline if max > 0
+          wprinttimeline(disks[i].between.write, diskstat[i].length, 1, &diskstat[i].write, 
+                        stw.sbar[SBarLine], stw.sbar[SBarCpuPoint], diskstat[i].write.max);
+        
+          sprintf(stwbuffer,"   %s",ebuf[3]);
+          wprintln(stwbuffer);
+
+        }else{
+          diskstat[i].writeges = 0; // clearing history
+          sprintf(stwbuffer,"  |         +--writen: %s",ebuf[0]);
+          wprintln(stwbuffer);
+        }
+
+      }else{
+        if(diskstat[i].write.max > 0){
+          sprintf(stwbuffer,"            +--write:  %s @ %s", ebuf[1], ebuf[2]);
+          wprintln(stwbuffer);
+    
+          wprintln("                 |");
+          wprint("                 +--");
+
+          // printing timeline if max > 0
+          wprinttimeline(disks[i].between.write, diskstat[i].length, 1, &diskstat[i].write, 
+                        stw.sbar[SBarLine], stw.sbar[SBarCpuPoint], diskstat[i].write.max);
+          
+          sprintf(stwbuffer,"   %s",ebuf[3]);
+          wprintln(stwbuffer);
+        }else{
+          diskstat[i].writeges = 0; // clearing history
+          sprintf(stwbuffer,"            +--writen: %s",ebuf[0]);
+          wprintln(stwbuffer);
+        }
+
+      }
+
+      if(mi < mounted_volumes) wprintln("  |");
+    }else if(diskstat[i].read.max > 0 || diskstat[i].write.max > 0){
+      diskstat[i].read.max  = 0;
+      diskstat[i].write.max = 0;
+      diskstat[i].readges   = 0;
+      diskstat[i].writeges   = 0;
+
+      for(mj = 0;mj < diskstat[i].length;mj++){
+        diskstat[i].read.bytes[mj]  = 0;
+        diskstat[i].write.bytes[mj] = 0;
+      }
+    }
+  }
+}
+
+void draw_stw_disk_block() {
+
+  char stwbuffer[100], ebuf[5][20], ebuf2[5][20], buff2[100], *tmp_ptr, *tmp_ptr2;
+  int i, countdisks, mj, mi = 0, len;
   
   for(i = 0;i < MAXPARTITIONS;i++)
     if(!disks[i].active) break;
@@ -343,142 +505,6 @@ void drawstw()
       // line seperator
       wprintln(diskstat_utils.line_seperator); 
 
-
-      
-
-/*
-
-      mi++;
-      sprintf(stwbuffer,"  +--%s  @  %s", disks[i].path, disks[i].mountpoint);  
-      wprintln(stwbuffer);
-      if(mi < mounted_volumes) wprintln("  |    |");
-      else wprintln("       |");
-
-      if(mi < mounted_volumes) wprint("  |    +--usage:  ");
-      else wprint("       +--usage:  ");
-      wprintcolln(disks[i].pused, 100, 0.65, 2 );
-      if(mi < mounted_volumes) wprintln("  |         |");
-      else wprintln("            |");
-
-      human_readable_disk(disks[i].avil, &ebuf[0]);
-      human_readable_disk(disks[i].total, &ebuf[1]);
-      if(mi < mounted_volumes) sprintf(stwbuffer,"  |         +--free:  %s / %s  -  %d%c", ebuf[0], ebuf[1], (int)(disks[i].pavil*100),'%');
-      else sprintf(stwbuffer,"            +--free:  %s / %s  -  %d%c", ebuf[0], ebuf[1], (int)(disks[i].pavil*100),'%');
-      wprintln(stwbuffer);
-
-
-      ****** RAED *****
-
-      // calculation inforamtions and make it readable
-      diskstat[i].readges += disks[i].between.read;
-      calc_timline_max(&diskstat[i].read, disks[i].between.read, diskstat[i].length);
-      human_readable_disk(disks[i].now.read, &ebuf[0]);
-      human_readable(disks[i].between.read, False, &ebuf[1]);
-      human_readable(diskstat[i].read.max, False, &ebuf[2]);
-      human_readable_disk(diskstat[i].readges, &ebuf[3]);
-
-      if(mi < mounted_volumes){
-        if(diskstat[i].read.max > 0){
-          sprintf(stwbuffer,"  |         +--read:  %s @ %s", ebuf[1], ebuf[2]);
-          wprintln(stwbuffer);
-
-          wprintln("  |         |    |");
-          wprint("  |         |    +--");
-
-          // printing timeline if max > 0
-          wprinttimeline(disks[i].between.read, diskstat[i].length, 1, &diskstat[i].read, 
-                        stw.sbar[SBarLine], stw.sbar[SBarCpuPoint], diskstat[i].read.max);
-        
-          sprintf(stwbuffer,"   %s",ebuf[3]);
-          wprintln(stwbuffer);
-          wprintln("  |         |");
-
-        }else{
-          diskstat[i].readges = 0; // clearing history
-          sprintf(stwbuffer,"  |         +--readed: %s",ebuf[0]);
-          wprintln(stwbuffer);
-        }
-
-      }else{
-        if(diskstat[i].read.max > 0){
-          sprintf(stwbuffer,"            +--read:  %s @ %s", ebuf[1], ebuf[2]);
-          wprintln(stwbuffer);
-    
-          wprintln("            |    |");
-          wprint("            |    +--");
-
-          // printing timeline if max > 0
-          wprinttimeline(disks[i].between.read, diskstat[i].length, 1, &diskstat[i].read, 
-                        stw.sbar[SBarLine], stw.sbar[SBarCpuPoint], diskstat[i].read.max);
-          
-          sprintf(stwbuffer,"   %s",ebuf[3]);
-          wprintln(stwbuffer);
-          wprintln("            |");
-
-        }else{
-          diskstat[i].readges = 0; // clearing history
-          sprintf(stwbuffer,"            +--readed %s",ebuf[0]);
-          wprintln(stwbuffer);
-        }
-
-      }
-
-
-      ****** WRITE *****
-
-      // calculation inforamtions and make it readable
-      diskstat[i].writeges += disks[i].between.write;
-      calc_timline_max(&diskstat[i].write, disks[i].between.write, diskstat[i].length);
-      human_readable_disk(disks[i].now.write, &ebuf[0]);
-      human_readable(disks[i].between.write, False, &ebuf[1]);
-      human_readable(diskstat[i].write.max, False, &ebuf[2]);
-      human_readable_disk(diskstat[i].writeges, &ebuf[3]);
-
-      if(mi < mounted_volumes){
-        if(diskstat[i].write.max > 0){
-          sprintf(stwbuffer,"  |         +--write:  %s @ %s", ebuf[1], ebuf[2]);
-          wprintln(stwbuffer);
-
-          wprintln("  |              |");
-          wprint("  |              +--");
-
-          // printing timeline if max > 0
-          wprinttimeline(disks[i].between.write, diskstat[i].length, 1, &diskstat[i].write, 
-                        stw.sbar[SBarLine], stw.sbar[SBarCpuPoint], diskstat[i].write.max);
-        
-          sprintf(stwbuffer,"   %s",ebuf[3]);
-          wprintln(stwbuffer);
-
-        }else{
-          diskstat[i].writeges = 0; // clearing history
-          sprintf(stwbuffer,"  |         +--writen: %s",ebuf[0]);
-          wprintln(stwbuffer);
-        }
-
-      }else{
-        if(diskstat[i].write.max > 0){
-          sprintf(stwbuffer,"            +--write:  %s @ %s", ebuf[1], ebuf[2]);
-          wprintln(stwbuffer);
-    
-          wprintln("                 |");
-          wprint("                 +--");
-
-          // printing timeline if max > 0
-          wprinttimeline(disks[i].between.write, diskstat[i].length, 1, &diskstat[i].write, 
-                        stw.sbar[SBarLine], stw.sbar[SBarCpuPoint], diskstat[i].write.max);
-          
-          sprintf(stwbuffer,"   %s",ebuf[3]);
-          wprintln(stwbuffer);
-        }else{
-          diskstat[i].writeges = 0; // clearing history
-          sprintf(stwbuffer,"            +--writen: %s",ebuf[0]);
-          wprintln(stwbuffer);
-        }
-
-      }
-
-      if(mi < mounted_volumes) wprintln("  |");
-    */
     }else if(diskstat[i].read.max > 0 || diskstat[i].write.max > 0){
       diskstat[i].read.max  = 0;
       diskstat[i].write.max = 0;
@@ -491,14 +517,42 @@ void drawstw()
       }
     }
   }
-  
-  
-  // set to original Coordinates
+}
+
+void drawstw()
+{
+
+  // set Coordinates for main info
   stwwrite.xs = stwwrite.xc  = gappx;
   stwwrite.ys = stwwrite.yc = stw.font.height + gappx;
   stwwrite.xe = stwwrite.w = stw.w - gappx;
   stwwrite.ye = stwwrite.h = stw.h;
+
+  // clear
+  XCopyArea(dpy, background, stw.drawable, stw.gc, 0, 0, stw.w, stw.h, 0, 0 );
+  stwwrite.xc = stwwrite.xs;
+  stwwrite.yc = stwwrite.ys;
   
+
+  // draw main info
+  draw_stw_main_info();
+
+  // set Coordinates for disk
+  stwwrite.xs = stwwrite.xc  = screenWidth - gappx - status_win_width;// TODO Statuswin pos and size to config.h
+  stwwrite.ys = stwwrite.yc = (stw.font.height + gappx);
+  stwwrite.xe = stwwrite.w = stw.w - gappx;
+  stwwrite.ye = stwwrite.h = stw.h;
+
+  // draw disk
+  switch (stw_disk_verbose) {
+    case 5: 
+      draw_stw_disk_tree_left();
+      break;
+    case 4:
+      draw_stw_disk_block();
+      break;
+
+  }
                                           
   XCopyArea(dpy, stw.drawable, selmon->statuswin, stw.gc, 0, 0, stw.w, stw.h, 0, 0 );
 }
@@ -634,7 +688,7 @@ void setup_stw_disks() {
 
 
     if ((max_prefix + diskstat_utils.min_status_win_width) > status_win_width) {
-      sprintf(diskstat_utils.read_prefix, "%s", "r: ");
+      printf(diskstat_utils.read_prefix, "%s", "r: ");
       sprintf(diskstat_utils.write_prefix,"%s", "w: ");
 
       max_prefix = textnw(diskstat_utils.write_prefix, strlen(diskstat_utils.write_prefix))
