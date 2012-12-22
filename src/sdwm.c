@@ -202,6 +202,8 @@ void sbardrawtext(const char *text, unsigned long col[ColLast], Bool invert);
 void setup_vim();
 void vimcmd();
 void stw_disk_set_width(const char *input);
+void stw_disk_set_tree(const char *input);
+void stw_disk_set_verbose(const char *input);
 void run_vim_command(const char *input);
 void log_str(const char *str, unsigned int importance);
 #define LOG_DEBUG   0
@@ -1062,6 +1064,24 @@ void stw_disk_set_width(const char *input) {
   diskstat_utils.max_chrs_per_line = status_win_width / diskstat_utils.max_char_len;
   diskstat_utils.max_chrs_per_halfln = (status_win_width / 2) / diskstat_utils.max_char_len;
 
+}
+
+void stw_disk_set_tree(const char *input) {
+  if (!strcmp(input, ":stw disk set tree right")) 
+    stw_disk_tree_right = True;
+  else if (!strcmp(input, ":stw disk set tree left"))
+    stw_disk_tree_right = False;
+}
+
+void stw_disk_set_verbose(const char *input) {
+  
+  int verbose = -1;
+  sscanf(input, ":stw disk set verbose %d", &verbose);
+
+  if (verbose > 5) verbose = 5;
+  if (verbose < 0) verbose = 0;
+  
+  stw_disk_verbose = verbose;
 }
 
 

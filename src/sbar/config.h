@@ -112,7 +112,7 @@ static const double blowstat          = 0.1;          // defines the warning sta
 static const double bverylowstat      = 0.12;         // 1 is full 0 is empty
 static const double bat_suspend       = 0.075;        // percent when go to suspend
 static unsigned int stw_disk_verbose  = 5;            // verbose level of status window disk
-static Bool stw_disk_tree_right       = False;         // print tree of stw left or right 
+static Bool stw_disk_tree_right       = False;        // print tree of stw left or right 
 
 
 
