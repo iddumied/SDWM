@@ -1,4 +1,4 @@
-//#define DEBUG
+#define DEBUG
 #define INFO
 
 /* See LICENSE file for copyright and license details.
@@ -962,6 +962,12 @@ void run_vim_command(const char *input) {
 
 void stw_disk_set_width(const char *input) {
 
+  #ifdef DEBUG
+    char log_buff[256];
+    sprintf(log_buff, "entered %s [DSW]", __func__);
+    log_str(log_buff, LOG_DEBUG);
+  #endif
+
   int i, j;
  
 
@@ -975,6 +981,14 @@ void stw_disk_set_width(const char *input) {
       status_win_width = diskstat_utils.min_status_win_width;
     else
       sscanf(input, ":stw disk set width %d", &status_win_width);
+  
+    #ifdef DEBUG
+      sprintf(log_buff, "[DSW] new width %d", status_win_width);
+      log_str(log_buff, LOG_DEBUG);
+      sprintf(log_buff, "[DSW] min width %d max width %d", diskstat_utils.min_status_win_width, 
+                                                        diskstat_utils.max_status_win_width);
+      log_str(log_buff, LOG_DEBUG);
+    #endif
  
  
     if (status_win_width < diskstat_utils.min_status_win_width) {
@@ -992,6 +1006,11 @@ void stw_disk_set_width(const char *input) {
     int max_prefix = textnw(diskstat_utils.write_prefix, strlen(diskstat_utils.write_prefix))
                       + textnw(diskstat_utils.read_prefix, strlen(diskstat_utils.read_prefix));
  
+    #ifdef DEBUG
+      sprintf(log_buff, "[DSW] max_prefix %d", max_prefix);
+      log_str(log_buff, LOG_DEBUG);
+    #endif
+
     if (status_win_width > diskstat_utils.max_status_win_width) {
       char logbuff[64];
       sprintf(logbuff, "status_win_width (%d) to big => set to %d", status_win_width, diskstat_utils.min_status_win_width);
@@ -1006,6 +1025,10 @@ void stw_disk_set_width(const char *input) {
  
       max_prefix = textnw(diskstat_utils.write_prefix, strlen(diskstat_utils.write_prefix))
                     + textnw(diskstat_utils.read_prefix, strlen(diskstat_utils.read_prefix));
+      #ifdef DEBUG
+        sprintf(log_buff, "[DSW] max_prefix %d", max_prefix);
+        log_str(log_buff, LOG_DEBUG);
+      #endif
  
       if ((max_prefix + diskstat_utils.min_status_win_width) > status_win_width) {
         diskstat_utils.read_prefix[0]  = (char) 0;
@@ -1018,6 +1041,11 @@ void stw_disk_set_width(const char *input) {
  
     int max2_prefix = textnw(diskstat_utils.written_prefix, strlen(diskstat_utils.written_prefix))
                        + textnw(diskstat_utils.readed_prefix, strlen(diskstat_utils.readed_prefix));
+
+    #ifdef DEBUG
+      sprintf(log_buff, "[DSW] max2_prefix %d", max2_prefix);
+      log_str(log_buff, LOG_DEBUG);
+    #endif
  
     if ((max2_prefix + diskstat_utils.readed_width) > status_win_width) {
       sprintf(diskstat_utils.readed_prefix, "%s", "r: ");
@@ -1026,11 +1054,21 @@ void stw_disk_set_width(const char *input) {
  
     sprintf(diskstat_utils.free_prefix, "%s", "free: ");
     int free_prefix_len = textnw(diskstat_utils.free_prefix, strlen(diskstat_utils.free_prefix));
+
+    #ifdef DEBUG
+      sprintf(log_buff, "[DSW] free_prefix_len %d", free_prefix_len);
+      log_str(log_buff, LOG_DEBUG);
+    #endif
  
     if ((free_prefix_len + diskstat_utils.free_width) * 2 > status_win_width) {
       diskstat_utils.free_prefix[0]  = (char) 0;
     }
   }
+
+  #ifdef DEBUG
+    sprintf(log_buff, "[DSW] status_win_width / 2 - gappx %d", status_win_width / 2 - gappx);
+    log_str(log_buff, LOG_DEBUG);
+  #endif
 
   // init diskstat (Distk Timelines and stuff)
   for(i = 0; i < MAXPARTITIONS;i++){
@@ -1055,6 +1093,11 @@ void stw_disk_set_width(const char *input) {
   diskstat_utils.line_seperator[0] = '-';
   diskstat_utils.line_seperator[1] = (char) 0;
   int line_seperator_len = textnw(diskstat_utils.line_seperator, 1);
+
+  #ifdef DEBUG
+    sprintf(log_buff, "[DSW] line_seperator_len %d", line_seperator_len);
+    log_str(log_buff, LOG_DEBUG);
+  #endif
   
   for (i = 1; i < status_win_width / line_seperator_len; i++)
     add_char_to_str(diskstat_utils.line_seperator, '-', i);
@@ -1063,6 +1106,13 @@ void stw_disk_set_width(const char *input) {
 
   diskstat_utils.max_chrs_per_line = status_win_width / diskstat_utils.max_char_len;
   diskstat_utils.max_chrs_per_halfln = (status_win_width / 2) / diskstat_utils.max_char_len;
+
+  #ifdef DEBUG
+    sprintf(log_buff, "[DSW] max_char_len %d status_win_width %d max_chrs_per_line %d max_chrs_per_halfln %d", 
+              diskstat_utils.max_char_len, status_win_width, diskstat_utils.max_chrs_per_line, 
+              diskstat_utils.max_chrs_per_halfln );
+    log_str(log_buff, LOG_DEBUG);
+  #endif
 
 }
 
@@ -1080,6 +1130,12 @@ void stw_disk_set_verbose(const char *input) {
 
   if (verbose > 5) verbose = 5;
   if (verbose < 0) verbose = 0;
+
+  if (stw_disk_verbose == 5)
+    status_win_width = 266 - gappx; // TODO stw own gappx => config.h
+  else
+    stw_disk_set_width("stw disk set width max");
+
   
   stw_disk_verbose = verbose;
 }

@@ -23,6 +23,16 @@ void add_char_to_str(char *str, char chr, int len) {
 }
 
 char *let_str_fitt_to(char *dst, char *src, int dst_len, int src_len) {
+
+  #ifdef DEBUG
+    char log_buff[256];
+    sprintf(log_buff, "%s [SFT]: src \"%s\" src_len %d dst \"%s\" dst_len %d", __func__, src, src_len, dst, dst_len);
+    log_str(log_buff, LOG_DEBUG);
+    
+    if (src_len <= dst_len) log_str("[SFT] fitting, return", LOG_DEBUG);
+    if (dst_len <= 3) log_str("[SFT] dst_len to smal return NULL!", LOG_DEBUG);
+  #endif
+
   if (src_len <= dst_len) return src;
   if (dst_len <= 3) return NULL;
 
@@ -34,6 +44,12 @@ char *let_str_fitt_to(char *dst, char *src, int dst_len, int src_len) {
       dst[i] = '.';
   }
   dst[i] = (char) 0;
+
+  #ifdef DEBUG
+    sprintf(log_buff, "[SFT]: %s trimmt to %s", src, dst);
+    log_str(log_buff, LOG_DEBUG);
+  #endif
+
   return dst;
 }
 

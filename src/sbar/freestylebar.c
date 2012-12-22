@@ -11,11 +11,21 @@ static int freestylebar_width;
 
 void draw_freestylebar(){
 
+  #ifdef DEBUG
+    char buffer[256];
+    log_str("starting to draw freesylebar [FSB]", LOG_DEBUG);
+  #endif
+
   int src_x = (freestylebar_curr_x < 0) ? (-1) * freestylebar_curr_x : 0;
   int width = (freestylebar_curr_x < 0) ? freestylebar_curr_x + freestylebar.w :
                 ((freestylebar_curr_x + freestylebar.w) < freestylebar_width) ? 
                   freestylebar.w : freestylebar_width - freestylebar_curr_x;
   int des_x = (freestylebar_curr_x < 0) ? freestylebar.x : freestylebar_curr_x + freestylebar.x;
+
+  #ifdef DEBUG
+    sprintf(buffer, "[FSB] src_x %d, width %d, dest_c %d", src_x, width, des_x);
+    log_str(buffer, LOG_DEBUG);
+  #endif
 
   // copping freestylebar on bar
     XCopyArea(dpy, freestylebar.drawable, dc.drawable, freestylebar.gc, 
@@ -23,12 +33,13 @@ void draw_freestylebar(){
                   width, freestylebar.h,                     // width, height
                     des_x, freestylebar.y);                  // des x, y
 
+  #ifdef DEBUG
+    log_str("[FSB] freesylebar drawn", LOG_DEBUG);
+  #endif
+
   freestylebar_curr_x++;
   if (freestylebar_curr_x >= freestylebar_width) 
     freestylebar_curr_x = (-1) * freestylebar.w;
-
-//  // copping freestylebar on bar
-//  XCopyArea(dpy, freestylebar.drawable, dc.drawable, freestylebar.gc, 0,0, freestylebar.w, freestylebar.h, freestylebar.x, freestylebar.y);
 }
 
 

@@ -352,7 +352,7 @@ void drawsymbolstatus()
     } 
     #ifdef DEBUG
       char buffer[256];
-      sprintf(buffer, "drawsymbolstatus %d %s", i, sbar_status_symbols[i].active ? "yes" : "no");
+      sprintf(buffer, "drawsymbolstatus %d / %d %s", i, DrawLast - 1, sbar_status_symbols[i].active ? "yes" : "no");
       log_str(buffer, LOG_DEBUG);
     #endif
   }

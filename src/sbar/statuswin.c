@@ -60,6 +60,10 @@ void calc_timline_max(Timeline *timeline, int bytes, int length)
 
 void draw_stw_main_info() {
 
+  #ifdef DEBUG
+    log_str("[STW] main info [MI]", LOG_DEBUG);
+  #endif
+
   // values
   char stwbuffer[100], hread[12], maxhread[12];
   int i;
@@ -68,6 +72,9 @@ void draw_stw_main_info() {
   gcv.foreground = stw.sel[ColFG];
   XChangeGC(dpy, stw.gc, GCForeground, &gcv);
 
+  #ifdef DEBUG
+    log_str("[STW] [MI] values initilaized", LOG_DEBUG);
+  #endif
     
   // statusmesage
   if(sbar_status_symbols[DrawUptime].active){
@@ -81,10 +88,18 @@ void draw_stw_main_info() {
   wprintln("  |    +--cpu");
   wprintln("  |    |    |");
 
+  #ifdef DEBUG
+    log_str("[STW] [MI] status message printed", LOG_DEBUG);
+  #endif
+
   for(i = 0; i < cpuinfo.ncpus; i++){;
     sprintf(stwbuffer, "  |    |    +--cpu%d:  %d%c",i+1, (int)(cpuinfo.cpuloads[i]*100), '%');
     wprintln(stwbuffer);
   }
+
+  #ifdef DEBUG
+    log_str("[STW] [MI] cpu info printed", LOG_DEBUG);
+  #endif
  
   wprintln("  |    |");
   if(sbar_status_symbols[DrawMemory].active){
@@ -118,6 +133,10 @@ void draw_stw_main_info() {
     }
   }  
 
+  #ifdef DEBUG
+    log_str("[STW] [MI] memory info printed", LOG_DEBUG);
+  #endif
+
   char pipe = (sbar_status_symbols[DrawBattery].active ? '|' : ' ');
   wprintln("  |    +--processes  ");
   sprintf(stwbuffer, "  |    %c    |", pipe);
@@ -128,6 +147,10 @@ void draw_stw_main_info() {
   wprintln(stwbuffer);                                        
   sprintf(stwbuffer, "  |    %c    +--blocked:  %d",pipe , cpuinfo.processes.blocked);
   wprintln(stwbuffer);
+
+  #ifdef DEBUG
+    log_str("[STW] [MI] process info printed", LOG_DEBUG);
+  #endif
 
   if(sbar_status_symbols[DrawBattery].active){
     wprintln("  |    |");
@@ -142,6 +165,10 @@ void draw_stw_main_info() {
     wprintln(stwbuffer);
     wprintln("  |");
   }
+
+  #ifdef DEBUG
+    log_str("[STW] [MI] battery info printed", LOG_DEBUG);
+  #endif
 
   if(sbar_status_symbols[DrawNet].active){
     wprintln("  +--net");
@@ -252,9 +279,17 @@ void draw_stw_main_info() {
     wprintln("  +--net: error");
   }  
 
+  #ifdef DEBUG
+    log_str("[STW] [MI] network info printed", LOG_DEBUG);
+  #endif
+
 }
 
 void draw_stw_disk_tree_right() {
+
+  #ifdef DEBUG
+    log_str("[STW] disk tree right [DTR]", LOG_DEBUG);
+  #endif
 
   char stwbuffer[100], ebuf[5][20], ebuf2[5][20], buff2[100], *tmp_ptr, *tmp_ptr2;
   int i, countdisks, mj, mi = 0, len;
@@ -263,16 +298,30 @@ void draw_stw_disk_tree_right() {
     if(!disks[i].active) break;
   
   countdisks = i;
+
+  #ifdef DEBUG
+    log_str("[STW] [DTR] values initialized", LOG_DEBUG);
+  #endif
   
   wprintln("");
   sprintf(stwbuffer,"Volumes mounted:  %d  of  %d  Disks",mounted_volumes,countdisks);
   STW_SET_POS(stwbuffer);
   wprintln(stwbuffer);
   STW_WPRINTLN_RIGHT("|  ");
+
+  #ifdef DEBUG
+    char log_buff[256];
+    log_str("[STW] [DTR] caption printed", LOG_DEBUG);
+  #endif
+  
   for(i = 0; i < MAXPARTITIONS; i++){
     if(!disks[i].active) break;
     
-  
+    #ifdef DEBUG
+      sprintf(log_buff, "[STW] [DTR] processing disk %d of %d", i, countdisks);
+      log_str(log_buff, LOG_DEBUG);
+    #endif
+
     if(disks[i].mountpoint != NULL){
       mi++;
       sprintf(stwbuffer,"%s  @  %s--+  ", disks[i].path, disks[i].mountpoint);  
@@ -280,6 +329,11 @@ void draw_stw_disk_tree_right() {
       wprintln(stwbuffer);
       if(mi < mounted_volumes) { STW_WPRINTLN_RIGHT("|    |  "); }
       else { STW_WPRINTLN_RIGHT("       |"); }
+
+      #ifdef DEBUG
+        log_str("[STW] [DTR] mountpoint printed", LOG_DEBUG);
+      #endif
+
 
       if(mi < mounted_volumes) { 
         sprintf(stwbuffer, "  :usage--+    |  ");
@@ -293,6 +347,11 @@ void draw_stw_disk_tree_right() {
         wprint(stwbuffer);
         stwwrite.xc = len - 100;
       }
+
+      #ifdef DEBUG
+        log_str("[STW] [DTR] usage printed", LOG_DEBUG);
+      #endif
+
       wprintcolln(disks[i].pused, 100, 0.65, 2 );
       if(mi < mounted_volumes) { STW_WPRINTLN_RIGHT("|         |  "); }
       else { STW_WPRINTLN_RIGHT("|  "); }
@@ -310,8 +369,12 @@ void draw_stw_disk_tree_right() {
 
       wprintln(stwbuffer);
 
+      #ifdef DEBUG
+        log_str("[STW] [DTR] free space printed", LOG_DEBUG);
+      #endif
 
-      /****** RAED *****/
+
+      /****** READ *****/
 
       // calculation inforamtions and make it readable
       diskstat[i].readges += disks[i].between.read;
@@ -320,6 +383,10 @@ void draw_stw_disk_tree_right() {
       human_readable(disks[i].between.read, False, &ebuf[1]);
       human_readable(diskstat[i].read.max, False, &ebuf[2]);
       human_readable_disk(diskstat[i].readges, &ebuf[3]);
+
+      #ifdef DEBUG
+        log_str("[STW] [DTR] read information calculated", LOG_DEBUG);
+      #endif
 
       if(mi < mounted_volumes){
         if(diskstat[i].read.max > 0){
@@ -371,6 +438,10 @@ void draw_stw_disk_tree_right() {
 
       }
 
+      #ifdef DEBUG
+        log_str("[STW] [DTR] read information printed", LOG_DEBUG);
+      #endif
+
 
       /****** WRITE *****/
 
@@ -381,6 +452,10 @@ void draw_stw_disk_tree_right() {
       human_readable(disks[i].between.write, False, &ebuf[1]);
       human_readable(diskstat[i].write.max, False, &ebuf[2]);
       human_readable_disk(diskstat[i].writeges, &ebuf[3]);
+
+      #ifdef DEBUG
+        log_str("[STW] [DTR] write information calculated", LOG_DEBUG);
+      #endif
 
       if(mi < mounted_volumes){
         if(diskstat[i].write.max > 0){
@@ -429,6 +504,10 @@ void draw_stw_disk_tree_right() {
 
       }
 
+      #ifdef DEBUG
+        log_str("[STW] [DTR] write information printed", LOG_DEBUG);
+      #endif
+
       if(mi < mounted_volumes) { STW_WPRINTLN_RIGHT("|  "); }
     }else if(diskstat[i].read.max > 0 || diskstat[i].write.max > 0){
       diskstat[i].read.max  = 0;
@@ -442,9 +521,17 @@ void draw_stw_disk_tree_right() {
       }
     }
   }
+
+  #ifdef DEBUG
+    log_str("[STW] leaving [DTR]", LOG_DEBUG);
+  #endif
 }
 
 void draw_stw_disk_tree_left() {
+
+  #ifdef DEBUG
+    log_str("[STW] disk tree left [DTL]", LOG_DEBUG);
+  #endif
 
   char stwbuffer[100], ebuf[5][20], ebuf2[5][20], buff2[100], *tmp_ptr, *tmp_ptr2;
   int i, countdisks, mj, mi = 0, len;
@@ -453,19 +540,38 @@ void draw_stw_disk_tree_left() {
     if(!disks[i].active) break;
   
   countdisks = i;
+
+  #ifdef DEBUG
+    log_str("[STW] [DTL] values initialized", LOG_DEBUG);
+  #endif
   
   wprintln("");
   sprintf(stwbuffer,"Volumes mounted:  %d  of  %d  Disks",mounted_volumes,countdisks);
   wprintln(stwbuffer);
   wprintln("  |");
+
+  #ifdef DEBUG
+    char log_buff[256];
+    log_str("[STW] [DTL] caption printed", LOG_DEBUG);
+  #endif
+
   for(i = 0; i < MAXPARTITIONS; i++){
     if(!disks[i].active) break;
-    
+
+    #ifdef DEBUG
+      sprintf(log_buff, "[STW] [DTL] processing disk %d of %d", i, countdisks);
+      log_str(log_buff, LOG_DEBUG);
+    #endif
   
     if(disks[i].mountpoint != NULL){
       mi++;
       sprintf(stwbuffer,"  +--%s  @  %s", disks[i].path, disks[i].mountpoint);  
       wprintln(stwbuffer);
+
+      #ifdef DEBUG
+        log_str("[STW] [DTL] mountpoint printed", LOG_DEBUG);
+      #endif
+
       if(mi < mounted_volumes) wprintln("  |    |");
       else wprintln("       |");
 
@@ -475,12 +581,19 @@ void draw_stw_disk_tree_left() {
       if(mi < mounted_volumes) wprintln("  |         |");
       else wprintln("            |");
 
+      #ifdef DEBUG
+        log_str("[STW] [DTL] usage printed", LOG_DEBUG);
+      #endif
+
       human_readable_disk(disks[i].avil, &ebuf[0]);
       human_readable_disk(disks[i].total, &ebuf[1]);
       if(mi < mounted_volumes) sprintf(stwbuffer,"  |         +--free:  %s / %s  -  %d%c", ebuf[0], ebuf[1], (int)(disks[i].pavil*100),'%');
       else sprintf(stwbuffer,"            +--free:  %s / %s  -  %d%c", ebuf[0], ebuf[1], (int)(disks[i].pavil*100),'%');
       wprintln(stwbuffer);
 
+      #ifdef DEBUG
+        log_str("[STW] [DTL] free space printed", LOG_DEBUG);
+      #endif
 
       /****** RAED *****/
 
@@ -491,6 +604,10 @@ void draw_stw_disk_tree_left() {
       human_readable(disks[i].between.read, False, &ebuf[1]);
       human_readable(diskstat[i].read.max, False, &ebuf[2]);
       human_readable_disk(diskstat[i].readges, &ebuf[3]);
+
+      #ifdef DEBUG
+        log_str("[STW] [DTL] read information calculated", LOG_DEBUG);
+      #endif
 
       if(mi < mounted_volumes){
         if(diskstat[i].read.max > 0){
@@ -538,6 +655,9 @@ void draw_stw_disk_tree_left() {
 
       }
 
+      #ifdef DEBUG
+        log_str("[STW] [DTL] read information printed", LOG_DEBUG);
+      #endif
 
       /****** WRITE *****/
 
@@ -548,6 +668,10 @@ void draw_stw_disk_tree_left() {
       human_readable(disks[i].between.write, False, &ebuf[1]);
       human_readable(diskstat[i].write.max, False, &ebuf[2]);
       human_readable_disk(diskstat[i].writeges, &ebuf[3]);
+
+      #ifdef DEBUG
+        log_str("[STW] [DTL] write information calculated", LOG_DEBUG);
+      #endif
 
       if(mi < mounted_volumes){
         if(diskstat[i].write.max > 0){
@@ -592,6 +716,10 @@ void draw_stw_disk_tree_left() {
 
       }
 
+      #ifdef DEBUG
+        log_str("[STW] [DTL] write information printed", LOG_DEBUG);
+      #endif
+
       if(mi < mounted_volumes) wprintln("  |");
     }else if(diskstat[i].read.max > 0 || diskstat[i].write.max > 0){
       diskstat[i].read.max  = 0;
@@ -605,9 +733,17 @@ void draw_stw_disk_tree_left() {
       }
     }
   }
+
+  #ifdef DEBUG
+    log_str("[STW] leaving [DTL]", LOG_DEBUG);
+  #endif
 }
 
 void draw_stw_disk_block() {
+
+  #ifdef DEBUG
+    log_str("[STW] disk block [DB]", LOG_DEBUG);
+  #endif
 
   char stwbuffer[100], ebuf[5][20], ebuf2[5][20], buff2[100], *tmp_ptr, *tmp_ptr2;
   int i, countdisks, mj, mi = 0, len;
@@ -617,15 +753,34 @@ void draw_stw_disk_block() {
   
   countdisks = i;
   
+  #ifdef DEBUG
+    log_str("[STW] [DB] values initialized", LOG_DEBUG);
+  #endif
+
   wprintln("");
   sprintf(stwbuffer,"Volumes mounted:  %d  of  %d  Disks",mounted_volumes,countdisks);
   wprintln(stwbuffer);
   wprintln(diskstat_utils.line_seperator); 
+
+  #ifdef DEBUG
+    char log_buff[256];
+    log_str("[STW] [DB] caption printed", LOG_DEBUG);
+  #endif
+
   for(i = 0; i < MAXPARTITIONS; i++){
     if(!disks[i].active) break;
-    
+
+    #ifdef DEBUG
+      sprintf(log_buff, "[STW] [DB] processing disk %d of %d", i, countdisks);
+      log_str(log_buff, LOG_DEBUG);
+    #endif
   
     if(disks[i].mountpoint != NULL){
+
+      #ifdef DEBUG
+        sprintf(log_buff, "[STW] [DB] processing mountpoint %s", disks[i].mountpoint);
+        log_str(log_buff, LOG_DEBUG);
+      #endif
 
       // path + mountpoint
       tmp_ptr = let_str_fitt_to(stwbuffer, disks[i].path, diskstat_utils.max_chrs_per_halfln, strlen(disks[i].path));
@@ -633,6 +788,10 @@ void draw_stw_disk_block() {
       stwwrite.xc = screenWidth - gappx - status_win_width / 2; // set cursor to half
       tmp_ptr = let_str_fitt_to(stwbuffer, disks[i].mountpoint, diskstat_utils.max_chrs_per_halfln, strlen(disks[i].path));
       wprintln(tmp_ptr);
+
+      #ifdef DEBUG
+        log_str("[STW] [DB] mountpoint printed", LOG_DEBUG);
+      #endif
 
       // usage
       //wprintcol(disks[i].pused, status_win_width / 2 - gappx, 0.65, 2);
@@ -644,6 +803,10 @@ void draw_stw_disk_block() {
       stwwrite.xc = screenWidth - gappx - status_win_width / 2; // set cursor to half
       wprintcolln(disks[i].pused, status_win_width / 2 - gappx, 0.65, 2);
 
+      #ifdef DEBUG
+        log_str("[STW] [DB] space usage printed", LOG_DEBUG);
+      #endif
+
       // read write
 
       // calculation inforamtions and make it readable
@@ -654,6 +817,10 @@ void draw_stw_disk_block() {
       human_readable(diskstat[i].read.max, False, &ebuf[2]);
       human_readable_disk(diskstat[i].readges, &ebuf[3]);
 
+      #ifdef DEBUG
+        log_str("[STW] [DB] read information calculated", LOG_DEBUG);
+      #endif
+
       diskstat[i].writeges += disks[i].between.write;
       calc_timline_max(&diskstat[i].write, disks[i].between.write, diskstat[i].length);
       human_readable_disk(disks[i].now.write, &ebuf2[0]);
@@ -661,11 +828,19 @@ void draw_stw_disk_block() {
       human_readable(diskstat[i].write.max, False, &ebuf2[2]);
       human_readable_disk(diskstat[i].writeges, &ebuf2[3]);
 
+      #ifdef DEBUG
+        log_str("[STW] [DB] write information calculated", LOG_DEBUG);
+      #endif
+
       sprintf(stwbuffer, "%s%s / %s", diskstat_utils.readed_prefix, ebuf[3], ebuf[0]);
       wprint(stwbuffer);
       stwwrite.xc = screenWidth - gappx - status_win_width / 2; // set cursor to half
       sprintf(stwbuffer, "%s%s / %s", diskstat_utils.written_prefix, ebuf2[3], ebuf2[0]);
       wprintln(stwbuffer);
+
+      #ifdef DEBUG
+        log_str("[STW] [DB] read and write information printed", LOG_DEBUG);
+      #endif
 
       if(diskstat[i].read.max > 0 || diskstat[i].write.max > 0){
         sprintf(stwbuffer, "%s%s @ %s", diskstat_utils.read_prefix, ebuf[1], ebuf[2]);
@@ -689,6 +864,9 @@ void draw_stw_disk_block() {
 
       }
 
+      #ifdef DEBUG
+        log_str("[STW] [DB] read and write timeline printed", LOG_DEBUG);
+      #endif
 
       // line seperator
       wprintln(diskstat_utils.line_seperator); 
@@ -705,10 +883,17 @@ void draw_stw_disk_block() {
       }
     }
   }
+
+  #ifdef DEBUG
+    log_str("[STW] leaving [DB]", LOG_DEBUG);
+  #endif
 }
 
 void drawstw()
 {
+  #ifdef DEBUG
+    log_str("starting to draw statuswin [STW]", LOG_DEBUG);
+  #endif
 
   // set Coordinates for main info
   stwwrite.xs = stwwrite.xc  = gappx;
@@ -716,20 +901,35 @@ void drawstw()
   stwwrite.xe = stwwrite.w = stw.w - gappx;
   stwwrite.ye = stwwrite.h = stw.h;
 
+  #ifdef DEBUG
+    log_str("[STW] coordinates setted", LOG_DEBUG);
+  #endif
+
   // clear
   XCopyArea(dpy, background, stw.drawable, stw.gc, 0, 0, stw.w, stw.h, 0, 0 );
   stwwrite.xc = stwwrite.xs;
   stwwrite.yc = stwwrite.ys;
   
+  #ifdef DEBUG
+    log_str("[STW] arrea cleard", LOG_DEBUG);
+  #endif
 
   // draw main info
   draw_stw_main_info();
+
+  #ifdef DEBUG
+    log_str("[STW] main info drawn", LOG_DEBUG);
+  #endif
 
   // set Coordinates for disk
   stwwrite.xs = stwwrite.xc  = screenWidth - gappx - status_win_width;// TODO Statuswin pos and size to config.h
   stwwrite.ys = stwwrite.yc = (stw.font.height + gappx);
   stwwrite.xe = stwwrite.w = stw.w - gappx;
   stwwrite.ye = stwwrite.h = stw.h;
+
+  #ifdef DEBUG
+    log_str("[STW] coordinates set to disk", LOG_DEBUG);
+  #endif
 
   // draw disk
   switch (stw_disk_verbose) {
@@ -744,8 +944,16 @@ void drawstw()
       break;
 
   }
+
+  #ifdef DEBUG
+    log_str("[STW] disk drawn", LOG_DEBUG);
+  #endif
                                           
   XCopyArea(dpy, stw.drawable, selmon->statuswin, stw.gc, 0, 0, stw.w, stw.h, 0, 0 );
+
+  #ifdef DEBUG
+    log_str("[STW] statuswin drawn", LOG_DEBUG);
+  #endif
 }
 
 void setup_stw()
@@ -825,103 +1033,101 @@ void setup_stw_disks() {
 
     int i, j;
 
-    if (stw_disk_verbose == 5) {
-      status_win_width = 266 - gappx; // TODO stw own gappx => config.h
-    } else {
-
-      // calculate minimum status_win_width
-      const char *num[] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
-      const char *byte_per_sec[] = { "B/s","KB/s","MB/s" };
-      const char *byte[] = { "B","KB","MB","GB","TB" };
-      char max_numi, max_byte_per_seci, max_bytei;
+    // calculate minimum status_win_width
+    const char *num[] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+    const char *byte_per_sec[] = { "B/s","KB/s","MB/s" };
+    const char *byte[] = { "B","KB","MB","GB","TB" };
+    char max_numi, max_byte_per_seci, max_bytei;
  
  
-      for (i = 0, max_numi = 0; i < 10; i++) {
-        if (max_numi < textnw(num[i], 1)) 
-          max_numi = textnw(num[i], 1);
-      }
+    for (i = 0, max_numi = 0; i < 10; i++) {
+      if (max_numi < textnw(num[i], 1)) 
+        max_numi = textnw(num[i], 1);
+    }
  
-      for (i = 0, max_byte_per_seci = 0; i < 3; i++) {
-        if (max_byte_per_seci < textnw(byte_per_sec[i], strlen(byte_per_sec[i])))
-          max_byte_per_seci = textnw(byte_per_sec[i], strlen(byte_per_sec[i]));
-      }
+    for (i = 0, max_byte_per_seci = 0; i < 3; i++) {
+      if (max_byte_per_seci < textnw(byte_per_sec[i], strlen(byte_per_sec[i])))
+        max_byte_per_seci = textnw(byte_per_sec[i], strlen(byte_per_sec[i]));
+    }
  
-      for (i = 0, max_bytei = 0; i < 5; i++) {
-        if (max_bytei < textnw(byte[i], strlen(byte[i])))
-          max_bytei = textnw(byte[i], strlen(byte[i]));
-      }
+    for (i = 0, max_bytei = 0; i < 5; i++) {
+      if (max_bytei < textnw(byte[i], strlen(byte[i])))
+        max_bytei = textnw(byte[i], strlen(byte[i]));
+    }
  
-      // maximum minimal printable text is "000 MB/s @ 000 MB/s"
-      diskstat_utils.min_status_win_width = (textnw("  @  ", 5) + 6 * max_numi + 2 * max_byte_per_seci) * 2 + gappx;
-      diskstat_utils.readed_width         = (textnw("  /  ", 5) + 6 * max_numi + 2 * max_bytei) * 2 + gappx;
-      diskstat_utils.free_width           = (textnw("  /  ", 5) + 6 * max_numi + 2 * max_bytei) + gappx / 2;
+    // maximum minimal printable text is "000 MB/s @ 000 MB/s"
+    diskstat_utils.min_status_win_width = (textnw("  @  ", 5) + 6 * max_numi + 2 * max_byte_per_seci) * 2 + gappx;
+    diskstat_utils.readed_width         = (textnw("  /  ", 5) + 6 * max_numi + 2 * max_bytei) * 2 + gappx;
+    diskstat_utils.free_width           = (textnw("  /  ", 5) + 6 * max_numi + 2 * max_bytei) + gappx / 2;
  
-      if (status_win_width < diskstat_utils.min_status_win_width) {
-        char logbuff[64];
-        sprintf(logbuff, "status_win_width (%d) to smal => set to %d", status_win_width, diskstat_utils.min_status_win_width);
-        log_str(logbuff, LOG_WARNING);
+    if (status_win_width < diskstat_utils.min_status_win_width) {
+      char logbuff[64];
+      sprintf(logbuff, "status_win_width (%d) to smal => set to %d", status_win_width, diskstat_utils.min_status_win_width);
+      log_str(logbuff, LOG_WARNING);
  
-        status_win_width = diskstat_utils.min_status_win_width;
-      } 
+      status_win_width = diskstat_utils.min_status_win_width;
+    } 
  
-      // init prefixes
-      sprintf(diskstat_utils.read_prefix, "%s", "read: ");
-      sprintf(diskstat_utils.write_prefix,"%s", "write: ");
+    // init prefixes
+    sprintf(diskstat_utils.read_prefix, "%s", "read: ");
+    sprintf(diskstat_utils.write_prefix,"%s", "write: ");
  
-      int max_prefix = textnw(diskstat_utils.write_prefix, strlen(diskstat_utils.write_prefix))
-                        + textnw(diskstat_utils.read_prefix, strlen(diskstat_utils.read_prefix));
- 
-      diskstat_utils.max_status_win_width = max_prefix + diskstat_utils.min_status_win_width;
- 
-      if (status_win_width > diskstat_utils.max_status_win_width) {
-        char logbuff[64];
-        sprintf(logbuff, "status_win_width (%d) to big => set to %d", status_win_width, diskstat_utils.min_status_win_width);
-        log_str(logbuff, LOG_WARNING);
- 
-        status_win_width = diskstat_utils.max_status_win_width;
-      } 
- 
- 
-      if ((max_prefix + diskstat_utils.min_status_win_width) > status_win_width) {
-        printf(diskstat_utils.read_prefix, "%s", "r: ");
-        sprintf(diskstat_utils.write_prefix,"%s", "w: ");
- 
-        max_prefix = textnw(diskstat_utils.write_prefix, strlen(diskstat_utils.write_prefix))
+    int max_prefix = textnw(diskstat_utils.write_prefix, strlen(diskstat_utils.write_prefix))
                       + textnw(diskstat_utils.read_prefix, strlen(diskstat_utils.read_prefix));
  
-        if ((max_prefix + diskstat_utils.min_status_win_width) > status_win_width) {
-          diskstat_utils.read_prefix[0]  = (char) 0;
-          diskstat_utils.write_prefix[0] = (char) 0;
-        }
+    diskstat_utils.max_status_win_width = max_prefix + diskstat_utils.min_status_win_width;
+ 
+    if (status_win_width > diskstat_utils.max_status_win_width) {
+      char logbuff[64];
+      sprintf(logbuff, "status_win_width (%d) to big => set to %d", status_win_width, diskstat_utils.min_status_win_width);
+      log_str(logbuff, LOG_WARNING);
+ 
+      status_win_width = diskstat_utils.max_status_win_width;
+    } 
+ 
+ 
+    if ((max_prefix + diskstat_utils.min_status_win_width) > status_win_width) {
+      printf(diskstat_utils.read_prefix, "%s", "r: ");
+      sprintf(diskstat_utils.write_prefix,"%s", "w: ");
+ 
+      max_prefix = textnw(diskstat_utils.write_prefix, strlen(diskstat_utils.write_prefix))
+                    + textnw(diskstat_utils.read_prefix, strlen(diskstat_utils.read_prefix));
+ 
+      if ((max_prefix + diskstat_utils.min_status_win_width) > status_win_width) {
+        diskstat_utils.read_prefix[0]  = (char) 0;
+        diskstat_utils.write_prefix[0] = (char) 0;
       }
- 
-      sprintf(diskstat_utils.readed_prefix, "%s", "readed: ");
-      sprintf(diskstat_utils.written_prefix,"%s", "written: ");
- 
-      int max2_prefix = textnw(diskstat_utils.written_prefix, strlen(diskstat_utils.written_prefix))
-                         + textnw(diskstat_utils.readed_prefix, strlen(diskstat_utils.readed_prefix));
- 
-      if ((max2_prefix + diskstat_utils.readed_width) > status_win_width) {
-        sprintf(diskstat_utils.readed_prefix, "%s", "r: ");
-        sprintf(diskstat_utils.written_prefix,"%s", "w: ");
-      }
- 
-      sprintf(diskstat_utils.free_prefix, "%s", "free: ");
-      int free_prefix_len = textnw(diskstat_utils.free_prefix, strlen(diskstat_utils.free_prefix));
- 
-      if ((free_prefix_len + diskstat_utils.free_width) * 2 > status_win_width) {
-        diskstat_utils.free_prefix[0]  = (char) 0;
-      }
- 
- 
-      #ifdef INFO
-        char logbuf[250];
-        sprintf(logbuf, "Status window size is between [%d, %d]", diskstat_utils.min_status_win_width,
-                  diskstat_utils.max_status_win_width);
-        log_str(logbuf, LOG_INFO);
-      #endif
- 
     }
+ 
+    sprintf(diskstat_utils.readed_prefix, "%s", "readed: ");
+    sprintf(diskstat_utils.written_prefix,"%s", "written: ");
+ 
+    int max2_prefix = textnw(diskstat_utils.written_prefix, strlen(diskstat_utils.written_prefix))
+                       + textnw(diskstat_utils.readed_prefix, strlen(diskstat_utils.readed_prefix));
+ 
+    if ((max2_prefix + diskstat_utils.readed_width) > status_win_width) {
+      sprintf(diskstat_utils.readed_prefix, "%s", "r: ");
+      sprintf(diskstat_utils.written_prefix,"%s", "w: ");
+    }
+ 
+    sprintf(diskstat_utils.free_prefix, "%s", "free: ");
+    int free_prefix_len = textnw(diskstat_utils.free_prefix, strlen(diskstat_utils.free_prefix));
+ 
+    if ((free_prefix_len + diskstat_utils.free_width) * 2 > status_win_width) {
+      diskstat_utils.free_prefix[0]  = (char) 0;
+    }
+ 
+ 
+    #ifdef INFO
+      char logbuf[250];
+      sprintf(logbuf, "Status window size is between [%d, %d]", diskstat_utils.min_status_win_width,
+                diskstat_utils.max_status_win_width);
+      log_str(logbuf, LOG_INFO);
+    #endif
+ 
+
+    if (stw_disk_verbose == 5)
+      status_win_width = 266 - gappx; // TODO stw own gappx => config.h
 
     // init diskstat (Distk Timelines and stuff)
     for(i = 0; i < MAXPARTITIONS;i++){
