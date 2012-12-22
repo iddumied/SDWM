@@ -28,6 +28,7 @@ void togglestw();
 void draw_stw_main_info();
 void draw_stw_disk_block();
 void draw_stw_disk_tree_left();
+void draw_stw_disk_tree_right();
 
 
 void togglestw(){
@@ -43,6 +44,9 @@ void togglestw(){
 
 
 #include "write.c"
+#define STW_SET_POS(X) stwwrite.xc = screenWidth - gappx - TEXTW(X)
+#define STW_WPRINT_RIGHT(X) sprintf(stwbuffer, X); STW_SET_POS(stwbuffer); wprint(stwbuffer)
+#define STW_WPRINTLN_RIGHT(X) sprintf(stwbuffer, X); STW_SET_POS(stwbuffer); wprintln(stwbuffer)
 
 void calc_timline_max(Timeline *timeline, int bytes, int length)
 {
@@ -250,6 +254,196 @@ void draw_stw_main_info() {
 
 }
 
+void draw_stw_disk_tree_right() {
+
+  char stwbuffer[100], ebuf[5][20], ebuf2[5][20], buff2[100], *tmp_ptr, *tmp_ptr2;
+  int i, countdisks, mj, mi = 0, len;
+
+  for(i = 0;i < MAXPARTITIONS;i++)
+    if(!disks[i].active) break;
+  
+  countdisks = i;
+  
+  wprintln("");
+  sprintf(stwbuffer,"Volumes mounted:  %d  of  %d  Disks",mounted_volumes,countdisks);
+  STW_SET_POS(stwbuffer);
+  wprintln(stwbuffer);
+  STW_WPRINTLN_RIGHT("|  ");
+  for(i = 0; i < MAXPARTITIONS; i++){
+    if(!disks[i].active) break;
+    
+  
+    if(disks[i].mountpoint != NULL){
+      mi++;
+      sprintf(stwbuffer,"%s  @  %s--+  ", disks[i].path, disks[i].mountpoint);  
+      STW_SET_POS(stwbuffer);
+      wprintln(stwbuffer);
+      if(mi < mounted_volumes) { STW_WPRINTLN_RIGHT("|    |  "); }
+      else { STW_WPRINTLN_RIGHT("       |"); }
+
+      if(mi < mounted_volumes) { 
+        sprintf(stwbuffer, "  :usage--+    |  ");
+        stwwrite.xc = len = screenWidth - gappx - TEXTW(stwbuffer);
+        wprint(stwbuffer);
+        stwwrite.xc = len - 100;
+      }
+      else { 
+        sprintf(stwbuffer,"  :usage--+       "); 
+        stwwrite.xc = len = screenWidth - gappx - TEXTW(stwbuffer);
+        wprint(stwbuffer);
+        stwwrite.xc = len - 100;
+      }
+      wprintcolln(disks[i].pused, 100, 0.65, 2 );
+      if(mi < mounted_volumes) { STW_WPRINTLN_RIGHT("|         |  "); }
+      else { STW_WPRINTLN_RIGHT("|  "); }
+
+      human_readable_disk(disks[i].avil, &ebuf[0]);
+      human_readable_disk(disks[i].total, &ebuf[1]);
+      if(mi < mounted_volumes) {
+        sprintf(stwbuffer,"%s / %s  -  %d%c :free--+         |  ", ebuf[0], ebuf[1], (int)(disks[i].pavil*100),'%');
+        STW_SET_POS(stwbuffer);
+      }
+      else {
+        sprintf(stwbuffer,"%s / %s  -  %d%c :free--+            ", ebuf[0], ebuf[1], (int)(disks[i].pavil*100),'%');
+        STW_SET_POS(stwbuffer);
+      }
+
+      wprintln(stwbuffer);
+
+
+      /****** RAED *****/
+
+      // calculation inforamtions and make it readable
+      diskstat[i].readges += disks[i].between.read;
+      calc_timline_max(&diskstat[i].read, disks[i].between.read, diskstat[i].length);
+      human_readable_disk(disks[i].now.read, &ebuf[0]);
+      human_readable(disks[i].between.read, False, &ebuf[1]);
+      human_readable(diskstat[i].read.max, False, &ebuf[2]);
+      human_readable_disk(diskstat[i].readges, &ebuf[3]);
+
+      if(mi < mounted_volumes){
+        if(diskstat[i].read.max > 0){
+          sprintf(stwbuffer,"%s @ %s  :read--+         |  ", ebuf[1], ebuf[2]);
+          STW_SET_POS(stwbuffer);
+          wprintln(stwbuffer);
+
+          STW_WPRINTLN_RIGHT("|    |         |  ");
+          STW_WPRINT_RIGHT("---+    |         |  ");
+
+          // printing timeline if max > 0
+          wprinttimeline(disks[i].between.read, diskstat[i].length, 1, &diskstat[i].read, 
+                        stw.sbar[SBarLine], stw.sbar[SBarCpuPoint], diskstat[i].read.max);
+        
+          sprintf(stwbuffer,"   %s",ebuf[3]);
+          wprintln(stwbuffer);
+          STW_WPRINTLN_RIGHT("|         |  ");
+
+        }else{
+          diskstat[i].readges = 0; // clearing history
+          sprintf(stwbuffer,"%s :readed--+         |  ",ebuf[0]);
+          STW_SET_POS(stwbuffer);
+          wprintln(stwbuffer);
+        }
+
+      }else{
+        if(diskstat[i].read.max > 0){
+          sprintf(stwbuffer,"%s @ %s  :read--+            ", ebuf[1], ebuf[2]);
+          STW_SET_POS(stwbuffer);
+          wprintln(stwbuffer);
+    
+          STW_WPRINTLN_RIGHT("|    |            ");
+          STW_WPRINT_RIGHT("---+    |            ");
+
+          // printing timeline if max > 0
+          wprinttimeline(disks[i].between.read, diskstat[i].length, 1, &diskstat[i].read, 
+                        stw.sbar[SBarLine], stw.sbar[SBarCpuPoint], diskstat[i].read.max);
+          
+          sprintf(stwbuffer,"   %s",ebuf[3]);
+          wprintln(stwbuffer);
+          STW_WPRINTLN_RIGHT("|            ");
+
+        }else{
+          diskstat[i].readges = 0; // clearing history
+          sprintf(stwbuffer,"%s :readed--+            ",ebuf[0]);
+          STW_SET_POS(stwbuffer);
+          wprintln(stwbuffer);
+        }
+
+      }
+
+
+      /****** WRITE *****/
+
+      // calculation inforamtions and make it readable
+      diskstat[i].writeges += disks[i].between.write;
+      calc_timline_max(&diskstat[i].write, disks[i].between.write, diskstat[i].length);
+      human_readable_disk(disks[i].now.write, &ebuf[0]);
+      human_readable(disks[i].between.write, False, &ebuf[1]);
+      human_readable(diskstat[i].write.max, False, &ebuf[2]);
+      human_readable_disk(diskstat[i].writeges, &ebuf[3]);
+
+      if(mi < mounted_volumes){
+        if(diskstat[i].write.max > 0){
+          sprintf(stwbuffer,"%s @ %s  :write--+         |  ", ebuf[1], ebuf[2]);
+          STW_SET_POS(stwbuffer);
+          wprintln(stwbuffer);
+
+          STW_WPRINTLN_RIGHT("|    |         |  ");
+          STW_WPRINT_RIGHT("---+    |         |  ");
+
+          // printing timeline if max > 0
+          wprinttimeline(disks[i].between.write, diskstat[i].length, 1, &diskstat[i].write, 
+                        stw.sbar[SBarLine], stw.sbar[SBarCpuPoint], diskstat[i].write.max);
+        
+          sprintf(stwbuffer,"   %s",ebuf[3]);
+          wprintln(stwbuffer);
+
+        }else{
+          diskstat[i].writeges = 0; // clearing history
+          sprintf(stwbuffer,"%s :written--+         |  ",ebuf[0]);
+          STW_SET_POS(stwbuffer);
+          wprintln(stwbuffer);
+        }
+
+      }else{
+        if(diskstat[i].write.max > 0){
+          sprintf(stwbuffer,"%s @ %s  :write--+            ", ebuf[1], ebuf[2]);
+          STW_SET_POS(stwbuffer);
+          wprintln(stwbuffer);
+    
+          STW_WPRINTLN_RIGHT("|    |            ");
+          STW_WPRINT_RIGHT("---+    |            ");
+
+          // printing timeline if max > 0
+          wprinttimeline(disks[i].between.write, diskstat[i].length, 1, &diskstat[i].write, 
+                        stw.sbar[SBarLine], stw.sbar[SBarCpuPoint], diskstat[i].write.max);
+          
+          sprintf(stwbuffer,"   %s",ebuf[3]);
+          wprintln(stwbuffer);
+        }else{
+          diskstat[i].writeges = 0; // clearing history
+          sprintf(stwbuffer,"%s :written--+            ",ebuf[0]);
+          STW_SET_POS(stwbuffer);
+          wprintln(stwbuffer);
+        }
+
+      }
+
+      if(mi < mounted_volumes) { STW_WPRINTLN_RIGHT("|  "); }
+    }else if(diskstat[i].read.max > 0 || diskstat[i].write.max > 0){
+      diskstat[i].read.max  = 0;
+      diskstat[i].write.max = 0;
+      diskstat[i].readges   = 0;
+      diskstat[i].writeges   = 0;
+
+      for(mj = 0;mj < diskstat[i].length;mj++){
+        diskstat[i].read.bytes[mj]  = 0;
+        diskstat[i].write.bytes[mj] = 0;
+      }
+    }
+  }
+}
+
 void draw_stw_disk_tree_left() {
 
   char stwbuffer[100], ebuf[5][20], ebuf2[5][20], buff2[100], *tmp_ptr, *tmp_ptr2;
@@ -372,7 +566,7 @@ void draw_stw_disk_tree_left() {
 
         }else{
           diskstat[i].writeges = 0; // clearing history
-          sprintf(stwbuffer,"  |         +--writen: %s",ebuf[0]);
+          sprintf(stwbuffer,"  |         +--written: %s",ebuf[0]);
           wprintln(stwbuffer);
         }
 
@@ -392,7 +586,7 @@ void draw_stw_disk_tree_left() {
           wprintln(stwbuffer);
         }else{
           diskstat[i].writeges = 0; // clearing history
-          sprintf(stwbuffer,"            +--writen: %s",ebuf[0]);
+          sprintf(stwbuffer,"            +--written: %s",ebuf[0]);
           wprintln(stwbuffer);
         }
 
@@ -403,7 +597,7 @@ void draw_stw_disk_tree_left() {
       diskstat[i].read.max  = 0;
       diskstat[i].write.max = 0;
       diskstat[i].readges   = 0;
-      diskstat[i].writeges   = 0;
+      diskstat[i].writeges  = 0;
 
       for(mj = 0;mj < diskstat[i].length;mj++){
         diskstat[i].read.bytes[mj]  = 0;
@@ -540,7 +734,10 @@ void drawstw()
   // draw disk
   switch (stw_disk_verbose) {
     case 5: 
-      draw_stw_disk_tree_left();
+      if (stw_disk_tree_right) 
+        draw_stw_disk_tree_right();
+      else
+        draw_stw_disk_tree_left();
       break;
     case 4:
       draw_stw_disk_block();
