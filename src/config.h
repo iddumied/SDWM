@@ -44,7 +44,7 @@ static Key keys[] = {
   { 0,                            XfnBacklightUp,   set_backlight,    {.i = +1 } },
   { 0,                            XfnBacklightDown, set_backlight,    {.i = -1 } }, 
   { 0,                            XfnWlan,          toogle_wlan,      {} },
-  { 0,                            XK_Escape,        vimcmd,           {} },
+  { MODKEY,                       XK_Escape,        vimcmd,           {} },
   { MODKEY,                       XK_y,             incnmaster,       {.i = +1 } },
   { MODKEY,                       XK_x,             incnmaster,       {.i = -1 } },
   { MODKEY,                       XK_z,             setnmaster,       {.i =  1 } },
