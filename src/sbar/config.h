@@ -3,6 +3,7 @@
 #define MAX_TABS 9
 #include "typedef.c"
 
+#ifdef NF310_A01
 // order of SBar Status Symbols. first = right
 SBarStatusSymbol sbar_status_symbols[] = {
   //  function      active
@@ -15,6 +16,20 @@ SBarStatusSymbol sbar_status_symbols[] = {
   { draw_audio,     True },
   { draw_net,       True },
 };
+#else
+// order of SBar Status Symbols. first = right
+SBarStatusSymbol sbar_status_symbols[] = {
+  //  function      active
+  { draw_time,      True },
+  { draw_battery,   False },
+  { draw_uptime,    True },
+  { draw_memory,    True },
+  { draw_termal,    False },
+  { draw_backlight, False },
+  { draw_audio,     True },
+  { draw_net,       True },
+};
+#endif
 // must be in the same order!
 enum { DrawTime, DrawBattery, DrawUptime, DrawMemory, DrawTermal, DrawBacklight, DrawAudio, DrawNet, DrawLast };
 

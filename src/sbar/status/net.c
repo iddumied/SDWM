@@ -1,4 +1,7 @@
 #ifdef DEBUG_NET
+#ifndef NF310_A01
+#define NF310_A01
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -45,7 +48,10 @@ typedef struct {
   int linkcur, linkmax, bytespersec;
   Bool wireless;
   double strength;
-  Bool online, easy_online, state_unknowen;
+  Bool online, state_unknowen;
+  #ifdef NF310_A01
+  Bool easy_online;
+  #endif
   char name[25];
   NetTimeline timeline;
 } Interface;
@@ -66,7 +72,9 @@ void setup_net();
 void get_net_statistic();
 void calculate_wlan_strength();
 void get_interface_stat();
+#ifdef NF310_A01
 void toogle_wlan();
+#endif
 Interface *interface_by_name(char *name);
 Bool net_lan_online();
 int net_lan_bytes_per_sec();
@@ -584,29 +592,31 @@ void get_interface_stat()
     buffer[0] = '\x00';
   }
   
-  fp = open("/proc/easy_wifi_kill", O_RDONLY);
-  if (fp == -1){
-        log_str("failed to read /proc/easy_wifi_kill", LOG_WARNING);
-        #ifndef DEBUG_NET
-        sbar_status_symbols[DrawNet].active = False;
-        #endif
-        return;
-  }
-
-  if (read(fp, buffer, 1) != -1) {
-    for (i = 0; i < net.num_interfaces; i++) {
-      if (!strcmp(net.interfaces[i].name, "wlan0")) {
-
-        if(buffer[0] != '0'){ //up
-          net.interfaces[i].easy_online = True;
-        }else{ //down
-          net.interfaces[i].easy_online = False;
-        }
-        break;
-      }
-
+  #ifdef NF310_A01
+    fp = open("/proc/easy_wifi_kill", O_RDONLY);
+    if (fp == -1){
+          log_str("failed to read /proc/easy_wifi_kill", LOG_WARNING);
+          #ifndef DEBUG_NET
+          sbar_status_symbols[DrawNet].active = False;
+          #endif
+          return;
     }
-  }
+ 
+    if (read(fp, buffer, 1) != -1) {
+      for (i = 0; i < net.num_interfaces; i++) {
+        if (!strcmp(net.interfaces[i].name, "wlan0")) {
+ 
+          if(buffer[0] != '0'){ //up
+            net.interfaces[i].easy_online = True;
+          }else{ //down
+            net.interfaces[i].easy_online = False;
+          }
+          break;
+        }
+ 
+      }
+    }
+  #endif
   
   net.connected = False;
   for (i = 0; i < net.num_interfaces; i++) {
@@ -619,6 +629,7 @@ void get_interface_stat()
   close(fp);
 }
 
+#ifdef NF310_A01
 void toogle_wlan()
 {
   #ifndef DEBUG_NET
@@ -652,6 +663,7 @@ void toogle_wlan()
   spawn(&sarg);
   #endif
 }
+#endif
 
 Interface *interface_by_name(char *name) 
 {

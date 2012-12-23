@@ -187,7 +187,11 @@ void draw_stw_main_info() {
       calc_timline_max(&net.interfaces[i].timeline.t, net.interfaces[i].between.transmit.bytes_per_sec, net.timeline_length);
       calc_timline_max(&net.interfaces[i].timeline.r, net.interfaces[i].between.receive.bytes_per_sec, net.timeline_length);
       if(net.interfaces[i].timeline.r.max == 0 && net.interfaces[i].timeline.t.max == 0){                                 
+        #ifdef NF310_A01
         if (net.interfaces[i].online || net.interfaces[i].easy_online)
+        #else
+        if (net.interfaces[i].online)
+        #endif
           wprintln(":  inactive");
         else if (net.interfaces[i].state_unknowen)
           wprintln(":  unknowen");
@@ -235,7 +239,11 @@ void draw_stw_main_info() {
     calc_timline_max(&net.interfaces[i].timeline.t, net.interfaces[i].between.transmit.bytes_per_sec, net.timeline_length);
     calc_timline_max(&net.interfaces[i].timeline.r, net.interfaces[i].between.receive.bytes_per_sec, net.timeline_length);
     if(net.interfaces[i].timeline.r.max == 0 && net.interfaces[i].timeline.t.max == 0){                                 
+      #ifdef NF310_A01
       if (net.interfaces[i].online || net.interfaces[i].easy_online)
+      #else
+      if (net.interfaces[i].online)
+      #endif
         wprintln(":  inactive");
       else if (net.interfaces[i].state_unknowen)
         wprintln(":  unknowen");

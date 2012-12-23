@@ -13,10 +13,14 @@ int draw_net(int y, int pos)
   // calc symbol
   if(!net.connected) {
     symbol = net_sym_offline;
-    if(!(interface_by_name("wlan0")->easy_online))
+    #ifdef NF310_A01
+      if(!(interface_by_name("wlan0")->easy_online))
+        sprintf(buffer_net," down");
+      else 
+        sprintf(buffer_net," of");
+    #else
       sprintf(buffer_net," down");
-    else 
-      sprintf(buffer_net," of");
+    #endif
   } else if(net_lan_online()){
     symbol = net_sym_lan_online;
     human_readable(net_all_bytes_per_sec(), False, buffer_speed);
