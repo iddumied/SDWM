@@ -1,3 +1,4 @@
+#ifdef NF310_A01
 void update_backlight();
 void get_backlight_max();
 void get_backlight_cur();
@@ -135,3 +136,4 @@ void get_backlight_max()
     line = NULL;
     fclose(fp);
 }
+#endif

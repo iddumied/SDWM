@@ -10,6 +10,7 @@
 #include "net.c"
 #include "disk.c"
 
+#ifdef NF310_A01
 // my netbook NF310 Fn-keys
 #define XFnToggleMute 0x1008ff12
 #define XFnAudioUp 0x1008ff13
@@ -18,6 +19,7 @@
 #define XfnBacklightUp 0x1008FF02
 #define XfnBacklightDown 0x1008FF03
 #define XfnWlan 0x1008ff95
+#endif
 
 void setup_status();
 void update_status();
@@ -84,6 +86,7 @@ void update_status()
       #endif
     }
 
+    #ifdef NF310_A01
     if(sbar_status_symbols[DrawBacklight].active) {
       update_backlight();
 
@@ -91,6 +94,7 @@ void update_status()
       log_str("Sucessfully Updated Backlight", LOG_DEBUG);
       #endif
     }
+    #endif
 
     if(sbar_status_symbols[DrawNet].active) {
       update_net();
@@ -160,6 +164,7 @@ void setup_status()
     #endif
   }
   
+  #ifdef NF310_A01
   // setup backlight
   if(sbar_status_symbols[DrawBacklight].active) {
     backlight.on = True;
@@ -168,6 +173,7 @@ void setup_status()
     log_str("Setup Status Backlight", LOG_INFO);
     #endif
   }
+  #endif
 
   // setup cpu
   setup_cpu();

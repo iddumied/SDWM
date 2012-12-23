@@ -104,6 +104,7 @@ int draw_audio(int y, int pos)
   return pos;
 }
 
+#ifdef NF310_A01
 int draw_backlight(int y, int pos)
 {
   int buffer_len;
@@ -143,6 +144,7 @@ int draw_backlight(int y, int pos)
 
   return pos;
 }
+#endif
 
 int draw_termal(int y, int pos)
 {

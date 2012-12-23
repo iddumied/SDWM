@@ -1,5 +1,6 @@
 #define DEBUG
 #define INFO
+#define NF310_A01
 
 /* See LICENSE file for copyright and license details.
  *

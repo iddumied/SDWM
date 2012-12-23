@@ -25,7 +25,6 @@ SBarStatusSymbol sbar_status_symbols[] = {
   { draw_uptime,    True },
   { draw_memory,    True },
   { draw_termal,    False },
-  { draw_backlight, False },
   { draw_audio,     True },
   { draw_net,       True },
 };
