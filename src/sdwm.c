@@ -1133,10 +1133,7 @@ void stw_disk_set_verbose(const char *input) {
 
   stw_disk_verbose = verbose;
 
-  if (stw_disk_verbose == 5)
-    status_win_width = 266 - stw_gappx; 
-  else
-    stw_disk_set_width("stw disk set width max");
+  stw_disk_set_width("stw disk set width max");
 }
 
 

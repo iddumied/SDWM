@@ -337,13 +337,13 @@ void draw_stw_disk_tree_right() {
 
       if(mi < mounted_volumes) { 
         sprintf(stwbuffer, "  :usage--+    |  ");
-        stwwrite.xc = len = screenWidth - gappx - TEXTW(stwbuffer);
+        stwwrite.xc = len = screenWidth - stw_gappx - TEXTW(stwbuffer);
         wprint(stwbuffer);
         stwwrite.xc = len - 100;
       }
       else { 
         sprintf(stwbuffer,"  :usage--+       "); 
-        stwwrite.xc = len = screenWidth - gappx - TEXTW(stwbuffer);
+        stwwrite.xc = len = screenWidth - stw_gappx - TEXTW(stwbuffer);
         wprint(stwbuffer);
         stwwrite.xc = len - 100;
       }
@@ -785,7 +785,7 @@ void draw_stw_disk_block() {
       // path + mountpoint
       tmp_ptr = let_str_fitt_to(stwbuffer, disks[i].path, diskstat_utils.max_chrs_per_halfln, strlen(disks[i].path));
       wprint(tmp_ptr);
-      stwwrite.xc = screenWidth - gappx - status_win_width / 2; // set cursor to half
+      stwwrite.xc = screenWidth - stw_gappx - status_win_width / 2; // set cursor to half
       tmp_ptr = let_str_fitt_to(stwbuffer, disks[i].mountpoint, diskstat_utils.max_chrs_per_halfln, strlen(disks[i].path));
       wprintln(tmp_ptr);
 
@@ -794,88 +794,93 @@ void draw_stw_disk_block() {
       #endif
 
       // usage
-      //wprintcol(disks[i].pused, status_win_width / 2 - gappx, 0.65, 2);
-      //stwwrite.xc += gappx;
-      human_readable_disk(disks[i].avil, &ebuf[0]);
-      human_readable_disk(disks[i].total, &ebuf[1]);
-      sprintf(stwbuffer,"%s%s / %s", diskstat_utils.free_prefix, ebuf[0], ebuf[1]);
-      wprint(stwbuffer);
-      stwwrite.xc = screenWidth - gappx - status_win_width / 2; // set cursor to half
-      wprintcolln(disks[i].pused, status_win_width / 2 - gappx, 0.65, 2);
-
+      if (stw_disk_verbose > 0) {
+        human_readable_disk(disks[i].avil, &ebuf[0]);
+        human_readable_disk(disks[i].total, &ebuf[1]);
+        sprintf(stwbuffer,"%s%s / %s", diskstat_utils.free_prefix, ebuf[0], ebuf[1]);
+        wprint(stwbuffer);
+        stwwrite.xc = screenWidth - stw_gappx - status_win_width / 2; // set cursor to half
+        wprintcolln(disks[i].pused, status_win_width / 2 - stw_gappx, 0.65, 2);
+      }
       #ifdef DEBUG
         log_str("[STW] [DB] space usage printed", LOG_DEBUG);
       #endif
 
       // read write
+      if (stw_disk_verbose > 1 ) {
 
-      // calculation inforamtions and make it readable
-      diskstat[i].readges += disks[i].between.read;
-      calc_timline_max(&diskstat[i].read, disks[i].between.read, diskstat[i].length);
-      human_readable_disk(disks[i].now.read, &ebuf[0]);
-      human_readable(disks[i].between.read, False, &ebuf[1]);
-      human_readable(diskstat[i].read.max, False, &ebuf[2]);
-      human_readable_disk(diskstat[i].readges, &ebuf[3]);
-
-      #ifdef DEBUG
-        log_str("[STW] [DB] read information calculated", LOG_DEBUG);
-      #endif
-
-      diskstat[i].writeges += disks[i].between.write;
-      calc_timline_max(&diskstat[i].write, disks[i].between.write, diskstat[i].length);
-      human_readable_disk(disks[i].now.write, &ebuf2[0]);
-      human_readable(disks[i].between.write, False, &ebuf2[1]);
-      human_readable(diskstat[i].write.max, False, &ebuf2[2]);
-      human_readable_disk(diskstat[i].writeges, &ebuf2[3]);
-
-      #ifdef DEBUG
-        log_str("[STW] [DB] write information calculated", LOG_DEBUG);
-      #endif
-
-      sprintf(stwbuffer, "%s%s / %s", diskstat_utils.readed_prefix, ebuf[3], ebuf[0]);
-      wprint(stwbuffer);
-      stwwrite.xc = screenWidth - gappx - status_win_width / 2; // set cursor to half
-      sprintf(stwbuffer, "%s%s / %s", diskstat_utils.written_prefix, ebuf2[3], ebuf2[0]);
-      wprintln(stwbuffer);
-
-      #ifdef DEBUG
-        log_str("[STW] [DB] read and write information printed", LOG_DEBUG);
-      #endif
-
-      if(diskstat[i].read.max > 0 || diskstat[i].write.max > 0){
-        sprintf(stwbuffer, "%s%s @ %s", diskstat_utils.read_prefix, ebuf[1], ebuf[2]);
+        // calculation inforamtions and make it readable
+        diskstat[i].readges += disks[i].between.read;
+        calc_timline_max(&diskstat[i].read, disks[i].between.read, diskstat[i].length);
+        human_readable_disk(disks[i].now.read, &ebuf[0]);
+        human_readable(disks[i].between.read, False, &ebuf[1]);
+        human_readable(diskstat[i].read.max, False, &ebuf[2]);
+        human_readable_disk(diskstat[i].readges, &ebuf[3]);
+       
+        #ifdef DEBUG
+          log_str("[STW] [DB] read information calculated", LOG_DEBUG);
+        #endif
+       
+        diskstat[i].writeges += disks[i].between.write;
+        calc_timline_max(&diskstat[i].write, disks[i].between.write, diskstat[i].length);
+        human_readable_disk(disks[i].now.write, &ebuf2[0]);
+        human_readable(disks[i].between.write, False, &ebuf2[1]);
+        human_readable(diskstat[i].write.max, False, &ebuf2[2]);
+        human_readable_disk(diskstat[i].writeges, &ebuf2[3]);
+       
+        #ifdef DEBUG
+          log_str("[STW] [DB] write information calculated", LOG_DEBUG);
+        #endif
+       
+        sprintf(stwbuffer, "%s%s / %s", diskstat_utils.readed_prefix, ebuf[3], ebuf[0]);
         wprint(stwbuffer);
-        stwwrite.xc = screenWidth - gappx - status_win_width / 2; // set cursor to half
-        sprintf(stwbuffer, "%s%s @ %s", diskstat_utils.write_prefix, ebuf2[1], ebuf2[2]);
+        stwwrite.xc = screenWidth - stw_gappx - status_win_width / 2; // set cursor to half
+        sprintf(stwbuffer, "%s%s / %s", diskstat_utils.written_prefix, ebuf2[3], ebuf2[0]);
         wprintln(stwbuffer);
-        stwwrite.yc += 6;
-
-
-        // printing timeline if max > 0
-        wprinttimeline(disks[i].between.read, diskstat[i].length, 1, &diskstat[i].read, 
-                      stw.sbar[SBarLine], stw.sbar[SBarCpuPoint], diskstat[i].read.max);
-      
-
-        stwwrite.xc = screenWidth - gappx - status_win_width / 2; // set cursor to half
-
-        wprinttimelineln(disks[i].between.write, diskstat[i].length, 1, &diskstat[i].write, 
-                      stw.sbar[SBarLine], stw.sbar[SBarCpuPoint], diskstat[i].write.max);
-      
-
+       
+        #ifdef DEBUG
+          log_str("[STW] [DB] read and write information printed", LOG_DEBUG);
+        #endif
       }
 
-      #ifdef DEBUG
-        log_str("[STW] [DB] read and write timeline printed", LOG_DEBUG);
-      #endif
+      if (stw_disk_verbose > 2) {
+        if(diskstat[i].read.max > 0 || diskstat[i].write.max > 0){
+          sprintf(stwbuffer, "%s%s @ %s", diskstat_utils.read_prefix, ebuf[1], ebuf[2]);
+          wprint(stwbuffer);
+          stwwrite.xc = screenWidth - stw_gappx - status_win_width / 2; // set cursor to half
+          sprintf(stwbuffer, "%s%s @ %s", diskstat_utils.write_prefix, ebuf2[1], ebuf2[2]);
+          wprintln(stwbuffer);
+       
+       
+          // printing timeline if max > 0
+          if (stw_disk_verbose > 3) {
+            stwwrite.yc += 6;
+
+            wprinttimeline(disks[i].between.read, diskstat[i].length, 1, &diskstat[i].read, 
+                          stw.sbar[SBarLine], stw.sbar[SBarCpuPoint], diskstat[i].read.max);
+         
+        
+            stwwrite.xc = screenWidth - stw_gappx - status_win_width / 2; // set cursor to half
+        
+            wprinttimelineln(disks[i].between.write, diskstat[i].length, 1, &diskstat[i].write, 
+                          stw.sbar[SBarLine], stw.sbar[SBarCpuPoint], diskstat[i].write.max);
+         
+            #ifdef DEBUG
+              log_str("[STW] [DB] read and write timeline printed", LOG_DEBUG);
+            #endif
+          }
+        }
+      }
 
       // line seperator
-      wprintln(diskstat_utils.line_seperator); 
+      if (stw_disk_verbose > 0)
+        wprintln(diskstat_utils.line_seperator); 
 
     }else if(diskstat[i].read.max > 0 || diskstat[i].write.max > 0){
       diskstat[i].read.max  = 0;
       diskstat[i].write.max = 0;
       diskstat[i].readges   = 0;
-      diskstat[i].writeges   = 0;
+      diskstat[i].writeges  = 0;
 
       for(mj = 0;mj < diskstat[i].length;mj++){
         diskstat[i].read.bytes[mj]  = 0;
@@ -896,9 +901,9 @@ void drawstw()
   #endif
 
   // set Coordinates for main info
-  stwwrite.xs = stwwrite.xc  = gappx;
-  stwwrite.ys = stwwrite.yc = stw.font.height + gappx;
-  stwwrite.xe = stwwrite.w = stw.w - gappx;
+  stwwrite.xs = stwwrite.xc  = stw_gappx;
+  stwwrite.ys = stwwrite.yc = stw.font.height + stw_gappx;
+  stwwrite.xe = stwwrite.w = stw.w - stw_gappx;
   stwwrite.ye = stwwrite.h = stw.h;
 
   #ifdef DEBUG
@@ -922,9 +927,9 @@ void drawstw()
   #endif
 
   // set Coordinates for disk
-  stwwrite.xs = stwwrite.xc  = screenWidth - gappx - status_win_width;// TODO Statuswin pos and size to config.h
-  stwwrite.ys = stwwrite.yc = (stw.font.height + gappx);
-  stwwrite.xe = stwwrite.w = stw.w - gappx;
+  stwwrite.xs = stwwrite.xc  = screenWidth - stw_gappx - status_win_width;
+  stwwrite.ys = stwwrite.yc = (stw.font.height + stw_gappx);
+  stwwrite.xe = stwwrite.w = stw.w - stw_gappx;
   stwwrite.ye = stwwrite.h = stw.h;
 
   #ifdef DEBUG
@@ -932,18 +937,14 @@ void drawstw()
   #endif
 
   // draw disk
-  switch (stw_disk_verbose) {
-    case 5: 
-      if (stw_disk_tree_right) 
-        draw_stw_disk_tree_right();
-      else
-        draw_stw_disk_tree_left();
-      break;
-    case 4:
-      draw_stw_disk_block();
-      break;
+  if (stw_disk_verbose >= 5) {
+    if (stw_disk_tree_right) 
+      draw_stw_disk_tree_right();
+    else
+      draw_stw_disk_tree_left();
+  } else 
+    draw_stw_disk_block();
 
-  }
 
   #ifdef DEBUG
     log_str("[STW] disk drawn", LOG_DEBUG);
@@ -980,7 +981,7 @@ void setup_stw()
     
     stw.w = screenWidth;
     stw.y = dc.font.height + 3;
-    stw.x = gappx;
+    stw.x = stw_gappx;
     stw.h = screenHeight-bh;
     
     stw.drawable = XCreatePixmap(dpy, root, screenWidth, stw.h, DefaultDepth(dpy, screen));
@@ -995,9 +996,9 @@ void setup_stw()
     XCopyArea(dpy, root, background, stw.gc, stw.x, stw.y, stw.w, stw.h, 0,0 );
     
     // initializing write
-    stwwrite.xs = stwwrite.xc  = gappx;
-    stwwrite.ys = stwwrite.yc = stw.font.height + gappx;
-    stwwrite.xe = stwwrite.w = stw.w - gappx;
+    stwwrite.xs = stwwrite.xc  = stw_gappx;
+    stwwrite.ys = stwwrite.yc = stw.font.height + stw_gappx;
+    stwwrite.xe = stwwrite.w = stw.w - stw_gappx;
     stwwrite.ye = stwwrite.h = stw.h;
     stwwrite.drawable = stw.drawable;
     stwwrite.gc = stw.gc;
@@ -1056,9 +1057,9 @@ void setup_stw_disks() {
     }
  
     // maximum minimal printable text is "000 MB/s @ 000 MB/s"
-    diskstat_utils.min_status_win_width = (textnw("  @  ", 5) + 6 * max_numi + 2 * max_byte_per_seci) * 2 + gappx;
-    diskstat_utils.readed_width         = (textnw("  /  ", 5) + 6 * max_numi + 2 * max_bytei) * 2 + gappx;
-    diskstat_utils.free_width           = (textnw("  /  ", 5) + 6 * max_numi + 2 * max_bytei) + gappx / 2;
+    diskstat_utils.min_status_win_width = (textnw("  @  ", 5) + 6 * max_numi + 2 * max_byte_per_seci) * 2 + stw_gappx;
+    diskstat_utils.readed_width         = (textnw("  /  ", 5) + 6 * max_numi + 2 * max_bytei) * 2 + stw_gappx;
+    diskstat_utils.free_width           = (textnw("  /  ", 5) + 6 * max_numi + 2 * max_bytei) + stw_gappx / 2;
  
     if (status_win_width < diskstat_utils.min_status_win_width) {
       char logbuff[64];
@@ -1127,14 +1128,14 @@ void setup_stw_disks() {
  
 
     if (stw_disk_verbose == 5)
-      status_win_width = 266 - gappx; // TODO stw own gappx => config.h
+      status_win_width = 266 - stw_gappx;
 
     // init diskstat (Distk Timelines and stuff)
     for(i = 0; i < MAXPARTITIONS;i++){
       if (stw_disk_verbose == 5) {
         diskstat[i].length      = 100;
       } else {
-        diskstat[i].length      = status_win_width / 2 - gappx;
+        diskstat[i].length      = status_win_width / 2 - stw_gappx;
       }
       diskstat[i].read.bytes  = (int*)malloc(sizeof(int)*timeline_length);
       diskstat[i].write.bytes = (int*)malloc(sizeof(int)*timeline_length);
