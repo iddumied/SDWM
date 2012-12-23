@@ -44,7 +44,7 @@ void togglestw(){
 
 
 #include "write.c"
-#define STW_SET_POS(X) stwwrite.xc = screenWidth - gappx - TEXTW(X)
+#define STW_SET_POS(X) stwwrite.xc = screenWidth - stw_gappx - TEXTW(X)
 #define STW_WPRINT_RIGHT(X) sprintf(stwbuffer, X); STW_SET_POS(stwbuffer); wprint(stwbuffer)
 #define STW_WPRINTLN_RIGHT(X) sprintf(stwbuffer, X); STW_SET_POS(stwbuffer); wprintln(stwbuffer)
 

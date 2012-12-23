@@ -972,7 +972,7 @@ void stw_disk_set_width(const char *input) {
  
 
   if (stw_disk_verbose == 5) {
-    status_win_width = 266 - gappx; // TODO stw own gappx => config.h
+    status_win_width = 266 - stw_gappx; 
   } else {
   
     if (!strcmp(input, ":stw disk set width max")) 
@@ -1066,7 +1066,7 @@ void stw_disk_set_width(const char *input) {
   }
 
   #ifdef DEBUG
-    sprintf(log_buff, "[DSW] status_win_width / 2 - gappx %d", status_win_width / 2 - gappx);
+    sprintf(log_buff, "[DSW] status_win_width / 2 - stw_gappx %d", status_win_width / 2 - stw_gappx);
     log_str(log_buff, LOG_DEBUG);
   #endif
 
@@ -1075,7 +1075,7 @@ void stw_disk_set_width(const char *input) {
     if (stw_disk_verbose == 5) {
       diskstat[i].length      = 100;
     } else {
-      diskstat[i].length      = status_win_width / 2 - gappx;
+      diskstat[i].length      = status_win_width / 2 - stw_gappx;
     }
 
     for(j = 0;j < diskstat[i].length;j++){
@@ -1134,7 +1134,7 @@ void stw_disk_set_verbose(const char *input) {
   stw_disk_verbose = verbose;
 
   if (stw_disk_verbose == 5)
-    status_win_width = 266 - gappx; // TODO stw own gappx => config.h
+    status_win_width = 266 - stw_gappx; 
   else
     stw_disk_set_width("stw disk set width max");
 }
