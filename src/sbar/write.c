@@ -4,6 +4,8 @@ void wprintcol(double percent, int length, double height_percent, int y_shifting
 void wprintcolln(double percent, int length, double height_percent, int y_shifting);
 void wprinttimeline(int bytes, int length, double fact, Timeline *timeline, unsigned int cline, unsigned int cpoint, int max);
 void wprinttimelineln(int bytes, int length, double fact, Timeline *timeline, unsigned int cline, unsigned int cpoint, int max);
+void wprinttimeline_tr(int bytes, int length, double fact, Timeline *timeline, unsigned int cline, unsigned int cpoint, int max);
+void wprinttimelineln_tr(int bytes, int length, double fact, Timeline *timeline, unsigned int cline, unsigned int cpoint, int max);
 void wprintcols(double *percent, unsigned long *colors, int n, int length, double height_percent, int y_shifting);
 void wprintcolsln(double *percent, unsigned long *colors, int n, int length, double height_percent, int y_shifting);
 
@@ -32,6 +34,14 @@ void wprinttimelineln(int bytes, int length, double fact, Timeline *timeline, un
   stwwrite.yc += stwwrite.font.height;
 }
 
+// disk tree right version
+void wprinttimelineln_tr(int bytes, int length, double fact, Timeline *timeline, unsigned int cline, unsigned int cpoint, int max)
+{
+  wprinttimeline(bytes, length, fact, timeline, cline, cpoint, max);
+  
+  stwwrite.xc = stwwrite.xs;
+  stwwrite.yc += stwwrite.font.height;
+}
 
 void wprinttimeline(int bytes, int length, double fact, Timeline *timeline, unsigned int cline, unsigned int cpoint, int max)
 {
@@ -95,6 +105,68 @@ void wprinttimeline(int bytes, int length, double fact, Timeline *timeline, unsi
   stwwrite.xc += length;
 }
 
+// disk tree right version
+void wprinttimeline_tr(int bytes, int length, double fact, Timeline *timeline, unsigned int cline, unsigned int cpoint, int max)
+{
+  
+  double percent;
+  int i, x, py, ly, y, h = stwwrite.font.height*fact;
+  y = stwwrite.yc - h;
+  x = stwwrite.xc;
+
+  
+  XGCValues gcv;
+  
+  XDrawLine(dpy, stwwrite.drawable, stw.gc, x + length,y,x + length,stwwrite.yc);
+  XDrawLine(dpy, stwwrite.drawable, stw.gc, x,stwwrite.yc,x+length,stwwrite.yc );
+  x++;
+
+ 
+  
+  for(i = 1; i < length;i++){
+    if(timeline->bytes[length - i] == 0) percent = 1.0;
+    else percent = (1 - ((double)timeline->bytes[length - i] / (double)max));
+    py = y + (int)((double)h * percent);
+    ly = py+1;
+    
+    
+   if(ly < stwwrite.yc){
+    gcv.foreground = cline;
+    XChangeGC(dpy, stwwrite.gc, GCForeground, &gcv);
+    XDrawLine(dpy, stwwrite.drawable, stwwrite.gc, x+i-1, ly, x+i-1, stwwrite.yc-1);
+   }
+   if(py < stwwrite.yc){
+    gcv.foreground = cpoint;
+    XChangeGC(dpy, stwwrite.gc, GCForeground, &gcv);
+    XDrawPoint(dpy, stwwrite.drawable, stwwrite.gc, x+i-1, py);
+   }
+   
+   timeline->bytes[i-1] = timeline->bytes[i];
+  }
+  
+  if(bytes == 0) percent = 1.0;
+  else percent = (1 - ((double)bytes / (double)max));
+  py = y + (int)((double)h * percent);
+  ly = py+1;
+    
+  if(ly < stwwrite.yc){
+    gcv.foreground = cline;
+    XChangeGC(dpy, stwwrite.gc, GCForeground, &gcv);
+    XDrawLine(dpy, stwwrite.drawable, stwwrite.gc, x+length-1, ly, x+length-1, stwwrite.yc-1);
+  }
+  if(py < stwwrite.yc){
+    gcv.foreground = cpoint;
+    XChangeGC(dpy, stwwrite.gc, GCForeground, &gcv);
+    XDrawPoint(dpy, stwwrite.drawable, stwwrite.gc, x+length-1, py);
+  }
+   
+  timeline->bytes[length-1] = bytes;
+   
+  gcv.foreground = stw.sel[ColFG];;
+  XChangeGC(dpy, stw.gc, GCForeground, &gcv);
+
+  stwwrite.xc += length;
+}
 
 
 void wprintcolln(double percent, int length, double height_percent, int y_shifting)

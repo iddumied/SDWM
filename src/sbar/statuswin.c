@@ -409,7 +409,7 @@ void draw_stw_disk_tree_right() {
           stwwrite.xc -= timeline_length;
 
           // printing timeline if max > 0
-          wprinttimeline(disks[i].between.read, diskstat[i].length, 1, &diskstat[i].read, 
+          wprinttimeline_tr(disks[i].between.read, diskstat[i].length, 1, &diskstat[i].read, 
                         stw.sbar[SBarLine], stw.sbar[SBarCpuPoint], diskstat[i].read.max);
 
         
@@ -438,7 +438,7 @@ void draw_stw_disk_tree_right() {
           stwwrite.xc -= timeline_length;
 
           // printing timeline if max > 0
-          wprinttimeline(disks[i].between.read, diskstat[i].length, 1, &diskstat[i].read, 
+          wprinttimeline_tr(disks[i].between.read, diskstat[i].length, 1, &diskstat[i].read, 
                         stw.sbar[SBarLine], stw.sbar[SBarCpuPoint], diskstat[i].read.max);
           
 
@@ -488,7 +488,7 @@ void draw_stw_disk_tree_right() {
           stwwrite.xc -= timeline_length;
 
           // printing timeline if max > 0
-          wprinttimeline(disks[i].between.write, diskstat[i].length, 1, &diskstat[i].write, 
+          wprinttimeline_tr(disks[i].between.write, diskstat[i].length, 1, &diskstat[i].write, 
                         stw.sbar[SBarLine], stw.sbar[SBarCpuPoint], diskstat[i].write.max);
         
           sprintf(stwbuffer,"%s ",ebuf[3]);
@@ -515,7 +515,7 @@ void draw_stw_disk_tree_right() {
           stwwrite.xc -= timeline_length;
 
           // printing timeline if max > 0
-          wprinttimeline(disks[i].between.write, diskstat[i].length, 1, &diskstat[i].write, 
+          wprinttimeline_tr(disks[i].between.write, diskstat[i].length, 1, &diskstat[i].write, 
                         stw.sbar[SBarLine], stw.sbar[SBarCpuPoint], diskstat[i].write.max);
           
           sprintf(stwbuffer,"%s ",ebuf[3]);
