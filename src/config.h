@@ -35,6 +35,7 @@ static const Bool resizehints = False; /* True means respect size hints in tiled
 
 static Key keys[] = {
 	/* modifier                     key        function        argument */
+  #ifdef NF310_A01
   { 0,                            XFnToggleMute,    toggle_mute,      {} },
   { 0,                            XFnAudioUp,       set_audio,        {.i = +10 } },
   { 0,                            XFnAudioDown,     set_audio,        {.i = -10 } },
@@ -44,6 +45,7 @@ static Key keys[] = {
   { 0,                            XfnBacklightUp,   set_backlight,    {.i = +1 } },
   { 0,                            XfnBacklightDown, set_backlight,    {.i = -1 } }, 
   { 0,                            XfnWlan,          toogle_wlan,      {} },
+  #endif
   { MODKEY,                       XK_Escape,        vimcmd,           {} },
   { MODKEY,                       XK_y,             incnmaster,       {.i = +1 } },
   { MODKEY,                       XK_x,             incnmaster,       {.i = -1 } },

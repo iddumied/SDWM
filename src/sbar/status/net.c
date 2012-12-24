@@ -127,7 +127,9 @@ void setup_net()
   for(i = 0; i < MAX_NET_INTERFACES; i++) {
     net.interfaces[i].name[0] = '\x00';
     net.interfaces[i].state_unknowen = False;
+    #ifdef NF310_A01
     net.interfaces[i].easy_online = False;
+    #endif
     net.interfaces[i].online = False;
     net.interfaces[i].linkmax = -1;
     net.interfaces[i].linkcur = 0;
@@ -188,7 +190,9 @@ void new_interface(Interface *interface, char *line, int len)
 
   interface->name[0] = '\x00';
   interface->state_unknowen = False;
+  #ifdef NF310_A01
   interface->easy_online = False;
+  #endif
   interface->online = False;
   interface->linkmax = -1;
   interface->linkcur = 0;

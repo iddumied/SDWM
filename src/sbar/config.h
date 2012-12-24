@@ -4,6 +4,7 @@
 #include "typedef.c"
 
 #ifdef NF310_A01
+
 // order of SBar Status Symbols. first = right
 SBarStatusSymbol sbar_status_symbols[] = {
   //  function      active
@@ -16,7 +17,12 @@ SBarStatusSymbol sbar_status_symbols[] = {
   { draw_audio,     True },
   { draw_net,       True },
 };
+
+// must be in the same order!
+enum { DrawTime, DrawBattery, DrawUptime, DrawMemory, DrawTermal, DrawBacklight, DrawAudio, DrawNet, DrawLast };
+
 #else
+
 // order of SBar Status Symbols. first = right
 SBarStatusSymbol sbar_status_symbols[] = {
   //  function      active
@@ -28,9 +34,10 @@ SBarStatusSymbol sbar_status_symbols[] = {
   { draw_audio,     True },
   { draw_net,       True },
 };
-#endif
+
 // must be in the same order!
-enum { DrawTime, DrawBattery, DrawUptime, DrawMemory, DrawTermal, DrawBacklight, DrawAudio, DrawNet, DrawLast };
+enum { DrawTime, DrawBattery, DrawUptime, DrawMemory, DrawTermal, DrawAudio, DrawNet, DrawLast };
+#endif
 
 /* tagging */
 static const char *tags[] = { "main", "term", "dev", "img", "misc", "more" };

@@ -36,8 +36,10 @@ void update_status()
     log_str(buffer, LOG_DEBUG);
     sprintf(buffer, "Update Status: draw Termal %s", sbar_status_symbols[DrawTermal].active ? "yes" : "no");
     log_str(buffer, LOG_DEBUG);
+    #ifdef NF310_A01
     sprintf(buffer, "Update Status: draw Backlight %s", sbar_status_symbols[DrawBacklight].active ? "yes" : "no");
     log_str(buffer, LOG_DEBUG);
+    #endif
     sprintf(buffer, "Update Status: draw Net %s", sbar_status_symbols[DrawNet].active ? "yes" : "no");
     log_str(buffer, LOG_DEBUG);
     #endif
@@ -124,8 +126,10 @@ void setup_status()
   log_str(buffer, LOG_DEBUG);
   sprintf(buffer, "Setup Status: draw Termal %s", sbar_status_symbols[DrawTermal].active ? "yes" : "no");
   log_str(buffer, LOG_DEBUG);
+  #ifdef NF310_A01
   sprintf(buffer, "Setup Status: draw Backlight %s", sbar_status_symbols[DrawBacklight].active ? "yes" : "no");
   log_str(buffer, LOG_DEBUG);
+  #endif
   sprintf(buffer, "Setup Status: draw Net %s", sbar_status_symbols[DrawNet].active ? "yes" : "no");
   log_str(buffer, LOG_DEBUG);
   #endif
