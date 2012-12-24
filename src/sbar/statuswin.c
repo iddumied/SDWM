@@ -360,7 +360,7 @@ void draw_stw_disk_tree_right() {
         log_str("[STW] [DTR] usage printed", LOG_DEBUG);
       #endif
 
-      wprintcolln(disks[i].pused, 100, 0.65, 2 );
+      wprintcolln_tr(disks[i].pused, 100, 0.65, 2 );
       if(mi < mounted_volumes) { STW_WPRINTLN_RIGHT("|         |  "); }
       else { STW_WPRINTLN_RIGHT("|            "); }
 

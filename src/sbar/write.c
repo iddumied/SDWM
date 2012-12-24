@@ -2,6 +2,8 @@ void wprint(const char * cstr);
 void wprintln(const char * cstr);
 void wprintcol(double percent, int length, double height_percent, int y_shifting); 
 void wprintcolln(double percent, int length, double height_percent, int y_shifting);
+void wprintcol_tr(double percent, int length, double height_percent, int y_shifting); 
+void wprintcolln_tr(double percent, int length, double height_percent, int y_shifting);
 void wprinttimeline(int bytes, int length, double fact, Timeline *timeline, unsigned int cline, unsigned int cpoint, int max);
 void wprinttimelineln(int bytes, int length, double fact, Timeline *timeline, unsigned int cline, unsigned int cpoint, int max);
 void wprinttimeline_tr(int bytes, int length, double fact, Timeline *timeline, unsigned int cline, unsigned int cpoint, int max);
@@ -177,6 +179,15 @@ void wprintcolln(double percent, int length, double height_percent, int y_shifti
   stwwrite.yc += stwwrite.font.height;
 }
 
+// disk tree right version
+void wprintcolln_tr(double percent, int length, double height_percent, int y_shifting)
+{
+  wprintcol_tr(percent, length, height_percent, y_shifting);
+  
+  stwwrite.xc = stwwrite.xs;
+  stwwrite.yc += stwwrite.font.height;
+}
+
 void wprintcol(double percent, int length, double height_percent, int y_shifting)
 {
   int y, h = (int)((double)stwwrite.font.height * height_percent);
@@ -190,6 +201,24 @@ void wprintcol(double percent, int length, double height_percent, int y_shifting
   XFillRectangle(dpy, stwwrite.drawable, stwwrite.gc, stwwrite.xc+2, 
                  y+2, (int)(((double)length-4) * percent), 
                  h-3);
+  
+  stwwrite.xc += length+1;
+}
+
+// disk tree right version
+void wprintcol_tr(double percent, int length, double height_percent, int y_shifting)
+{
+  int y, col_len, h = (int)((double)stwwrite.font.height * height_percent);
+  y =  stwwrite.yc - ((stwwrite.font.height - h)/2 + h) + y_shifting;
+  col_len = (int)(((double)length-3) * percent);
+  
+  if((stwwrite.xc + length) > stwwrite.xe) length = stwwrite.xe - stwwrite.xc;
+  
+  XDrawRectangle(dpy, stwwrite.drawable, stwwrite.gc, stwwrite.xc, 
+                 y, length, h);
+  
+  XFillRectangle(dpy, stwwrite.drawable, stwwrite.gc, stwwrite.xc + (length - col_len - 1), 
+                 y+2, col_len, h-3);
   
   stwwrite.xc += length+1;
 }
