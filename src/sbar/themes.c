@@ -84,8 +84,29 @@ static const Theme themes[] = {
   // very low
   {"#880000","#000000","#ff0000",
    "#ff0000","#000000","#ffaa00",
-   "#ff0000","#440000","#ff0000"}}
+   "#ff0000","#440000","#ff0000"}},
+
+{ "AnimeNinjaGirl", "/home/chief/.dwm/AnimeNinjaGirl.jpg",
+  // status window
+  {"#82a1a6","#000000","#ffffff",
+   "#fafafa","#000000","#fafafa",
+   "#fafafa","#395153","#fafafa"},
+
+  // normal
+  {"#82a1a6","#000000","#82a1a6",
+   "#fafafa","#000000","#fafafa",
+   "#fafafa","#395153","#fafafa"},
+
+  // low
+  {"#82a1a6","#000000","#82a1a6",
+   "#fafafa","#000000","#fafafa",
+   "#ff0000","#395153","#fafafa"},
+
+  // very low
+  {"#880000","#000000","#ff0000",
+   "#ff0000","#000000","#ffaa00",
+   "#ff0000","#440000","#ff0000"}},
 
 };
-enum { ThemeBlueAngel, ThemeFireLove, ThemeHackingWorld, ThemeLast };
+enum { ThemeBlueAngel, ThemeFireLove, ThemeHackingWorld, ThemeAnimeNinjaGirl, ThemeLast };
 static int CurTheme = ThemeBlueAngel;
