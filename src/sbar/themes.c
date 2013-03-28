@@ -63,8 +63,29 @@ static const Theme themes[] = {
   // very low
   {"#880000","#000000","#ff0000",
    "#ff0000","#000000","#ffaa00",
+   "#ff0000","#440000","#ff0000"}},
+
+{ "HackingWorld", "/home/chief/.dwm/HackingWorld.png",
+  // status window
+  {"#3d6a33","#000000","#ffffff",
+   "#4dd42b","#000000","#4dd42b",
+   "#4dd42b","#246a15","#4dd42b"},
+
+  // normal
+  {"#3d6a33","#000000","#ffffff",
+   "#4dd42b","#000000","#4dd42b",
+   "#4dd42b","#246a15","#4dd42b"},
+  
+  // low
+  {"#005588","#000000","#ffffff",
+   "#00aaff","#000000","#00aaff",
+   "#ff0000","#21536a","#00aaff"},
+
+  // very low
+  {"#880000","#000000","#ff0000",
+   "#ff0000","#000000","#ffaa00",
    "#ff0000","#440000","#ff0000"}}
 
 };
-enum { ThemeBlueAngel, ThemeFireLove, ThemeLast };
+enum { ThemeBlueAngel, ThemeFireLove, ThemeHackingWorld, ThemeLast };
 static int CurTheme = ThemeBlueAngel;
